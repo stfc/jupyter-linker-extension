@@ -1,0 +1,30 @@
+
+% Default to the notebook output style
+((* if not cell_style is defined *))
+    ((* set cell_style = 'custom_style_ipython.tplx' *))
+((* endif *))
+
+% Inherit from the specified cell style.
+((* extends cell_style *))
+
+((* block output_group *))
+	((( super() )))
+	((* if cell['metadata'].get('referenceURLs','') != [] *))
+		References:\newline
+		((* for item in cell['metadata'].get('referenceURLs','') *))
+			\href{(((item)))}{(((item)))} \newline
+		((* endfor *))
+	((* endif *))
+((* endblock output_group *))
+
+((* block input_group *))
+	
+((* endblock input_group *))
+
+%===============================================================================
+% Latex Article
+%===============================================================================
+
+((* block docclass *))
+\documentclass[11pt]{article}
+((* endblock docclass *))
