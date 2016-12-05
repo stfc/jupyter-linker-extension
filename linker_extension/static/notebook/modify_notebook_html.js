@@ -1,4 +1,4 @@
-define(['base/js/namespace'],function(Jupyter){
+define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
 
 	function load_ipython_extension(){
 		//applies to all pages - need to repeat for tree and edit
@@ -38,6 +38,33 @@ define(['base/js/namespace'],function(Jupyter){
         	   	   .append($("<li/>").attr("id","select_data").append($("<a/>").attr("href","#").text("Select associated data")))
         		   .append($("<li/>").attr("id","view_data").append($("<a/>").attr("href","#").text("View associated data")))
         		   .append($("<li/>").attr("id","upload_data").append($("<a/>").attr("href","#").text("Upload associated data")));
+    
+        $("#download_pdf").remove();
+        var new_pdf_menu_item = $("<li>").attr("id","#download_pdf").append($("<a/>").attr("href","#").text("PDF via LaTeX (.pdf)"));
+
+        new_pdf_menu_item.click(function() {
+            var notebook_path = utils.encode_uri_components(Jupyter.notebook.notebook_path);
+            var url = utils.url_path_join(
+                Jupyter.notebook.base_url,
+                'nbconvert',
+                'pdf',
+                "custom_article",
+                notebook_path
+            ) + "?download=true";
+            
+            var w = window.open('', Jupyter._target);
+            if (Jupyter.notebook.dirty && Jupyter.notebook.writable) {
+                Jupyter.notebook.save_notebook().then(function() {
+                    w.location = url;
+                });
+            } else {
+                w.location = url;
+            }
+        });
+
+        $("#download_rst").after(new_pdf_menu_item);
+
+
     }
 
     return {

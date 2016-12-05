@@ -10,12 +10,18 @@ import xml.etree.ElementTree as ET
 import zipfile
 import ldap3
 
-from tornado import web, gen
+from tornado import web, gen, escape
 
 from notebook.utils import url_path_join
 from notebook.base.handlers import (
     IPythonHandler, APIHandler, json_errors, path_regex,
 )
+
+from notebook.nbconvert.handlers import (
+    get_exporter, respond_zip, find_resource_files,
+)
+
+from ipython_genutils import text
 
 #-----------------------------------------------------------------------------
 # DSpace handler
@@ -694,9 +700,9 @@ class UploadBundleHandler(IPythonHandler):
             raise web.HTTPError(500, "Requests failed after 5 retries")
 
 
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # LDAP handler
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 
 class LDAPHandler(IPythonHandler):
@@ -733,10 +739,68 @@ class LDAPHandler(IPythonHandler):
         self.set_header('Content-Type', 'application/json')
         self.finish(json.dumps(json_entries))
 
+# ----------------------------------------------------------------------------
+# Custom Nbconvert handler (need this to select template)
+# ----------------------------------------------------------------------------
+
+
+class CustomNbconvertHandler(IPythonHandler):
+
+    SUPPORTED_METHODS = ('GET',)
+
+    @web.authenticated
+    def get(self, format, template_file, path):
+
+        exporter = get_exporter(format, config=self.config, log=self.log, template_file=template_file)
+
+        path = path.strip('/')
+        model = self.contents_manager.get(path=path)
+        name = model['name']
+        if model['type'] != 'notebook':
+            # not a notebook, redirect to files
+            return FilesRedirectHandler.redirect_to_files(self, path)
+
+        self.set_header('Last-Modified', model['last_modified'])
+
+        try:
+            output, resources = exporter.from_notebook_node(
+                model['content'],
+                resources={
+                    "metadata": {
+                        "name": name[:name.rfind('.')],
+                        "modified_date": (model['last_modified']
+                            .strftime(text.date_format))
+                    },
+                    "config_dir": self.application.settings['config_dir'],
+                }
+            )
+        except Exception as e:
+            self.log.exception("nbconvert failed: %s", e)
+            raise web.HTTPError(500, "nbconvert failed: %s" % e)
+
+        if respond_zip(self, name, output, resources):
+            return
+
+        # Force download if requested
+        if self.get_argument('download', 'false').lower() == 'true':
+            filename = os.path.splitext(name)[0] + resources['output_extension']
+            self.set_header('Content-Disposition',
+                            'attachment; filename="%s"' % escape.url_escape(filename))
+
+        # MIME type
+        if exporter.output_mimetype:
+            self.set_header('Content-Type',
+                            '%s; charset=utf-8' % exporter.output_mimetype)
+
+        self.finish(output)
 
 # ----------------------------------------------------------------------------
 # URL to handler mappings
 # ----------------------------------------------------------------------------
+
+_format_regex = r"(?P<format>\w+)"
+
+_template_regex = r"(?P<template_file>\w+)"
 
 
 def load_jupyter_server_extension(nbapp):
@@ -759,6 +823,8 @@ def load_jupyter_server_extension(nbapp):
     web_app.add_handlers(host_pattern, [(route_pattern_dspace_test, TestDSpaceHandler)])
     route_pattern_ldap = url_path_join(web_app.settings['base_url'], '/ldap')
     web_app.add_handlers(host_pattern, [(route_pattern_ldap, LDAPHandler)])
+    route_pattern_nbconvert = url_path_join(web_app.settings['base_url'], r"/nbconvert/%s/%s%s" % (_format_regex, _template_regex, path_regex))
+    web_app.add_handlers(host_pattern, [(route_pattern_nbconvert, CustomNbconvertHandler)])
 
 
 def _jupyter_server_extension_paths():
