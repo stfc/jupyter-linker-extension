@@ -1,0 +1,9 @@
+This is the Jupyter Notebook extension for the linker project. Install to the notebook by running the following commands after installing the overall package using pip:
+
+jupyter serverextension enable --py linker_extension --system
+
+jupyter nbextension install --overwrite --py linker_extension
+
+jupyter nbextension enable --py linker_extension --system
+
+This will enable the server extension and install and enable the javascript extensions. This will also mean that every notebook is set to load these extensions by default.

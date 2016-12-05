@@ -1,0 +1,46 @@
+define(['base/js/namespace'],function(Jupyter){
+
+	function load_ipython_extension(){
+		//applies to all pages - need to repeat for tree and edit
+        console.log('Modify notebook html loaded');
+        var header_container = $('#header-container').detach();
+        var header_container_container = $('<div/>').attr("id","header-container-container").addClass("container");
+        header_container_container.append(header_container);
+        $('#header').prepend(header_container_container);
+
+        var file_tree_button = $('<a/>').addClass("btn btn-default btn-sm navbar-btn pull-right").css("margin-right","2px").css("margin-left","2px").attr("href",Jupyter.notebook.base_url).text("File Tree");
+        $('#login_widget').after(file_tree_button);
+        
+		$('#ipython_notebook').children("a").attr("href","https://www.stfc.ac.uk/");
+
+        //notebook page specific modifications
+        var menubar_container = $('#menubar-container').detach();
+        var menubar_container_container = $('<div/>').attr("id","menubar-container-container").addClass("container");
+        menubar_container_container.append(menubar_container);
+        $('.header-bar').after(menubar_container_container);
+
+        //make publish menu
+        var dropdown = $("<li/>").addClass("dropdown").append($("<a/>").attr("href","#").addClass("dropdown-toggle").attr("data-toggle","dropdown").text("Publish"));
+        dropdown.click(function (event, ui) {
+                // The selected cell loses focus when the menu is entered, so we
+                // re-select it upon selection.
+                var i = Jupyter.notebook.get_selected_index();
+                Jupyter.notebook.select(i, false);
+        });
+        var dropdown_ul = $('<ul/>').attr("id","publish_menu").addClass("dropdown-menu");
+        dropdown.append(dropdown_ul);
+        $('ul.navbar-nav').append(dropdown);
+
+        dropdown_ul.append($("<li/>").attr("id","add_metadata").append($("<a/>").attr("href","#").text("Add Metadata")))
+        		   .append($("<li/>").attr("id","dspace_new_item").append($("<a/>").attr("href","#").text("New DSpace item")))
+        		   .append($("<li/>").attr("id","sword_new_item").append($("<a/>").attr("href","#").text("New SWORD item")))
+        		   .append($("<li/>").addClass("divider"))
+        	   	   .append($("<li/>").attr("id","select_data").append($("<a/>").attr("href","#").text("Select associated data")))
+        		   .append($("<li/>").attr("id","view_data").append($("<a/>").attr("href","#").text("View associated data")))
+        		   .append($("<li/>").attr("id","upload_data").append($("<a/>").attr("href","#").text("Upload associated data")));
+    }
+
+    return {
+        load_ipython_extension: load_ipython_extension
+    };
+});

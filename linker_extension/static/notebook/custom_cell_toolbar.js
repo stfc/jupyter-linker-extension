@@ -1,0 +1,176 @@
+define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/events'], function(Jupyter,celltoolbar,dialog,events) {
+	"use strict";
+
+	var CellToolbar = celltoolbar.CellToolbar;
+
+	CellToolbar.prototype._rebuild = CellToolbar.prototype.rebuild;
+    CellToolbar.prototype.rebuild = function () {
+        events.trigger('toolbar_rebuild.CellToolbar', this.cell);
+        this._rebuild();
+	};
+
+	CellToolbar._global_hide = CellToolbar.global_hide;
+    CellToolbar.global_hide = function () {
+        CellToolbar._global_hide();
+        for (var i=0; i < CellToolbar._instances.length; i++) {
+            events.trigger('global_hide.CellToolbar', CellToolbar._instances[i].cell);
+        }
+	};
+
+	var example_preset = [];
+
+    var add_reference_url = function(div, cell) {
+    	var urlcount = 1;
+        var help_text = "Add the reference URLs that relate to this cell:\n";
+        var toolbar_container = $(div).addClass("cell-urls-container");
+
+        var URL_container = $('<div/>').addClass("cell-urls");
+        toolbar_container.append(help_text);
+        toolbar_container.append(URL_container);
+
+        var md_set = cell.metadata.hasOwnProperty("referenceURLs");
+        if(!md_set) {
+        	cell.metadata.referenceURLs = [];
+        }
+
+        var base_referenceURL = $('<input/>').addClass("referenceURL").attr('name','referenceURL').attr('id','referenceURL-' +cell.cell_id  + '-0');
+
+	   	var base_referenceURL_div = $('<div/>').addClass("referenceURL_div");
+        base_referenceURL_div.append(base_referenceURL);
+        var addURLButton = $('<button/>')
+            .addClass('btn btn-xs btn-default add-cell-url-button')
+            .attr('type','button')
+            .bind("click",addURL)
+            .attr("aria-label","Add reference URL");
+
+        addURLButton.append($('<i>').addClass("fa fa-plus"));
+        base_referenceURL_div.append(addURLButton);
+
+        URL_container.append(base_referenceURL_div);
+
+        base_referenceURL.focus(function() { //on focus switch into edit mode so we can type text normally
+        	Jupyter.keyboard_manager.edit_mode();
+        });
+
+        base_referenceURL.blur(function() { //save all values to metadata on defocus
+        	cell.metadata.referenceURLs = [];
+        	$(".referenceURL").each(function(i,e) {
+        		if($(e).val()) {
+        			cell.metadata.referenceURLs.push($(e).val());
+	        	}
+        	});
+        });
+
+        if(md_set) {
+	        var URLarr = cell.metadata.referenceURLs;
+	        var deleteURL;
+	        URLarr.forEach(function(item,index) {
+	            if(index === 0) {
+	                base_referenceURL.val(item);
+	                if(URLarr.length > 1) {
+	                    deleteURL = $('<button/>') //need to manually add delete button since addAuthor relies on finding
+	                        .addClass('btn btn-xs btn-default remove-cell-url-button') //is still being created I think...
+	                        .attr('type','button')
+	                        .attr("aria-label","Remove reference URL")
+	                            .click(function() {
+	                            	URL[1].remove();
+	                                $(this).remove();
+
+	                            	cell.metadata.referenceURLs = [];
+						        	$(".referenceURL").each(function(i,e) {
+						        		if($(e).val()) {
+						        			cell.metadata.referenceURLs.push($(e).val());
+							        	}
+						        	});
+	                            });
+	                    deleteURL.append($('<i>').addClass("fa fa-trash").attr("aria-hidden","true"));
+	                    base_referenceURL_div.append(deleteURL);
+	                }
+	                
+	            } else {
+	                var URL = addURL();
+	                URL[0].val(item);
+	                if(index !== URLarr.length - 1) { //if not last element
+	                    deleteURL = $('<button/>')
+	                        .addClass('btn btn-xs btn-default remove-cell-url-button')
+	                        .attr('type','button')
+	                        .attr("aria-label","Remove reference URL")
+	                            .click(function() {
+	                            	URL[1].remove();
+	                                $(this).remove();
+
+	                            	cell.metadata.referenceURLs = [];
+						        	$(".referenceURL").each(function(i,e) {
+						        		if($(e).val()) {
+						        			cell.metadata.referenceURLs.push($(e).val());
+							        	}
+						        	});
+	                            });
+	                    deleteURL.append($('<i>').addClass("fa fa-trash").attr("aria-hidden","true"));
+	                    URL[1].append(deleteURL);
+	                }
+	            }
+	        });
+        }
+
+        function addURL() {
+	    	var newURL = ($('<div/>')).addClass("referenceURL_div");
+	        var currcount = urlcount;
+	        var URL = $('<input/>')
+	            .attr('class','referenceURL')
+	            .attr('type','text')
+	            .attr('id','referenceURL-' + cell.cell_id + "-" + urlcount);
+
+            URL.focus(function() { //on focus switch into edit mode so we can type text normally
+	        	Jupyter.keyboard_manager.edit_mode();
+	        });
+
+	        URL.blur(function() { //saveall values to metadata on defocus
+	        	cell.metadata.referenceURLs = [];
+	        	$(".referenceURL").each(function(i,e) {
+	        		if($(e).val()) {
+	        			cell.metadata.referenceURLs.push($(e).val());
+		        	}
+	        	});
+	        });
+
+	        var previousURL = $('.referenceURL_div').last();
+	        addURLButton.detach(); //detach from the previously last url input so we can put it back on the new one
+	        var deleteURL = $('<button/>')
+	            .addClass('btn btn-xs btn-default remove-cell-url-button')
+	            .attr('type','button')
+	            .attr("aria-label","Remove reference URL")
+	                .click(function() {
+	                    previousURL.remove();
+	                    $(this).remove();
+	                    cell.metadata.referenceURLs = [];
+			        	$(".referenceURL").each(function(i,e) {
+			        		if($(e).val()) {
+			        			cell.metadata.referenceURLs.push($(e).val());
+				        	}
+			        	});
+	                }); //add a remove button to the previously last url
+
+	        deleteURL.append($('<i>').addClass("fa fa-trash").attr("aria-hidden","true"));
+	        previousURL.append(deleteURL);
+	        URL_container.append(newURL.append(URL).append(addURLButton));
+	        urlcount++;
+
+	        return [URL,newURL];
+	    };
+    };
+
+    
+
+    function load_ipython_extension() {
+    	console.log("Custom cell toolbar loaded");
+    	CellToolbar.register_callback('linker_extension.add_reference_url',add_reference_url);
+        example_preset.push('linker_extension.add_reference_url');
+
+        CellToolbar.register_preset('Linker Extension',example_preset, Jupyter.notebook);
+    }
+	
+	return {
+		load_ipython_extension: load_ipython_extension
+	};
+});

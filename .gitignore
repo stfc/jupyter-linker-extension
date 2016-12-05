@@ -1,0 +1,9 @@
+dist/
+build/
+*.pyo
+*.pyc
+*.egg-info/
+__pycache__/
+*.egg
+MANIFEST
+.ipynb_checkpoints
