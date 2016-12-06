@@ -8,3 +8,5 @@ __pycache__/
 MANIFEST
 .ipynb_checkpoints
 admin.txt
+linker_extension/static/notebook/linker_notebook_extension.js
+linker_extension/static/tree/linker_tree_extension.js
