@@ -23,8 +23,12 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','./modify_notebook_
     var action_name = "select-associated-data";
     var full_action_name = Jupyter.actions.register(action,action_name,prefix);
 
-    $('#select_data').click(function() {
-        select_data();
-    });
+    var load = function () {
+        $('#select_data').click(function() {
+            select_data();
+        });
+    };
+
+    module.exports = {load: load};
 
 });

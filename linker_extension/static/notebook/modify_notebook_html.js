@@ -71,4 +71,6 @@ define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
 
         $("#download_rst").after(new_pdf_menu_item);
     };
+
+    module.exports = {load: load};
 });

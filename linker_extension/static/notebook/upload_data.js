@@ -234,7 +234,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
     var action_name = "upload-associated-data";
     var full_action_name = Jupyter.actions.register(action,action_name,prefix);
 
-    $('#upload_data').click(function () {
-        upload_data();
-    });
+    var load = function () {
+        $('#upload_data').click(function () {
+            upload_data();
+        });
+    };
+
+    module.exports = {load: load};
 });

@@ -11,7 +11,13 @@ define(['base/js/namespace','base/js/events','base/js/dialog','base/js/utils','.
         }
         page_loaded = true;
         $(document.body).append($("<div>").attr("id","tree_extension_loaded")); //this is so the test knows when we've loaded
-        //$("tree_extension_loaded").remove(); //remove immediately after to not clutter up the DOM
+        $("tree_extension_loaded").remove(); //remove immediately after to not clutter up the DOM
+
+        $('.bundle-button').click($.proxy(Jupyter.NotebookList.prototype.bundle_selected, Jupyter.notebook_list));
+        $('.bundle-cancel-button').click(function() {
+            sessionStorage.removeItem("bundle");
+            window.location.reload(); //TODO: should we redirect to tree page or back to notebook?
+        });
     };
 
     
@@ -360,17 +366,7 @@ define(['base/js/namespace','base/js/events','base/js/dialog','base/js/utils','.
                 },
             });
         }
-    };
-    
-    /*$('.bundle-button').click(function() {
-        console.log("button clicked");
-        bundle_selected();
-    });*/
-    $('.bundle-button').click($.proxy(Jupyter.NotebookList.prototype.bundle_selected, Jupyter.notebook_list));
-    $('.bundle-cancel-button').click(function() {
-    	sessionStorage.removeItem("bundle");
-        window.location.reload(); //TODO: should we redirect to tree page or back to notebook?
-    });
+    };    
 
     module.exports = {
         load: load,

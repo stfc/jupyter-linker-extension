@@ -75,7 +75,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
     var action_name = "upload-notebook-data";
     var full_action_name = Jupyter.actions.register(action,action_name,prefix);
 
-    $('#sword_new_item').click(function () {
-        upload_notebook();
-    });
+    var load = function () {
+        $('#sword_new_item').click(function () {
+            upload_notebook();
+        });
+    };
+
+    module.exports = {load: load};
 });

@@ -761,7 +761,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
     var action_name = "add-notebook-metadata";
     var full_action_name = Jupyter.actions.register(action,action_name,prefix);
 
-    $('#add_metadata').click(function () {
-        add_metadata();
-    });
+    var load = function () {
+        $('#add_metadata').click(function () {
+            add_metadata();
+        });
+    };
+
+    module.exports = {load: load};
 });

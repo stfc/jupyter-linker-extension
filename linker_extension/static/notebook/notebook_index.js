@@ -12,6 +12,11 @@ function load_ipython_extension(){
     console.log('Linker extension (notebook) loaded');
 
     modify_notebook_html.load();
+    add_metadata.load();
+    select_data_notebook.load();
+    upload_data.load();
+    upload_notebook.load();
+    view_data_dialog.load();
 }
 
 module.exports = {load_ipython_extension: load_ipython_extension};

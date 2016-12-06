@@ -71,8 +71,12 @@ define(['base/js/namespace','base/js/dialog','base/js/utils','./modify_notebook_
     var prefix = "linker_extension";
     var action_name = "view-associated-data";
     var full_action_name = Jupyter.actions.register(action,action_name,prefix);
+    
+    var load = function () {
+        $('#view_data').click(function () {
+            view_data();
+        });
+    };
 
-    $('#view_data').click(function () {
-        view_data();
-    });
+    module.exports = {load: load};
 });
