@@ -1,0 +1,19 @@
+module.exports = {
+	entry: {
+		'linker_extension/static/tree/linker_extension_tree': "./linker_extension/static/tree/tree_index.js",
+		'linker_extension/static/notebook/linker_extension_notebook': "./linker_extension/static/notebook/notebook_index.js",
+	},
+	output: {
+		path: "./",
+		filename: "[name].js",
+		libraryTarget: "amd",
+	},
+
+	externals: {
+		"base/js/namespace": "base/js/namespace",
+		"base/js/utils": "base/js/utils",
+		"base/js/dialog": "base/js/dialog",
+		"base/js/events": "base/js/events",
+		"notebook/js/celltoolbar": "notebook/js/celltoolbar",
+	}
+};
