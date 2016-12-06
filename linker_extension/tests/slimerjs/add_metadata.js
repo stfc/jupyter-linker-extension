@@ -26,6 +26,7 @@ casper.notebook_test(function() {
 
         });
     }); //TODO: check all the fields work. Also need to check the validators.
+    this.waitForSelector('#next');
     this.thenClick('#next');
     this.wait(300);
     this.waitForSelector("#collections_loaded"); //feels dirty...
