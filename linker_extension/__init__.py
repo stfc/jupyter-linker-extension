@@ -836,50 +836,13 @@ def _jupyter_server_extension_paths():
 def _jupyter_nbextension_paths():
     return [
         dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/custom_utils"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/custom_contents"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/after_custom_contents"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/notebook/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/notebook/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/notebook/modify_notebook_html"),
-
-        dict(
             section="tree",
             # the path is relative to the `my_fancy_module` directory
             src="static/tree/",
             # directory in the `nbextension/` namespace
             dest="linker_extension/tree/",
             # _also_ in the `nbextension/` namespace
-            require="linker_extension/tree/modify_tree_html"),
-
+            require="linker_extension/tree/linker_extension_tree"),
         dict(
             section="notebook",
             # the path is relative to the `my_fancy_module` directory
@@ -887,59 +850,5 @@ def _jupyter_nbextension_paths():
             # directory in the `nbextension/` namespace
             dest="linker_extension/notebook/",
             # _also_ in the `nbextension/` namespace
-            require="linker_extension/notebook/add_metadata"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/notebook/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/notebook/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/notebook/upload_data"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/notebook/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/notebook/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/notebook/view_data_dialog"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/notebook/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/notebook/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/notebook/select_data_notebook"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/notebook/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/notebook/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/notebook/upload_notebook"),
-
-        dict(
-            section="notebook",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/notebook/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/notebook/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/notebook/custom_cell_toolbar"),
-
-        dict(
-            section="tree",
-            # the path is relative to the `my_fancy_module` directory
-            src="static/tree/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/tree/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/tree/select_data_tree"),
+            require="linker_extension/notebook/linker_extension_notebook"),
     ]
