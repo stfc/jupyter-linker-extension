@@ -1,8 +1,4 @@
-define(['base/js/namespace','base/js/utils','base/js/dialog','nbextensions/linker_extension/notebook/modify_notebook_html'],function(Jupyter,utils,dialog){
-
-	function load_ipython_extension(){
-        console.log('Select data (notebook) loaded');
-    }
+define(['base/js/namespace','base/js/utils','base/js/dialog','./modify_notebook_html'],function(Jupyter,utils,dialog){
     
     var select_data = function () {
         var parameters = {
@@ -30,9 +26,5 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','nbextensions/linke
     $('#select_data').click(function() {
         select_data();
     });
-
-    return {
-        load_ipython_extension: load_ipython_extension
-    };
 
 });

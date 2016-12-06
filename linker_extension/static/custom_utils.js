@@ -35,7 +35,7 @@ define([], function(){
         return alert;
     };
 
-    return {
+    module.exports = {
     	getParameterByName : getParameterByName,
     	create_alert : create_alert,
         load_ipython_extension: load_ipython_extension

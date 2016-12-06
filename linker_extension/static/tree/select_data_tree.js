@@ -1,20 +1,18 @@
-define(['base/js/namespace','base/js/events','base/js/dialog','base/js/utils','nbextensions/linker_extension/custom_utils','nbextensions/linker_extension/tree/modify_tree_html'],function(Jupyter,events,dialog,utils,custom_utils){
+define(['base/js/namespace','base/js/events','base/js/dialog','base/js/utils','../custom_utils','./modify_tree_html'],function(Jupyter,events,dialog,utils,custom_utils){
     "use strict";
 
     var referring_notebook = "";
     var page_loaded;
 
-	function load_ipython_extension(){
-        console.log('Select data (tree) loaded');
-
+	var load = function(){
         Jupyter.notebook_list.load_list();
         if (sessionStorage.getItem("bundle")) {
             referring_notebook = sessionStorage.getItem("bundle");
         }
         page_loaded = true;
         $(document.body).append($("<div>").attr("id","tree_extension_loaded")); //this is so the test knows when we've loaded
-        $("tree_extension_loaded").remove(); //remove immediately after to not clutter up the DOM
-    }
+        //$("tree_extension_loaded").remove(); //remove immediately after to not clutter up the DOM
+    };
 
     
 
@@ -374,7 +372,7 @@ define(['base/js/namespace','base/js/events','base/js/dialog','base/js/utils','n
         window.location.reload(); //TODO: should we redirect to tree page or back to notebook?
     });
 
-    return {
-        load_ipython_extension: load_ipython_extension
+    module.exports = {
+        load: load,
     };
 });

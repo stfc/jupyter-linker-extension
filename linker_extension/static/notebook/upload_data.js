@@ -1,8 +1,4 @@
-define(['base/js/namespace','base/js/utils','base/js/dialog','nbextensions/linker_extension/custom_utils','nbextensions/linker_extension/custom_contents','nbextensions/linker_extension/notebook/modify_notebook_html'],function(Jupyter,utils,dialog,custom_utils,custom_contents){
-
-	function load_ipython_extension(){
-        console.log('Upload data loaded');
-    }
+define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','../custom_contents','./modify_notebook_html'],function(Jupyter,utils,dialog,custom_utils,custom_contents){
 
     var upload_data = function () {
         var error_div = $('<div/>').css('color', 'red');
@@ -241,9 +237,4 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','nbextensions/linke
     $('#upload_data').click(function () {
         upload_data();
     });
-
-    return {
-        load_ipython_extension: load_ipython_extension
-    };
-
 });

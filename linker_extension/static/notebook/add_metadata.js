@@ -1,8 +1,4 @@
-define(['base/js/namespace','base/js/utils','base/js/dialog','nbextensions/linker_extension/custom_contents','nbextensions/linker_extension/notebook/modify_notebook_html'],function(Jupyter,utils,dialog,custom_contents){
-
-	function load_ipython_extension(){
-        console.log('Add Metadata loaded');
-    }
+define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents','./modify_notebook_html'],function(Jupyter,utils,dialog,custom_contents){
 
     var add_metadata = function () {
         var message = "Add the report metadata.";
@@ -768,9 +764,4 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','nbextensions/linke
     $('#add_metadata').click(function () {
         add_metadata();
     });
-
-    return {
-        load_ipython_extension: load_ipython_extension
-    };
-
 });

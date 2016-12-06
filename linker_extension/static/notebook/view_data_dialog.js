@@ -1,9 +1,5 @@
-define(['base/js/namespace','base/js/dialog','base/js/utils','nbextensions/linker_extension/notebook/modify_notebook_html'],function(Jupyter,dialog,utils){
-
-	function load_ipython_extension(){
-        console.log('View data loaded');
-    }
-
+define(['base/js/namespace','base/js/dialog','base/js/utils','./modify_notebook_html'],function(Jupyter,dialog,utils){
+    
     var view_data = function () {
         var dialog_body = $('<div/>').append(
             $('<p/>').addClass("bundle-message")
@@ -79,9 +75,4 @@ define(['base/js/namespace','base/js/dialog','base/js/utils','nbextensions/linke
     $('#view_data').click(function () {
         view_data();
     });
-
-    return {
-        load_ipython_extension: load_ipython_extension
-    };
-
 });

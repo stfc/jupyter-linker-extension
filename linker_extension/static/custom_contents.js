@@ -92,7 +92,7 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
-    return {
+    module.exports = {
         load_ipython_extension: load_ipython_extension,
         sword_get_servicedocument: sword_get_servicedocument,
         sword_new_item: sword_new_item,

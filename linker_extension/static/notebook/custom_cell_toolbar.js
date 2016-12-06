@@ -160,17 +160,8 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	    };
     };
 
-    
+    CellToolbar.register_callback('linker_extension.add_reference_url',add_reference_url);
+    example_preset.push('linker_extension.add_reference_url');
 
-    function load_ipython_extension() {
-    	console.log("Custom cell toolbar loaded");
-    	CellToolbar.register_callback('linker_extension.add_reference_url',add_reference_url);
-        example_preset.push('linker_extension.add_reference_url');
-
-        CellToolbar.register_preset('Linker Extension',example_preset, Jupyter.notebook);
-    }
-	
-	return {
-		load_ipython_extension: load_ipython_extension
-	};
+    CellToolbar.register_preset('Linker Extension',example_preset, Jupyter.notebook);
 });
