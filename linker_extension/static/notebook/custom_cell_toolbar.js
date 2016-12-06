@@ -1,26 +1,33 @@
 define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/events'], function(Jupyter,celltoolbar,dialog,events) {
 	"use strict";
 
-	var CellToolbar = celltoolbar.CellToolbar;
 
-	CellToolbar.prototype._rebuild = CellToolbar.prototype.rebuild;
-    CellToolbar.prototype.rebuild = function () {
-        events.trigger('toolbar_rebuild.CellToolbar', this.cell);
-        this._rebuild();
-	};
+    var load = function() {
+    	var CellToolbar = celltoolbar.CellToolbar;
 
-	CellToolbar._global_hide = CellToolbar.global_hide;
-    CellToolbar.global_hide = function () {
-        CellToolbar._global_hide();
-        for (var i=0; i < CellToolbar._instances.length; i++) {
-            events.trigger('global_hide.CellToolbar', CellToolbar._instances[i].cell);
-        }
-	};
+		CellToolbar.prototype._rebuild = CellToolbar.prototype.rebuild;
+	    CellToolbar.prototype.rebuild = function () {
+	        events.trigger('toolbar_rebuild.CellToolbar', this.cell);
+	        this._rebuild();
+		};
 
-	var example_preset = [];
+		CellToolbar._global_hide = CellToolbar.global_hide;
+	    CellToolbar.global_hide = function () {
+	        CellToolbar._global_hide();
+	        for (var i=0; i < CellToolbar._instances.length; i++) {
+	            events.trigger('global_hide.CellToolbar', CellToolbar._instances[i].cell);
+	        }
+		};
+
+		var example_preset = [];
+
+		CellToolbar.register_callback('linker_extension.add_reference_url',add_reference_url);
+	    example_preset.push('linker_extension.add_reference_url');
+
+	    CellToolbar.register_preset('Linker Extension',example_preset, Jupyter.notebook);
+    };
 
     var add_reference_url = function(div, cell) {
-    	var urlcount = 1;
         var help_text = "Add the reference URLs that relate to this cell:\n";
         var toolbar_container = $(div).addClass("cell-urls-container");
 
@@ -33,9 +40,9 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
         	cell.metadata.referenceURLs = [];
         }
 
-        var base_referenceURL = $('<input/>').addClass("referenceURL").attr('name','referenceURL').attr('id','referenceURL-' +cell.cell_id  + '-0');
+        var base_referenceURL = $('<input/>').addClass("referenceURL").attr('name','referenceURL');
 
-	   	var base_referenceURL_div = $('<div/>').addClass("referenceURL_div");
+	   	var base_referenceURL_div = $('<div/>').addClass("referenceURL_div").addClass("referenceURL_div_" + cell.cell_id);
         base_referenceURL_div.append(base_referenceURL);
         var addURLButton = $('<button/>')
             .addClass('btn btn-xs btn-default add-cell-url-button')
@@ -54,7 +61,7 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 
         base_referenceURL.blur(function() { //save all values to metadata on defocus
         	cell.metadata.referenceURLs = [];
-        	$(".referenceURL").each(function(i,e) {
+        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
         		if($(e).val()) {
         			cell.metadata.referenceURLs.push($(e).val());
 	        	}
@@ -73,11 +80,11 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	                        .attr('type','button')
 	                        .attr("aria-label","Remove reference URL")
 	                            .click(function() {
-	                            	URL[1].remove();
+	                            	base_referenceURL.remove();
 	                                $(this).remove();
 
 	                            	cell.metadata.referenceURLs = [];
-						        	$(".referenceURL").each(function(i,e) {
+						        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
 						        		if($(e).val()) {
 						        			cell.metadata.referenceURLs.push($(e).val());
 							        	}
@@ -100,7 +107,7 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	                                $(this).remove();
 
 	                            	cell.metadata.referenceURLs = [];
-						        	$(".referenceURL").each(function(i,e) {
+						        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
 						        		if($(e).val()) {
 						        			cell.metadata.referenceURLs.push($(e).val());
 							        	}
@@ -114,12 +121,10 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
         }
 
         function addURL() {
-	    	var newURL = ($('<div/>')).addClass("referenceURL_div");
-	        var currcount = urlcount;
+	    	var newURL = ($('<div/>')).addClass("referenceURL_div").addClass("referenceURL_div_" + cell.cell_id);
 	        var URL = $('<input/>')
-	            .attr('class','referenceURL')
-	            .attr('type','text')
-	            .attr('id','referenceURL-' + cell.cell_id + "-" + urlcount);
+	            .attr('class','referenceURL referenceURL_' + cell.cell_id)
+	            .attr('type','text');
 
             URL.focus(function() { //on focus switch into edit mode so we can type text normally
 	        	Jupyter.keyboard_manager.edit_mode();
@@ -127,14 +132,14 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 
 	        URL.blur(function() { //saveall values to metadata on defocus
 	        	cell.metadata.referenceURLs = [];
-	        	$(".referenceURL").each(function(i,e) {
+	        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
 	        		if($(e).val()) {
 	        			cell.metadata.referenceURLs.push($(e).val());
 		        	}
 	        	});
 	        });
 
-	        var previousURL = $('.referenceURL_div').last();
+	        var previousURL = $('.referenceURL_div_' + cell.cell_id).last();
 	        addURLButton.detach(); //detach from the previously last url input so we can put it back on the new one
 	        var deleteURL = $('<button/>')
 	            .addClass('btn btn-xs btn-default remove-cell-url-button')
@@ -144,7 +149,7 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	                    previousURL.remove();
 	                    $(this).remove();
 	                    cell.metadata.referenceURLs = [];
-			        	$(".referenceURL").each(function(i,e) {
+			        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
 			        		if($(e).val()) {
 			        			cell.metadata.referenceURLs.push($(e).val());
 				        	}
@@ -154,14 +159,10 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	        deleteURL.append($('<i>').addClass("fa fa-trash").attr("aria-hidden","true"));
 	        previousURL.append(deleteURL);
 	        URL_container.append(newURL.append(URL).append(addURLButton));
-	        urlcount++;
-
 	        return [URL,newURL];
-	    };
+	    }
     };
 
-    CellToolbar.register_callback('linker_extension.add_reference_url',add_reference_url);
-    example_preset.push('linker_extension.add_reference_url');
 
-    CellToolbar.register_preset('Linker Extension',example_preset, Jupyter.notebook);
+    module.exports = {load: load};
 });
