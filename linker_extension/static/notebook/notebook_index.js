@@ -17,6 +17,7 @@ function load_ipython_extension(){
     upload_data.load();
     upload_notebook.load();
     view_data_dialog.load();
+    custom_cell_toolbar.load();
 }
 
 module.exports = {load_ipython_extension: load_ipython_extension};
