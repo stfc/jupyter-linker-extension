@@ -2,6 +2,17 @@
 
 import os
 from setuptools import setup, find_packages
+from setuptools.command.sdist import sdist
+
+
+class CustomsdistCommand(sdist):
+
+    def run(self):
+        # insert custom code here
+        import subprocess
+        subprocess.call(['webpack'])
+        sdist.run(self)
+
 
 def package_files(directory):
     paths = []
@@ -10,11 +21,11 @@ def package_files(directory):
             paths.append(os.path.join('..', path, filename))
     return paths
 
-static_files = package_files('linker_extension/static')
 phantomjs_files = package_files('linker_extension/tests/phantomjs')
 slimerjs_files = package_files('linker_extension/tests/slimerjs')
-print(phantomjs_files)
-print(find_packages())
+resource_files = package_files('linker_extension/resources')
+jsfiles = ['static/notebook/linker_extension_notebook.js', 'static/tree/linker_extension_tree.js']
+cssfiles = ['static/notebook/notebook_style.css', 'static/tree/tree_style.css']
 
 setup_args = dict(
     name='LinkerExtension',
@@ -25,13 +36,17 @@ setup_args = dict(
     url='http://www.stfc.ac.uk/',
     packages=find_packages(),
     package_data={
-        '':static_files + ['tests/*.js','tests/*.md'] + phantomjs_files + slimerjs_files
+        '': jsfiles + cssfiles + ['tests/*.js', 'tests/*.md'] + phantomjs_files + slimerjs_files + resource_files
     },
-    install_requires = [
+    install_requires=[
         'notebook>=4',
         'ldap3'
-    ]
+    ],
+    cmdclass={
+        'sdist': CustomsdistCommand,
+    }
 )
+
 
 def main():
     setup(**setup_args)
