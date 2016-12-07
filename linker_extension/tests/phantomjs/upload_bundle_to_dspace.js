@@ -173,7 +173,6 @@ casper.notebook_test(function() {
     this.waitForSelector(alert);
     this.then(function() {
         var alert_element = this.getElementAttribute(alert,'class');
-        this.echo(this.fetchText(alert));
         this.test.assertEquals(alert_element,"alert alert-dismissible fade in alert-success","Success alert seen");
     });
     
