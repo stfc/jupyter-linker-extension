@@ -40,7 +40,7 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
         	cell.metadata.referenceURLs = [];
         }
 
-        var base_referenceURL = $('<input/>').addClass("referenceURL").attr('name','referenceURL');
+        var base_referenceURL = $('<input/>').addClass("referenceURL referenceURL_" + cell.cell_id).attr('name','referenceURL');
 
 	   	var base_referenceURL_div = $('<div/>').addClass("referenceURL_div").addClass("referenceURL_div_" + cell.cell_id);
         base_referenceURL_div.append(base_referenceURL);
@@ -59,13 +59,17 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
         	Jupyter.keyboard_manager.edit_mode();
         });
 
-        base_referenceURL.blur(function() { //save all values to metadata on defocus
+        function update_metadata() {
         	cell.metadata.referenceURLs = [];
         	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
         		if($(e).val()) {
         			cell.metadata.referenceURLs.push($(e).val());
 	        	}
         	});
+        }
+
+        base_referenceURL.change(function() { //save all values to metadata on change
+        	update_metadata();
         });
 
         if(md_set) {
@@ -83,12 +87,7 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	                            	base_referenceURL.remove();
 	                                $(this).remove();
 
-	                            	cell.metadata.referenceURLs = [];
-						        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
-						        		if($(e).val()) {
-						        			cell.metadata.referenceURLs.push($(e).val());
-							        	}
-						        	});
+	                            	update_metadata();
 	                            });
 	                    deleteURL.append($('<i>').addClass("fa fa-trash").attr("aria-hidden","true"));
 	                    base_referenceURL_div.append(deleteURL);
@@ -106,12 +105,7 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	                            	URL[1].remove();
 	                                $(this).remove();
 
-	                            	cell.metadata.referenceURLs = [];
-						        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
-						        		if($(e).val()) {
-						        			cell.metadata.referenceURLs.push($(e).val());
-							        	}
-						        	});
+	                            	update_metadata();
 	                            });
 	                    deleteURL.append($('<i>').addClass("fa fa-trash").attr("aria-hidden","true"));
 	                    URL[1].append(deleteURL);
@@ -124,19 +118,15 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	    	var newURL = ($('<div/>')).addClass("referenceURL_div").addClass("referenceURL_div_" + cell.cell_id);
 	        var URL = $('<input/>')
 	            .attr('class','referenceURL referenceURL_' + cell.cell_id)
-	            .attr('type','text');
+	            .attr('type','text')
+	            .attr("name","referenceURL");
 
             URL.focus(function() { //on focus switch into edit mode so we can type text normally
 	        	Jupyter.keyboard_manager.edit_mode();
 	        });
 
-	        URL.blur(function() { //saveall values to metadata on defocus
-	        	cell.metadata.referenceURLs = [];
-	        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
-	        		if($(e).val()) {
-	        			cell.metadata.referenceURLs.push($(e).val());
-		        	}
-	        	});
+	        URL.change(function() { //saveall values to metadata on change
+	        	update_metadata();
 	        });
 
 	        var previousURL = $('.referenceURL_div_' + cell.cell_id).last();
@@ -148,12 +138,7 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	                .click(function() {
 	                    previousURL.remove();
 	                    $(this).remove();
-	                    cell.metadata.referenceURLs = [];
-			        	$(".referenceURL_" + cell.cell_id).each(function(i,e) {
-			        		if($(e).val()) {
-			        			cell.metadata.referenceURLs.push($(e).val());
-				        	}
-			        	});
+	                    update_metadata();
 	                }); //add a remove button to the previously last url
 
 	        deleteURL.append($('<i>').addClass("fa fa-trash").attr("aria-hidden","true"));
