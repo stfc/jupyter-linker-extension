@@ -26,8 +26,12 @@ body {
   overflow: hidden
 }
 
-span#login_widget, #kernel_logo_widget, a.btn.btn {
-  margin-top: 40px;
+span#login_widget, a.btn.btn {
+  margin-top: 25px;
+}
+
+span#login_widget {
+  margin-left: 4px; 
 }
 
 .bundle-button, .bundle-cancel-button {

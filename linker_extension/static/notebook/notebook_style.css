@@ -152,7 +152,7 @@ body {
   overflow: hidden
 }
 span.save_widget {
-  margin-top: 48px;
+  margin-top: 38px;
 }
 span.save_widget span.filename, span.last_modified, .dirty-indicator-clean, span.checkpoint_status, span.autosave_status, #current-mode {
   color: #ffffff;
@@ -163,7 +163,11 @@ span.save_widget span.filename:hover {
 }
 
 span#login_widget, #kernel_logo_widget, a.btn.btn {
-  margin-top: 40px;
+  margin-top: 25px;
+}
+
+span#login_widget {
+  margin-left: 4px; 
 }
 
 #fields1 > input, #fields2 > input, .referencedBy {
