@@ -58,11 +58,10 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                 "repository":md.reportmetadata.repository
             };
             
-            custom_contents.upload_data(options).catch(function(reason) {
-                var id = "";
-                var xml_str = "";
-                if (reason.xhr.status === 201) {
-                    xml_str = reason.xhr.responseText.split("\n");
+            custom_contents.upload_data(options).then(
+                function(response) {
+                    var id = "";
+                    var xml_str = response.split("\n");
                     xml_str.forEach(function(item) {
                         if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
                             var endtag = item.lastIndexOf("<");
@@ -73,22 +72,10 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                         }
                     });
                     custom_utils.create_alert("alert-success","Success! Item created in DSpace via SWORD!").attr('item-id',id);
-                } else if (reason.xhr.status === 202) {
-                    xml_str = reason.xhr.responseText.split("\n");
-                    xml_str.forEach(function(item) {
-                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
-                            var endtag = item.lastIndexOf("<");
-                            var without_endtag = item.slice(0,endtag);
-                            var starttag = without_endtag.indexOf(">");
-                            var without_starttag = without_endtag.slice(starttag + 1);
-                            id = without_starttag;
-                        }
-                    });
-                    custom_utils.create_alert("alert-warning","Item submitted to DSpace but it needs to be approved by an administrator").attr('item-id',id);
-                } else {
+                }, function(reason) {
                     custom_utils.create_alert("alert-danger","Error! " + reason.message + ", please try again. If it continues to fail please contact the developers.");
                 }
-            });
+            );
         } else { 
             if (!("reportmetadata" in md)) {
                 custom_utils.create_alert("alert-danger","Error! No report metadata - please fill in the report metadata first.");

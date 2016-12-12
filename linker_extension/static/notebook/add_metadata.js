@@ -487,8 +487,8 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
             .attr('id','repository')
             .append($('<option/>').attr("value","").text(""));
 
-        custom_contents.sword_get_servicedocument().catch(function(reason) {
-            var xml = $.parseXML(reason.xhr.responseText);
+        custom_contents.sword_get_servicedocument().then(function(response) {
+            var xml = $.parseXML(response);
             var collections = $(xml).find("app\\:collection");
             collections.each(function(index, item) {
                 var last_slash = $(item).attr("href").lastIndexOf("/");
@@ -506,9 +506,14 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
                 repository.val(md.reportmetadata.repository);
             }
             $(document.body).append($("<div/>").attr("id","collections_loaded"));
+        }, function(reason) { //error
+            console.log("Error getting service document: ");
+            console.log(reason.xhr);
+            $("label[for='abstract']").after($("<div/>").addClass("repository-fetch-error").text("Couldn't download the repository information from eData. Please reload and if the error persists contact the developers."));
         });
 
-        
+
+
 
         var form2 = $('<fieldset/>').addClass("hide-me").attr('title','fields2').attr('id','fields2')
             .append(publisherLabel)

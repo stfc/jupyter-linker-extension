@@ -25,14 +25,10 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                     "sponsors":Jupyter.notebook.metadata.reportmetadata.sponsors,
                     "repository":Jupyter.notebook.metadata.reportmetadata.repository
                 };
-                custom_contents.sword_new_item(options).catch(function(reason) {
-                    //I feel dirty, but I can't get Jupyter to not assume the success response is an error
-                    //so if the error response has the code 201, post a "success" notification instead
-                    //TODO: actually make Jupyter recognise that it's not an error? Is it worth it?
-                    var id = "";
-                    var xml_str = "";
-                    if (reason.xhr.status === 201) {
-                        xml_str = reason.xhr.responseText.split("\n");
+                custom_contents.sword_new_item(options).then(
+                    function(response) {
+                        var id = "";
+                        var xml_str = response.split("\n");
                         xml_str.forEach(function(item) {
                             if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
                                 var endtag = item.lastIndexOf("<");
@@ -43,23 +39,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                             }
                         });
                         custom_utils.create_alert("alert-success","Success! Item created in DSpace via SWORD!").attr('item-id',id);
-                    } else if (reason.xhr.status === 202) {
-                        xml_str = reason.xhr.responseText.split("\n");
-                        xml_str.forEach(function(item) {
-                            if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
-                                var endtag = item.lastIndexOf("<");
-                                var without_endtag = item.slice(0,endtag);
-                                var starttag = without_endtag.indexOf(">");
-                                var without_starttag = without_endtag.slice(starttag + 1);
-                                id = without_starttag;
-                            }
-                        });
-                        custom_utils.create_alert("alert-warning","Item submitted to DSpace but it needs to be approved by an administrator").attr('item-id',id);
-                    } else {
+                    }, function(reason) {
                         custom_utils.create_alert("alert-danger","Error! " + reason.message + ", please try again. If it continues to fail please contact the developers.");
                     }
                     //TODO: aim the error messages at the user and not me
-                });
+                );
             } else {
                 custom_utils.create_alert("alert-danger","Error! No metadata found. Please use the 'Add Metadata' menu item to add the metadata for this report");
             }

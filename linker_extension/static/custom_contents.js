@@ -12,7 +12,6 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
             type : "POST",
             processData : false,
             contentType: 'application/json',
-            dataType : "json",
         };
         return utils.promising_ajax(url + '?' + $.param(options), settings);
     };
@@ -23,7 +22,6 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
             type : "POST",
             processData : false,
             contentType: 'application/json',
-            dataType : "json",
         };
         return utils.promising_ajax(url + '?' + $.param(options), settings);
     };
@@ -34,7 +32,6 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
             type : "POST",
             processData : false,
             contentType: 'application/json',
-            dataType : "json",
         };
         return utils.promising_ajax(url + '?' + $.param(options), settings);
     };
@@ -45,7 +42,6 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
             processData : false,
             cache : false,
             type : "GET",
-            dataType : "json",
         };
         return utils.promising_ajax(url + '?' + $.param(options), settings);
     };
@@ -55,7 +51,6 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
         var settings = {
             processData : false,
             type : "DELETE",
-            dataType : "json",
         };
         return utils.promising_ajax(url + '?' + $.param(options), settings);
     };
@@ -66,7 +61,6 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
             processData : false,
             cache : false,
             type : "PUT",
-            dataType : "json",
         };
         return utils.promising_ajax(url + '?' + $.param(options), settings);
     };
@@ -87,7 +81,6 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
             processData : false,
             cache : false,
             type : "GET",
-            dataType : "json",
         };
         return utils.promising_ajax(url, settings);
     };
