@@ -9,6 +9,7 @@ import os
 import xml.etree.ElementTree as ET
 import zipfile
 import ldap3
+import re
 
 from tornado import web, gen, escape
 
@@ -479,7 +480,6 @@ class TestDSpaceHandler(IPythonHandler):
         self.finish(result_dict)
 
 
-
 class UploadBundleHandler(IPythonHandler):
 
     @web.authenticated
@@ -688,11 +688,11 @@ class UploadBundleHandler(IPythonHandler):
             print(r.status_code)
             retries -= 1
 
-        if(r.status_code == 201):
+        if(r.status_code == 201):  # created
             self.clear()
             self.set_status(201)
             self.finish(r.text)
-        elif (r.status_code == 202):
+        elif (r.status_code == 202):  # accepted (waiting for approval)
             self.clear()
             self.set_status(202)
             self.finish(r.text)
@@ -738,6 +738,56 @@ class LDAPHandler(IPythonHandler):
 
         self.set_header('Content-Type', 'application/json')
         self.finish(json.dumps(json_entries))
+
+    @web.authenticated
+    @json_errors
+    @gen.coroutine
+    def post(self):
+        json_obj = escape.json_decode(self.request.body)
+
+        username = json_obj['username']
+        password = json_obj['password']
+
+        valid_username_regex = r'^[a-z][.a-z0-9_-]*$'
+
+        bind_dn_template = [
+            'cn={username},ou=fbu,dc=fed,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=tbu,dc=fed,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=Swindon,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=obu,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=RALSpace,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=ROE,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=PPD,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=DLS,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=Facility Users,ou=fbu,dc=cclrc,dc=ac,dc=uk',
+            'cn={username},ou=RCaH,dc=cclrc,dc=ac,dc=uk'
+        ]
+
+        if not re.match(valid_username_regex, username):
+            self.set_status(400)
+            self.finish()
+            return None
+
+        def getConnection(userdn, username, password):
+            server = ldap3.Server('logon10.fed.cclrc.ac.uk', get_info=ldap3.ALL)
+
+            conn = ldap3.Connection(server, user=userdn, password=password)
+            return conn
+
+        for dn in bind_dn_template:
+            userdn = dn.format(username=username)
+            conn = getConnection(userdn, username, password)
+            isBound = conn.bind()
+            if isBound:
+                break
+
+        if isBound:
+            self.set_status(200)
+            self.finish()
+        else:
+            print("didn't log in")
+            self.set_status(401)
+            self.finish()
 
 # ----------------------------------------------------------------------------
 # Custom Nbconvert handler (need this to select template)
