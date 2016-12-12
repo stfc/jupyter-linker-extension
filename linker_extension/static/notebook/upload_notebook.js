@@ -1,6 +1,6 @@
 define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','../custom_contents','./modify_notebook_html'],function(Jupyter,utils,dialog,custom_utils,custom_contents){
 
-    var upload_notebook = function() {
+    var upload_notebook = function(username) {
         if ("reportmetadata" in Jupyter.notebook.metadata) {
                 var stringauthors = [];
                 var authors = Jupyter.notebook.metadata.reportmetadata.authors;
@@ -10,7 +10,8 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                 });
 
                 var options = {
-                    "notebookpath":Jupyter.notebook.notebook_path,
+                    "username": username,
+                    "notebookpath": Jupyter.notebook.notebook_path,
                     "title":Jupyter.notebook.metadata.reportmetadata.title,
                     "authors":stringauthors,
                     "abstract":Jupyter.notebook.metadata.reportmetadata.abstract,
@@ -77,9 +78,9 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
 
     var load = function () {
         $('#sword_new_item').click(function () {
-            upload_notebook();
+            upload_notebook("mnf98541"); //todo: username storage? or we can probably get rid of this button
         });
     };
 
-    module.exports = {load: load};
+    module.exports = {load: load, upload_notebook: upload_notebook};
 });
