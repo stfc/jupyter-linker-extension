@@ -7,6 +7,7 @@ var select_data_notebook = require("./select_data_notebook.js");
 var upload_data = require("./upload_data.js");
 var upload_notebook = require("./upload_notebook.js");
 var view_data_dialog = require("./view_data_dialog.js");
+var publish_notebook = require("./publish_notebook.js");
 
 function load_ipython_extension(){
     console.log('Linker extension (notebook) loaded');
@@ -18,6 +19,7 @@ function load_ipython_extension(){
     upload_notebook.load();
     view_data_dialog.load();
     custom_cell_toolbar.load();
+    publish_notebook.load();
 }
 
 module.exports = {load_ipython_extension: load_ipython_extension};
