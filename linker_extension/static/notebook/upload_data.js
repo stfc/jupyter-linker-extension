@@ -24,7 +24,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
 
     var upload_data = function(username, file_names,file_paths,file_types) {
         var md = Jupyter.notebook.metadata;
-        if ("reportmetadata" in md && "databundle" in md) {
+        if ("databundle_url" in md) {
+            //already uploaded to dspace so... TODO: do we want to block them if it's already been uplaoded? should I grey out the button?
+            custom_utils.create_alert("alert-warning","You have already uploaded the associate data for this notebook to eData and it will not be reuploaded.");
+        }
+        else if ("reportmetadata" in md && "databundle" in md) {
             var stringauthors = [];
             var authors = md.reportmetadata.authors;
             authors.forEach(function(author) {
@@ -71,6 +75,8 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                             id = without_starttag;
                         }
                     });
+                    md.databundle_url = id;
+                    Jupyter.notebook.save_notebook();
                     custom_utils.create_alert("alert-success","Success! Item created in DSpace via SWORD!").attr('item-id',id);
                 }, function(reason) {
                     custom_utils.create_alert("alert-danger","Error! " + reason.message + ", please try again. If it continues to fail please contact the developers.");

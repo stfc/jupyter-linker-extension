@@ -67,7 +67,13 @@ define(['base/js/namespace','base/js/dialog','base/js/utils','./modify_notebook_
                 });
                 view_data_div.append(bundlehtml);
             } else {
-            view_data_div.append($('<div/>').text("You have associated no files with this notebook!"));
+                view_data_div.append($('<div/>').text("You have associated no files with this notebook!"));
+            }
+            if("databundle_url" in Jupyter.notebook.metadata) {
+                view_data_div.append($("<br/>"));
+                view_data_div.append($('<strong/>').text("ATTENTION: ").css("color","red"));
+                view_data_div.append($('<p/>').text("You have already uploaded the associated data for this notebook. It is located here: "));
+                view_data_div.append($("<a/>").attr("href",Jupyter.notebook.metadata.databundle_url).text(Jupyter.notebook.metadata.databundle_url));
             }
         } else {
             view_data_div.append($('<div/>').text("You have associated no files with this notebook!"));
