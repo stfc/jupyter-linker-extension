@@ -1,13 +1,106 @@
-define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','../custom_contents','./modify_notebook_html'],function(Jupyter,utils,dialog,custom_utils,custom_contents){
+define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','../custom_contents','./view_data_dialog','./select_data_notebook','./modify_notebook_html'],function(Jupyter,utils,dialog,custom_utils,custom_contents,view_data,select_data_notebook){
 
-    var upload_data = function () {
-        var error_div = $('<div/>').css('color', 'red');
+    var upload_data_dialog = function () {
+        var upload_data_info = upload_data_form();
+
+        var dialog_body = upload_data_info.dialog_body;
+
+        var modal_obj = dialog.modal({
+            title: "Upload Associated Data",
+            body: dialog_body,
+            default_button: "Cancel",
+            buttons: {
+                Cancel: {},
+                Upload: { class : "btn-primary",
+                    click: function() { //todo: remove this button or sort out username
+                        upload_data("mnf98541",upload_data_info.file_names,upload_data_info.file_paths,upload_data_info.file_types);
+                    }
+                },
+            },
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.keyboard_manager,
+        });
+    };
+
+    var upload_data = function(username, file_names,file_paths,file_types) {
         var md = Jupyter.notebook.metadata;
-        var notebook = Jupyter.notebook;
-        var file_names = [];
-        var file_paths = [];
-        var file_types = [];
+        if ("reportmetadata" in md && "databundle" in md) {
+            var stringauthors = [];
+            var authors = md.reportmetadata.authors;
+            authors.forEach(function(author) {
+                var authorstring = author[0] + ", " + author[1];
+                stringauthors.push(authorstring); 
+            });
 
+            var referencedBy_URLs = [];
+            $('.data_referencedBy').each(function(i,e) {
+                referencedBy_URLs.push($(e).val());
+            });
+
+            var contents = Jupyter.notebook.contents;
+            var options = {
+                "username": username,
+                "notebookpath": Jupyter.notebook.notebook_path,
+                "file_names": file_names,
+                "file_paths": file_paths,
+                "file_types": file_types,
+                "abstract": $("#data_abstract").val(),
+                "referencedBy": referencedBy_URLs,
+                "title":md.reportmetadata.title, //rest are grabbed from the notebook metadata
+                "authors":stringauthors,
+                "tags":md.reportmetadata.tags,
+                "date":md.reportmetadata.date,
+                "language":md.reportmetadata.language,
+                "publisher":md.reportmetadata.publisher,
+                "citation":md.reportmetadata.citation,
+                "funders":md.reportmetadata.funders,
+                "sponsors":md.reportmetadata.sponsors,
+                "repository":md.reportmetadata.repository
+            };
+            
+            custom_contents.upload_data(options).catch(function(reason) {
+                var id = "";
+                var xml_str = "";
+                if (reason.xhr.status === 201) {
+                    xml_str = reason.xhr.responseText.split("\n");
+                    xml_str.forEach(function(item) {
+                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
+                            var endtag = item.lastIndexOf("<");
+                            var without_endtag = item.slice(0,endtag);
+                            var starttag = without_endtag.indexOf(">");
+                            var without_starttag = without_endtag.slice(starttag + 1);
+                            id = without_starttag;
+                        }
+                    });
+                    custom_utils.create_alert("alert-success","Success! Item created in DSpace via SWORD!").attr('item-id',id);
+                } else if (reason.xhr.status === 202) {
+                    xml_str = reason.xhr.responseText.split("\n");
+                    xml_str.forEach(function(item) {
+                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
+                            var endtag = item.lastIndexOf("<");
+                            var without_endtag = item.slice(0,endtag);
+                            var starttag = without_endtag.indexOf(">");
+                            var without_starttag = without_endtag.slice(starttag + 1);
+                            id = without_starttag;
+                        }
+                    });
+                    custom_utils.create_alert("alert-warning","Item submitted to DSpace but it needs to be approved by an administrator").attr('item-id',id);
+                } else {
+                    custom_utils.create_alert("alert-danger","Error! " + reason.message + ", please try again. If it continues to fail please contact the developers.");
+                }
+            });
+        } else { 
+            if (!("reportmetadata" in md)) {
+                custom_utils.create_alert("alert-danger","Error! No report metadata - please fill in the report metadata first.");
+            }
+            if(!("databundle" in md)) {
+                custom_utils.create_alert("alert-danger","Error! No data associated with this notebook. You must select data to upload before you an upload it."); //TODO: be a little less sassy?
+            }
+        }
+    };
+    
+
+    var upload_data_form = function() {
         var display_files = $('<div/>').append(
             $('<p/>').addClass("bundle-message")
                 .text('These are the files currently associated with ' + notebook.notebook_name + " :")
@@ -15,52 +108,13 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
             $('<br/>')
         );
 
-        if(!($.isEmptyObject(md))) {
-            if("databundle" in md) {
-                var databundle = md.databundle;
-                var bundlehtml = $('<div/>');
-                var type_order = {'directory':0,'notebook':1,'file':2};
-                var db_copy = databundle.slice();
-                db_copy.sort(function(a,b) {
-                    if (type_order[a.type] < type_order[b.type]) {
-                        return -1;
-                    }
-                    if (type_order[a.type] > type_order[b.type]) {
-                        return 1;
-                    }
-                    if (a.path.toLowerCase() < b.path.toLowerCase()) {
-                        return -1;
-                    }
-                    if (a.path.toLowerCase() > b.path.toLowerCase()) {
-                        return 1;
-                    }
-                    return 0;
-                });
-                var divs = {};
-                db_copy.forEach(function(item) {
-                    var div = $('<div/>').text(item.path).attr('data-indent',0).attr('class','bundle-item').css("margin-left","0px");
-                    if(item.type === 'directory') {
-                        divs[item.path] = div;
-                    }
-                    if(divs.hasOwnProperty(utils.url_path_split(item.path)[0])) {
-                        var parent = utils.url_path_split(item.path)[0];
-                        var indent = divs[parent].attr('data-indent') + 1;
-                        div.text(item.name).attr('data-indent',indent).css("margin-left","12px");
-                        divs[parent].append(div);
-                    } else {
-                        bundlehtml.append(div);
-                    }
-                    file_names.push(item.name);
-                    file_paths.push(item.path);
-                    file_types.push(item.type);
-                });
-                display_files.append(bundlehtml);
-            } else {
-            display_files.append($('<div/>').text("You have associated no files with this notebook!"));
-            }
-        } else {
-            display_files.append($('<div/>').text("You have associated no files with this notebook!"));
-        }
+        var view_data_info = view_data.view_data();
+
+        display_files.append(view_data_info.view_data_div);
+
+        var file_names = view_data_info.file_names;
+        var file_paths = view_data_info.file_paths;
+        var file_types = view_data_info.file_types;
 
         var data_abstract_label = $('<label/>')
             .attr('for','data_abstract')
@@ -130,104 +184,29 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
             return [URL,newURL];
         }
 
+        var select_data_button = $("<button/>")
+            .addClass('btn btn-xs btn-default select-data-button')
+            .attr('type','button')
+            .text("Select data")
+            .attr("title","Select data to associate with this notebook")
+            .attr("aria-label","Select data to associate with this notebook")
+            .click(function() {
+                select_data.select_data();
+            });
+
         var dialog_body = $('<div/>')
             .append(display_files)
+            .append(select_data_button)
             .append(data_fields);
 
-
-        var modal_obj = dialog.modal({
-            title: "Upload Associated Data",
-            body: dialog_body,
-            default_button: "Cancel",
-            buttons: {
-                Cancel: {},
-                Upload: { class : "btn-primary",
-                    click: function() {
-                        if ("reportmetadata" in md && "databundle" in md) {
-                            var stringauthors = [];
-                            var authors = md.reportmetadata.authors;
-                            authors.forEach(function(author) {
-                                var authorstring = author[0] + ", " + author[1];
-                                stringauthors.push(authorstring); 
-                            });
-
-                            var referencedBy_URLs = [];
-                            $('.data_referencedBy').each(function(i,e) {
-                                referencedBy_URLs.push($(e).val());
-                            });
-
-                            var contents = notebook.contents;
-                            var options = {
-                                "notebookpath": notebook.notebook_path,
-                                "file_names": file_names,
-                                "file_paths": file_paths,
-                                "file_types": file_types,
-                                "abstract": data_abstract.val(),
-                                "referencedBy": referencedBy_URLs,
-                                "title":md.reportmetadata.title, //rest are grabbed from the notebook metadata
-                                "authors":stringauthors,
-                                "tags":md.reportmetadata.tags,
-                                "date":md.reportmetadata.date,
-                                "language":md.reportmetadata.language,
-                                "publisher":md.reportmetadata.publisher,
-                                "citation":md.reportmetadata.citation,
-                                "funders":md.reportmetadata.funders,
-                                "sponsors":md.reportmetadata.sponsors,
-                                "repository":md.reportmetadata.repository
-                            };
-                            
-                            custom_contents.upload_data(options).catch(function(reason) {
-                                var id = "";
-                                var xml_str = "";
-                                if (reason.xhr.status === 201) {
-                                    xml_str = reason.xhr.responseText.split("\n");
-                                    xml_str.forEach(function(item) {
-                                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
-                                            var endtag = item.lastIndexOf("<");
-                                            var without_endtag = item.slice(0,endtag);
-                                            var starttag = without_endtag.indexOf(">");
-                                            var without_starttag = without_endtag.slice(starttag + 1);
-                                            id = without_starttag;
-                                        }
-                                    });
-                                    custom_utils.create_alert("alert-success","Success! Item created in DSpace via SWORD!").attr('item-id',id);
-                                } else if (reason.xhr.status === 202) {
-                                    xml_str = reason.xhr.responseText.split("\n");
-                                    xml_str.forEach(function(item) {
-                                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
-                                            var endtag = item.lastIndexOf("<");
-                                            var without_endtag = item.slice(0,endtag);
-                                            var starttag = without_endtag.indexOf(">");
-                                            var without_starttag = without_endtag.slice(starttag + 1);
-                                            id = without_starttag;
-                                        }
-                                    });
-                                    custom_utils.create_alert("alert-warning","Item submitted to DSpace but it needs to be approved by an administrator").attr('item-id',id);
-                                } else {
-                                    custom_utils.create_alert("alert-danger","Error! " + reason.message + ", please try again. If it continues to fail please contact the developers.");
-                                }
-                            });
-                        } else { 
-                            if (!("reportmetadata" in md)) {
-                                custom_utils.create_alert("alert-danger","Error! No report metadata - please fill in the report metadata first.");
-                            }
-                            if(!("databundle" in md)) {
-                                custom_utils.create_alert("alert-danger","Error! No data associated with this notebook. You must select data to upload before you an upload it."); //TODO: be a little less sassy?
-                            }
-                        }
-                    }
-                }
-            },
-            notebook: Jupyter.notebook,
-            keyboard_manager: Jupyter.keyboard_manager,
-        });
+        return {dialog_body: dialog_body, file_names: file_names, file_paths: file_paths, file_types: file_types};
     };
     
     var action = {
         help: 'Upload associated data',
         help_index: 'b',
         icon: 'fa-upload',
-        handler : upload_data,
+        handler : upload_data_dialog,
     };
 
     var prefix = "linker_extension";
@@ -236,9 +215,9 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
 
     var load = function () {
         $('#upload_data').click(function () {
-            upload_data();
+            upload_data_dialog();
         });
     };
 
-    module.exports = {load: load};
+    module.exports = {load: load, upload_data_form: upload_data_form};
 });

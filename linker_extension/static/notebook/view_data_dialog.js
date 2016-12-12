@@ -1,12 +1,31 @@
 define(['base/js/namespace','base/js/dialog','base/js/utils','./modify_notebook_html'],function(Jupyter,dialog,utils){
     
-    var view_data = function () {
+    var view_data_dialog = function () {
         var dialog_body = $('<div/>').append(
             $('<p/>').addClass("bundle-message")
                 .text('These are the files currently associated with ' + Jupyter.notebook.notebook_name + " :")
         ).append(
             $('<br/>')
+        ).append(
+            view_data().view_data_div
         );
+
+        var d = dialog.modal({
+            title : "View Associated Data",
+            body : dialog_body,
+            default_button: "OK",
+            buttons : {
+                OK: {}
+            },
+        });
+    };
+
+    var view_data = function() {
+        var view_data_div = $("<div/>").attr("id","view_data_container");
+        var file_names = [];
+        var file_paths = [];
+        var file_types = [];
+
         if(!($.isEmptyObject(Jupyter.notebook.metadata))) {
             if("databundle" in Jupyter.notebook.metadata) {
                 var databundle = Jupyter.notebook.metadata.databundle;
@@ -42,23 +61,18 @@ define(['base/js/namespace','base/js/dialog','base/js/utils','./modify_notebook_
                     } else {
                         bundlehtml.append(div);
                     }
+                    file_names.push(item.name);
+                    file_paths.push(item.path);
+                    file_types.push(item.type);
                 });
-                dialog_body.append(bundlehtml);
+                view_data_div.append(bundlehtml);
             } else {
-            dialog_body.append($('<div/>').text("You have associated no files with this notebook!"));
+            view_data_div.append($('<div/>').text("You have associated no files with this notebook!"));
             }
         } else {
-            dialog_body.append($('<div/>').text("You have associated no files with this notebook!"));
+            view_data_div.append($('<div/>').text("You have associated no files with this notebook!"));
         }
-
-        var d = dialog.modal({
-            title : "View Associated Data",
-            body : dialog_body,
-            default_button: "OK",
-            buttons : {
-                OK: {}
-            },
-        });
+        return {view_data_div: view_data_div, file_names: file_names, file_paths: file_paths, file_types: file_types};
     };
     
     var action = {
@@ -74,9 +88,9 @@ define(['base/js/namespace','base/js/dialog','base/js/utils','./modify_notebook_
     
     var load = function () {
         $('#view_data').click(function () {
-            view_data();
+            view_data_dialog();
         });
     };
 
-    module.exports = {load: load};
+    module.exports = {load: load, view_data: view_data};
 });

@@ -1,11 +1,61 @@
 define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents','./modify_notebook_html'],function(Jupyter,utils,dialog,custom_contents){
 
     var add_metadata = function () {
-        var message = "Add the report metadata.";
+
+        var form_fields = create_fields();
+
+        var form_body = $('<div/>').attr('title', 'Add the metadata')
+            .append(
+                $('<form id="add_metadata_form"/>').append(
+                        $('<label/>')
+                        .attr('for','add_metadata_form')
+                        .text("Add the metadata for the notebook."))
+                        .append(form_fields.form1)
+                        .append(form_fields.form2)
+            );
+        
+        var modal = dialog.modal({
+            title: "Add " + Jupyter.notebook.notebook_name + " Metadata",
+            body: form_body,
+            buttons: {
+                Cancel: {},
+                Previous: { click: function() {
+                                if(!$("#fields1").hasClass("hide-me") && $("#fields2").hasClass("hide-me")) { //make a multi page form by changing visibility of the forms
+                                    $("#previous").addClass("disabled"); //can't go back when we're on the first page
+                                }
+                                else if($("#fields1").hasClass("hide-me") && !$("#fields2").hasClass("hide-me")) {
+                                    $("#fields2").addClass("hide-me");
+                                    $("#fields1").removeClass("hide-me");
+                                    $("#next").text("Next"); //we want next to be next on any page but the last one
+                                }
+                            }
+                },
+                Next: { class : "btn-primary",
+                        click: function() {
+                            validate();
+                    },
+                }
+            },
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.notebook.keyboard_manager,
+        });
+
+		modal.on("shown.bs.modal", function () {
+            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss").attr("id","previous");
+			$(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss").attr("id","next");
+        });
+		
+
+        
+    };
+
+    var create_fields = function () {
         var md = Jupyter.notebook.metadata;
         var md_set = false;
         var contents = Jupyter.notebook.contents;
         var authorcount = 1;
+
+        var return_fields = {};
 
         if(md.hasOwnProperty("reportmetadata")) { //check to see if metadata has previously been set and whether we need to repopulate the form fields
             md_set = true;
@@ -17,18 +67,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
             .attr('type','text')
             .val("");
 
+        return_fields.title = title;
+
         var titleLabel =  $('<label/>')
             .attr('for','title')
             .text("Title: ");
-                        
-        var contributors = $('<input/>')
-            .attr('name','contributors')
-            .attr('id','contributors')
-            .attr('type','text');
-
-        var contributorsLabel = $('<label/>')
-            .attr('for','contributors')
-            .text("Contributors: ");
 
         var defaultAuthorFirstName = $('<input/>')
             .attr('class','author-first-name')
@@ -275,7 +318,7 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
             .attr('for','tags')
             .text("Tags: ");
 
-        var tags = $('<textarea/>').attr('name','tags');
+        var tags = $('<textarea/>').attr('name','tags').attr("id","tags");
 
         var dateLabel = $('<label/>')
             .attr('for','date')
@@ -347,8 +390,6 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
         var form1 = $('<fieldset/>').attr('title','fields1').attr('id','fields1')
             .append(titleLabel)
             .append(title)
-            .append(contributorsLabel)
-            .append(contributors)
             .append(authorsLabel)
             .append(authors)
             .append(abstractLabel)
@@ -438,7 +479,7 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
         var sponsors = $('<textarea/>').attr('name','sponsors').attr('id','sponsors');
 
         var repositoryLabel = $('<label/>') //TODO: it this the most sensible place to  put this? perhaps before upload?
-            .attr('for','respository')
+            .attr('for','repository')
             .text("Repository: ");
 
         var repository = $('<select/>')
@@ -483,168 +524,9 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
             .append(repositoryLabel)
             .append(repository);
 
-        var dialogform = $('<div/>').attr('title', 'Add the metadata')
-            .append(
-                $('<form id="add_metadata_form"/>').append(
-                        $('<label/>')
-                        .attr('for','add_metadata_form')
-                        .text(message))
-                        .append(form1)
-                        .append(form2)
-            );
-        var modal = dialog.modal({
-            title: "Add " + Jupyter.notebook.notebook_name + " Metadata",
-            body: dialogform,
-            buttons: {
-                Cancel: {},
-                Previous: { attributes: [["id","previous"]],
-                            removeattribute: ["data-dismiss"],
-                            click: function() {
-                                if(!form1.hasClass("hide-me") && form2.hasClass("hide-me")) { //make a multi page form by changing visibility of the forms
-                                    $("#previous").addClass("disabled"); //can't go back when we're on the first page
-                                }
-                                else if(form1.hasClass("hide-me") && !form2.hasClass("hide-me")) {
-                                    form2.addClass("hide-me");
-                                    form1.removeClass("hide-me");
-                                    $("#next").text("Next"); //we want next to be next on any page but the last one
-                                }
-                            }
-                },
-                Next: { class : "btn-primary",
-                        attributes: [["id","next"]],
-                        removeattribute: ["data-dismiss"],
-                        click: function() {
-                            if(!form1.hasClass("hide-me") && form2.hasClass("hide-me")) {
-                                $('.metadata-form-error').remove(); //clear errors
-
-                                if(title.val() === "") {
-                                    titleLabel.after($("<div/>").addClass("metadata-form-error").text("Please enter a title"));
-                                }
-                                if(abstract.val() === "") {
-                                    abstractLabel.after($("<div/>").addClass("metadata-form-error").text("Please enter an abstract"));
-                                }
-                                var isInteger = function(str,greaterthan,lessthan) {
-                                    var n = ~~Number(str); //convert into a number with no decimal part
-                                    return String(n) === str && n > greaterthan && n < lessthan;
-                                };
-                                var validDate = function(daystr,month,yearstr) {
-                                    if(!isInteger(daystr,0,32)) {
-                                        return false;
-                                    }
-                                    var day = Number(daystr); 
-                                    var year = Number(yearstr); //should be an int from the above checks
-
-                                    var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
-                                    // Adjust for leap years
-                                    if(year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
-                                        monthLength[1] = 29;
-                                    }
-                                    return day > 0 && day <= monthLength[month - 1];
-                                };
-                                if(year.val() === "") { //date checking. else ifs because previous errors affect later errors (e.g. invalid year affects day validity etc)
-                                    dateLabel.after($("<div/>").addClass("metadata-form-error").text("Please enter at least the year of publication"));
-                                } else if(!isInteger(year.val(),1800,3000)) {
-                                    dateLabel.after($("<div/>").addClass("metadata-form-error").text("Please enter a valid year"));
-                                } else if(day.val() !== "" && month.val() === "0") {
-                                    dateLabel.after($("<div/>").addClass("metadata-form-error").text("Please select a month"));
-                                } else if(day.val() !== "" && !validDate(day.val(),month.val(),year.val())) {
-                                    dateLabel.after($("<div/>").addClass("metadata-form-error").text("Please enter valid day"));
-                                }
-                                $('.metadata-form-error').css('color', 'red');
-                                if($(".metadata-form-error").length === 0) {
-                                    form1.addClass("hide-me");
-                                    form2.removeClass("hide-me");
-                                    $("#previous").removeClass("disabled");
-                                    $("#next").text("Save"); //we want next to be save on the last page
-                                }
-                            }
-                            else if(form1.hasClass("hide-me") && !form2.hasClass("hide-me")) { //save our metadata
-                                $('.metadata-form-error').remove(); //clear errors
-
-                                if(repository.val() === "") {
-                                    repositoryLabel.after($("<div/>").addClass("metadata-form-error").text("Please select a repository to deposit to"));
-                                }
-
-                                $('.metadata-form-error').css('color', 'red');
-
-                                if($(".metadata-form-error").length === 0) {
-                                    md.reportmetadata = {};
-                                    md.reportmetadata.title = title.val();
-                                    md.reportmetadata.contributors = contributors.val();
-
-                                    md.reportmetadata.authors = [];
-                                    $('.author').each(function(i,e) {
-                                        var authorarr = [];
-                                        var ln = $(e).children('.author-last-name').val();
-                                        var fn = $(e).children('.author-first-name').val();
-                                        if(ln !== "" || fn !== "") {
-                                            authorarr.push(ln);
-                                            authorarr.push(fn);
-                                            md.reportmetadata.authors.push(authorarr);
-                                        }
-                                    });
-                                    md.reportmetadata.abstract = abstract.val();
-
-                                    //Split our textarea by lines
-                                    var split = tags.val().split('\n');
-                                    var lines = [];
-                                    for (var i = 0; i < split.length; i++) {
-                                        if (split[i]) {
-                                            lines.push(split[i]); //make sure we don't add any empty lines!
-                                        }
-                                    }
-                                    md.reportmetadata.tags = lines;
-
-                                    var monthstring = "";
-                                    if (month.val() < 10) {
-                                        monthstring = "0" + month.val(); //we need a leading zero for DSpace
-                                    } else {
-                                        monthstring = month.val();
-                                    }
-                                    if(monthstring === "00") { //if no month set it to just be the year
-                                        md.reportmetadata.date = year.val();
-                                    } else if (day.val() === "") { //month is set but day isn't
-                                        md.reportmetadata.date = year.val() + "-" + monthstring;
-                                    } else {
-                                        md.reportmetadata.date = year.val() + "-" + monthstring + "-" + day.val();
-                                    }
-
-                                    md.reportmetadata.language = language.val();
-                                    md.reportmetadata.publisher = publisher.val();
-                                    md.reportmetadata.citation = citation.val();
-                                    
-                                    md.reportmetadata.referencedBy = [];
-                                    $('.referencedBy').each(function(i,e) {
-                                        md.reportmetadata.referencedBy.push($(e).val());
-                                    });
-
-                                    md.reportmetadata.funders = funders.val();
-                                    md.reportmetadata.sponsors = sponsors.val();
-
-                                    md.reportmetadata.repository = repository.val();
-
-                                    Jupyter.notebook.metadata = md;
-                                    Jupyter.notebook.save_notebook();
-                                    $("#collections_loaded").remove();
-                                    $(".modal").modal("hide");
-                                }
-                            }
-                    }
-                }
-            },
-            notebook: Jupyter.notebook,
-            keyboard_manager: Jupyter.notebook.keyboard_manager,
-        });
-
-		modal.on("shown.bs.modal", function () {
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss").attr("id","previous");
-			$(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss").attr("id","next");
-        });
-		
 
         if(md_set) { //repopulate the form fields with previously saved data
             title.val(md.reportmetadata.title);
-            contributors.val(md.reportmetadata.contributors);
             var authorsarr = md.reportmetadata.authors;
             var deleteAuthor;
             authorsarr.forEach(function(item,index) {
@@ -748,7 +630,139 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
             funders.val(md.reportmetadata.funders);
             sponsors.val(md.reportmetadata.sponsors);
         }
+
+        return {form1: form1, form2: form2};
     };
+
+    var validate_fields1 = function() {
+        var md = Jupyter.notebook.metadata;
+        $('.metadata-form-error').remove(); //clear errors
+
+        if($("#title").val() === "") {
+            $("label[for='title']").after($("<div/>").addClass("metadata-form-error").text("Please enter a title"));
+        }
+        if($("#abstract").val() === "") {
+            $("label[for='abstract']").after($("<div/>").addClass("metadata-form-error").text("Please enter an abstract"));
+        }
+        var isInteger = function(str,greaterthan,lessthan) {
+            var n = ~~Number(str); //convert into a number with no decimal part
+            return String(n) === str && n > greaterthan && n < lessthan;
+        };
+        var validDate = function(daystr,month,yearstr) {
+            if(!isInteger(daystr,0,32)) {
+                return false;
+            }
+            var day = Number(daystr); 
+            var year = Number(yearstr); //should be an int from the above checks
+
+            var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+            // Adjust for leap years
+            if(year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0)) {
+                monthLength[1] = 29;
+            }
+            return day > 0 && day <= monthLength[month - 1];
+        };
+        if($("#year").val() === "") { //date checking. else ifs because previous errors affect later errors (e.g. invalid year affects day validity etc)
+            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please enter at least the year of publication"));
+        } else if(!isInteger($("#year").val(),1800,3000)) {
+            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please enter a valid year"));
+        } else if($("#day").val() !== "" && $("#month").val() === "0") {
+            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please select a month"));
+        } else if($("#day").val() !== "" && !validDate($("#day").val(),$("#month").val(),$("#year").val())) {
+            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please enter valid day"));
+        }
+        $('.metadata-form-error').css('color', 'red');
+    };
+
+    var validate_fields2 = function() {
+        var md = Jupyter.notebook.metadata;
+        $('.metadata-form-error').remove(); //clear errors
+
+        if($("#repository").val() === "") {
+            $("label[for='repository']").after($("<div/>").addClass("metadata-form-error").text("Please select a repository to deposit to"));
+        }
+
+        $('.metadata-form-error').css('color', 'red');
+
+        if($(".metadata-form-error").length === 0) {
+            md.reportmetadata = {};
+            md.reportmetadata.title = $("#title").val();
+
+            md.reportmetadata.authors = [];
+            $('.author').each(function(i,e) {
+                var authorarr = [];
+                var ln = $(e).children('.author-last-name').val();
+                var fn = $(e).children('.author-first-name').val();
+                if(ln !== "" || fn !== "") {
+                    authorarr.push(ln);
+                    authorarr.push(fn);
+                    md.reportmetadata.authors.push(authorarr);
+                }
+            });
+            md.reportmetadata.abstract = $("#abstract").val();
+
+            //Split our textarea by lines
+            var split = $("#tags").val().split('\n');
+            var lines = [];
+            for (var i = 0; i < split.length; i++) {
+                if (split[i]) {
+                    lines.push(split[i]); //make sure we don't add any empty lines!
+                }
+            }
+            md.reportmetadata.tags = lines;
+
+            var monthstring = "";
+            if ($("#month").val() < 10) {
+                monthstring = "0" + $("#month").val(); //we need a leading zero for DSpace
+            } else {
+                monthstring = $("#month").val();
+            }
+            if(monthstring === "00") { //if no month set it to just be the year
+                md.reportmetadata.date = $("#year").val();
+            } else if ($("#day").val() === "") { //month is set but day isn't
+                md.reportmetadata.date = $("#year").val() + "-" + monthstring;
+            } else {
+                md.reportmetadata.date = $("#year").val() + "-" + monthstring + "-" + $("#day").val();
+            }
+
+            md.reportmetadata.language = $("#language").val();
+            md.reportmetadata.publisher = $("#publisher").val();
+            md.reportmetadata.citation = $("#citation").val();
+            
+            md.reportmetadata.referencedBy = [];
+            $('.referencedBy').each(function(i,e) {
+                md.reportmetadata.referencedBy.push($(e).val());
+            });
+
+            md.reportmetadata.funders = $("#funders").val();
+            md.reportmetadata.sponsors = $("#sponsors").val();
+
+            md.reportmetadata.repository = $("#repository").val();
+
+            Jupyter.notebook.metadata = md;
+            Jupyter.notebook.save_notebook();
+            $("#collections_loaded").remove();
+        }
+    };
+
+    var validate = function() {
+        if(!$("#fields1").hasClass("hide-me") && $("#fields2").hasClass("hide-me")) {
+            validate_fields1();
+            if($(".metadata-form-error").length === 0) {
+                $("#fields1").addClass("hide-me");
+                $("#fields2").removeClass("hide-me");
+                $("#previous").removeClass("disabled");
+                $("#next").text("Save"); //we want next to be save on the last page
+            }
+        }
+        else if($("#fields1").hasClass("hide-me") && !$("#fields2").hasClass("hide-me")) { //save our metadata
+            validate_fields2();
+            if($(".metadata-form-error").length === 0) {
+                $(".modal").modal("hide");
+            }
+        }
+    };
+   
 
     var action = {
         help: 'Add notebook metadata',
@@ -767,5 +781,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
         });
     };
 
-    module.exports = {load: load};
+    module.exports = {
+        load: load,
+        validate: validate,
+        validate_fields1: validate_fields1,
+        validate_fields2: validate_fields2,
+        create_fields: create_fields,
+    };
 });

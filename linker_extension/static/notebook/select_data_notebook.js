@@ -29,6 +29,6 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','./modify_notebook_
         });
     };
 
-    module.exports = {load: load};
+    module.exports = {load: load, select_data: select_data};
 
 });

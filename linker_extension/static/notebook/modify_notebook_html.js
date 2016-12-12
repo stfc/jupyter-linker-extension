@@ -44,7 +44,11 @@ define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
         		   .append($("<li/>").addClass("divider"))
         	   	   .append($("<li/>").attr("id","select_data").append($("<a/>").attr("href","#").text("Select associated data")))
         		   .append($("<li/>").attr("id","view_data").append($("<a/>").attr("href","#").text("View associated data")))
-        		   .append($("<li/>").attr("id","upload_data").append($("<a/>").attr("href","#").text("Upload associated data")));
+        		   .append($("<li/>").attr("id","upload_data").append($("<a/>").attr("href","#").text("Upload associated data")))
+                   .append($("<li/>").addClass("divider"))
+                   .append($("<li/>").attr("id","publish_notebook").append($("<a/>").attr("href","#").text("Publish Notebook")))
+                   .append($("<li/>").attr("id","publish_bundle").append($("<a/>").attr("href","#").text("Publish associated data")))
+                   .append($("<li/>").attr("id","publish_notebook_and_bundle").append($("<a/>").attr("href","#").text("Publish Notebook and associated data")));
 
         $("#download_pdf").remove();
         var new_pdf_menu_item = $("<li>").attr("id","#download_pdf").append($("<a/>").attr("href","#").text("PDF via LaTeX (.pdf)"));
