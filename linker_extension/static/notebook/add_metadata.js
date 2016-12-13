@@ -618,8 +618,7 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
                     URL[0].val(item);
                     if(index !== URLarr.length - 1) { //if not last element
                         deleteURL = $('<button/>')
-                            .addClass('btn btn-xs btn-default')
-                            .attr('id','remove-url-button')
+                            .addClass('btn btn-xs btn-default remove-url-button')
                             .attr('type','button')
                             .attr("aria-label","Remove referenced By URL")
                                 .click(function() {
@@ -644,10 +643,10 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
         $('.metadata-form-error').remove(); //clear errors
 
         if($("#title").val() === "") {
-            $("label[for='title']").after($("<div/>").addClass("metadata-form-error").text("Please enter a title"));
+            $("label[for='title']").after($("<div/>").attr("id","title-missing-error").addClass("metadata-form-error").text("Please enter a title"));
         }
         if($("#abstract").val() === "") {
-            $("label[for='abstract']").after($("<div/>").addClass("metadata-form-error").text("Please enter an abstract"));
+            $("label[for='abstract']").after($("<div/>").attr("id","abstract-missing-error").addClass("metadata-form-error").text("Please enter an abstract"));
         }
         var isInteger = function(str,greaterthan,lessthan) {
             var n = ~~Number(str); //convert into a number with no decimal part
@@ -668,13 +667,13 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
             return day > 0 && day <= monthLength[month - 1];
         };
         if($("#year").val() === "") { //date checking. else ifs because previous errors affect later errors (e.g. invalid year affects day validity etc)
-            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please enter at least the year of publication"));
+            $("label[for='date']").after($("<div/>").attr("id","year-missing-error").addClass("metadata-form-error").text("Please enter at least the year of publication"));
         } else if(!isInteger($("#year").val(),1800,3000)) {
-            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please enter a valid year"));
+            $("label[for='date']").after($("<div/>").attr("id","invalid-year-error").addClass("metadata-form-error").text("Please enter a valid year"));
         } else if($("#day").val() !== "" && $("#month").val() === "0") {
-            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please select a month"));
+            $("label[for='date']").after($("<div/>").attr("id","month-missing-error").addClass("metadata-form-error").text("Please select a month"));
         } else if($("#day").val() !== "" && !validDate($("#day").val(),$("#month").val(),$("#year").val())) {
-            $("label[for='date']").after($("<div/>").addClass("metadata-form-error").text("Please enter valid day"));
+            $("label[for='date']").after($("<div/>").attr("id","invalid-day-error").addClass("metadata-form-error").text("Please enter valid day"));
         }
         $('.metadata-form-error').css('color', 'red');
     };
@@ -684,7 +683,7 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
         $('.metadata-form-error').remove(); //clear errors
 
         if($("#repository").val() === "") {
-            $("label[for='repository']").after($("<div/>").addClass("metadata-form-error").text("Please select a repository to deposit to"));
+            $("label[for='repository']").after($("<div/>").attr("id","repository-missing-error").addClass("metadata-form-error").text("Please select a repository to deposit to"));
         }
 
         $('.metadata-form-error').css('color', 'red');
