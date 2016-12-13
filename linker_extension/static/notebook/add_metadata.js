@@ -736,7 +736,9 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_contents
             
             md.reportmetadata.referencedBy = [];
             $('.referencedBy').each(function(i,e) {
-                md.reportmetadata.referencedBy.push($(e).val());
+                if($(e).val() !== "") {
+                    md.reportmetadata.referencedBy.push($(e).val());
+                }
             });
 
             md.reportmetadata.funders = $("#funders").val();

@@ -38,7 +38,9 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
 
             var referencedBy_URLs = [];
             $('.data_referencedBy').each(function(i,e) {
-                referencedBy_URLs.push($(e).val());
+                if($(e).val() !== "") {
+                    referencedBy_URLs.push($(e).val());
+                }
             });
 
             var contents = Jupyter.notebook.contents;
