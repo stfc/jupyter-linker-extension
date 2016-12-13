@@ -46,6 +46,8 @@ define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
         		   .append($("<li/>").attr("id","view_data").append($("<a/>").attr("href","#").text("View associated data")))
         		   .append($("<li/>").attr("id","upload_data").append($("<a/>").attr("href","#").text("Upload associated data")))
                    .append($("<li/>").addClass("divider"))
+                   .append($("<li/>").attr("id","generate_references").append($("<a/>").attr("href","#").text("Generate references")))
+                   .append($("<li/>").addClass("divider"))
                    .append($("<li/>").attr("id","publish_notebook").append($("<a/>").attr("href","#").text("Publish Notebook")))
                    .append($("<li/>").attr("id","publish_bundle").append($("<a/>").attr("href","#").text("Publish associated data")))
                    .append($("<li/>").attr("id","publish_notebook_and_bundle").append($("<a/>").attr("href","#").text("Publish Notebook and associated data")));
