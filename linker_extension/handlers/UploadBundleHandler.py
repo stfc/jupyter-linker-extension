@@ -19,27 +19,13 @@ class UploadBundleHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
-        path = self.request.path  # should be of the form "/user/{username}/uploadbundle"
-        if(len(path.split("/")) == 4):
-            username = path.split("/")[2]
-        elif(len(path.split("/")) == 2):  # TODO: remove later - this is for testing the notebook only (no Hub)
-            username = ""
-        elif(len(path.split("/")) == 3):  # this is for the js test - find a better way to do this?
-            username = ""
-        else:
-            raise web.HTTPError(500, "path string is not correct length")
+        username = self.get_query_argument('username')
 
         repository = self.get_query_argument('repository')
         try:
-            if (username):
-                with open("/srv/jupyterhub/admin.txt", "r") as f:
+            with open("/srv/jupyterhub/admin.txt", "r") as f:
                     un = f.readline().strip()
                     pw = f.readline().strip()
-            else:
-                with open("/home/mnf98541/notebook/login.txt", "r") as f:  # TODO: remove later - this is for testing the notebook only (no Hub)
-                    un = f.readline().strip()
-                    pw = f.readline().strip()
-                    username = un
         except IOError:
             raise web.HTTPError(500, "IOError occured when opening login details file")
 

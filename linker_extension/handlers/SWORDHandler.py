@@ -19,27 +19,10 @@ class SWORDHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def get(self):
-        path = self.request.path  # should be of the form "/user/{username}/sword"
-        if(len(path.split("/")) == 4):
-            username = path.split("/")[2]
-        elif(len(path.split("/")) == 2):  # TODO: remove later - this is for testing the notebook only (no Hub)
-            username = ""
-        elif(len(path.split("/")) == 3):  # this is for the js test - find a better way to do this?
-            username = ""
-        else:
-            raise web.HTTPError(500, "path string is not correct length")
-
-        print("getting service document")
         try:
-            if (username):
-                with open("/srv/jupyterhub/admin.txt", "r") as f:
-                    print("using admin.txt")
-                    un = f.readline().strip()
-                    pw = f.readline().strip()
-            else:
-                with open("/home/mnf98541/notebook/login.txt", "r") as f:  # TODO: remove later - this is for testing the notebook only (no Hub)
-                    un = f.readline().strip()
-                    pw = f.readline().strip()
+            with open("/srv/jupyterhub/admin.txt", "r") as f:
+                un = f.readline().strip()
+                pw = f.readline().strip()
         except IOError:
             raise web.HTTPError(500, "IOError occured when opening login details file")
 
@@ -51,30 +34,16 @@ class SWORDHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
-        path = self.request.path  # should be of the form "/user/{username}/sword"
-        if(len(path.split("/")) == 4):
-            username = path.split("/")[2]
-        elif(len(path.split("/")) == 2):  # TODO: remove later - this is for testing the notebook only (no Hub)
-            username = ""
-        elif(len(path.split("/")) == 3):  # this is for the js test - find a better way to do this?
-            username = ""
-        else:
-            raise web.HTTPError(500, "path string is not correct length")
+        username = self.get_query_argument('username')
 
         repository = self.get_query_argument('repository')
         try:
-            if (username):
-                with open("/srv/jupyterhub/admin.txt", "r") as f:
-                    un = f.readline().strip()
-                    pw = f.readline().strip()
-            else:
-                with open("/home/mnf98541/notebook/login.txt", "r") as f:  # TODO: remove later - this is for testing the notebook only (no Hub)
-                    un = f.readline().strip()
-                    pw = f.readline().strip()
-                    username = un
+            with open("/srv/jupyterhub/admin.txt", "r") as f:
+                un = f.readline().strip()
+                pw = f.readline().strip()
         except IOError:
             raise web.HTTPError(500, "IOError occured when opening login details file")
-        
+
         ET.register_namespace("", "http://www.loc.gov/METS/")
         ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
         ET.register_namespace("dc", "http://purl.org/dc/elements/1.1/")
@@ -199,11 +168,6 @@ class SWORDHandler(IPythonHandler):
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)  # this is writing to the cwd - might need to change?
         except IOError:
             raise web.HTTPError(500, "IOError when writing tree to mets.xml")
-
-        #with open('mets.xml', 'r') as original:
-        #    data = original.read()
-        #with open('mets.xml', 'w') as modified:
-        #    modified.write('<?xml version="1.0" encoding="utf-8" standalone="no"?>\n' + data)
 
         try:
             created_zip_file = zipfile.ZipFile("notebook.zip", "w")
