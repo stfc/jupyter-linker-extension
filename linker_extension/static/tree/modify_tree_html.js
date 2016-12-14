@@ -7,7 +7,7 @@ define(['base/js/namespace','../custom_utils'],function(Jupyter,custom_utils){
         header_container_container.append(header_container);
         $('#header').prepend(header_container_container);
 
-        var file_tree_button = $('<a/>').addClass("btn btn-default btn-sm navbar-btn pull-right").css("margin-right","2px").css("margin-left","2px").attr("href",Jupyter.session_list.base_url).text("File Tree");
+        var file_tree_button = $('<a/>').addClass("btn btn-default btn-sm navbar-btn pull-right file-tree-button").css("margin-right","2px").css("margin-left","2px").attr("href",Jupyter.session_list.base_url).text("File Tree");
         $('#login_widget').after(file_tree_button);
         
     	$('#ipython_notebook').children("a").attr("href","https://www.stfc.ac.uk/");
