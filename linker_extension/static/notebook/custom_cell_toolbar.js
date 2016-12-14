@@ -25,6 +25,37 @@ define(['base/js/namespace','notebook/js/celltoolbar','base/js/dialog','base/js/
 	    example_preset.push('linker_extension.add_reference_url');
 
 	    CellToolbar.register_preset('Linker Extension',example_preset, Jupyter.notebook);
+
+	    var action = {
+	        help: 'Show/hide the cell references bar on all the cells ',
+	        help_index: 'g',
+	        icon: 'fa-eye',
+	        handler : toggle_cell_references_bar,
+	    };
+
+	    var prefix = "linker_extension";
+	    var action_name = "toggle-cell-references-bar";
+	    var full_action_name = Jupyter.actions.register(action,action_name,prefix);
+
+        $('#toggle_cell_references_bar').click(function () {
+	        toggle_cell_references_bar(); //todo: username storage? or we can probably get rid of this button
+	    });
+    };
+
+    var toggle_cell_references_bar = function() {
+    	var CellToolbar = celltoolbar.CellToolbar;
+    	if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
+    		CellToolbar.global_show();
+
+    		CellToolbar.activate_preset("Linker Extension");
+    		Jupyter.notebook.metadata.celltoolbar = "Linker Extension";
+
+    		$('#toggle_cell_references_bar > a').text("Hide cell references bar");
+    	} else {
+    		CellToolbar.global_hide();
+    		delete Jupyter.notebook.metadata.celltoolbar;
+    		$('#toggle_cell_references_bar > a').text("Show cell references bar");
+    	}
     };
 
     var add_reference_url = function(div, cell) {

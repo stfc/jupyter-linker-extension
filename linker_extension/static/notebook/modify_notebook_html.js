@@ -38,6 +38,14 @@ define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
         dropdown.append(dropdown_ul);
         $('ul.navbar-nav').append(dropdown);
 
+        var toggle_cell_references_bar_text = "";
+
+        if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
+            toggle_cell_references_bar_text = "Show cell references toolbar";
+        } else {
+            toggle_cell_references_bar_text = "Hide cell references toolbar";
+        }
+
         dropdown_ul.append($("<li/>").attr("id","add_metadata").append($("<a/>").attr("href","#").text("Add Metadata")))
         		   .append($("<li/>").attr("id","dspace_new_item").append($("<a/>").attr("href","#").text("New DSpace item")))
         		   .append($("<li/>").attr("id","sword_new_item").append($("<a/>").attr("href","#").text("New SWORD item")))
@@ -46,6 +54,7 @@ define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
         		   .append($("<li/>").attr("id","view_data").append($("<a/>").attr("href","#").text("View associated data")))
         		   .append($("<li/>").attr("id","upload_data").append($("<a/>").attr("href","#").text("Upload associated data")))
                    .append($("<li/>").addClass("divider"))
+                   .append($("<li/>").attr("id","toggle_cell_references_bar").append($("<a/>").attr("href","#").text(toggle_cell_references_bar_text)))
                    .append($("<li/>").attr("id","generate_references").append($("<a/>").attr("href","#").text("Generate references")))
                    .append($("<li/>").addClass("divider"))
                    .append($("<li/>").attr("id","publish_notebook").append($("<a/>").attr("href","#").text("Publish Notebook")))
