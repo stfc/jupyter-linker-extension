@@ -833,23 +833,16 @@ casper.wait_for_dashboard = function () {
  *      casper.start() multiple times causes casper to skip subsequent then()
  */
 casper.open_dashboard = function (use_start) {
-    if (use_start === undefined) {
-        use_start = false;
-    }
     // Start casper by opening the dashboard page.
     var baseUrl = this.get_notebook_server();
-    if (use_start) {
-        this.start(baseUrl);
-    } else {
-        this.open(baseUrl);
-    }
+    this.start(baseUrl);
     this.waitFor(this.page_loaded);
     this.wait_for_dashboard();
 };
 
 casper.dashboard_test = function (test) {
     // Open the dashboard page and run a test.
-    this.open_dashboard(true);
+    this.open_dashboard();
     this.then(test);
 
     this.then(function () {
