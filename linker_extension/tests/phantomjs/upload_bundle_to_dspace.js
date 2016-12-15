@@ -175,6 +175,21 @@ casper.notebook_test(function() {
         var alert_element = this.getElementAttribute(alert,'class');
         this.test.assertEquals(alert_element,"alert alert-dismissible fade in alert-success","Success alert seen");
     });
+
+    //check that we got the url reference back
+    this.then(function() {
+        var bundle_url_exists = this.evaluate(function() {
+            return ("databundle_url" in Jupyter.notebook.metadata);
+        });
+
+        this.test.assert(bundle_url_exists,"databundle_url exists in metadata");
+
+        var bundle_url = this.evaluate(function() {
+            return Jupyter.notebook.metadata.databundle_url;
+        });
+
+        this.test.assertTruthy(bundle_url,"databundle_url is not empty");
+    });
     
     var id = "";
 
