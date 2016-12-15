@@ -13,20 +13,32 @@ casper.notebook_test(function() {
     this.waitForSelector(selector);
     this.thenClick(selector);
 
-    //Click on menu item to switch to linker extension toolbar
-    selector = '#menu-cell-toolbar-submenu';
-    this.waitForSelector(selector);
-    selector = "li[data-name='Linker%20Extension'] > a";
+    //check that menu item exists
+    this.then(function() {
+        this.test.assertExists("li[data-name='Linker%20Extension'] > a","Toolbar visible in toolbar menu");
+    });
+
+    //click the toggle button
+    selector = "#toggle_cell_references_bar";
     this.waitForSelector(selector);
     this.thenClick(selector);
 
-    this.wait(300);
-
+    //test that toggle on works
     this.then(function() {
     	selector = '.cell-urls-container';
     	this.test.assertExists(selector, "Our cell toolbar instance exists"); //check we have our toolbar active
-    	this.test.assertElementCount(selector, 2, "There are 2 instances of the toolbar - one for each cell");
+        this.test.assertElementCount(selector, 2, "There are 2 instances of the toolbar - one for each cell");
+        this.test.assertVisible(selector, "At least one cell toolbars is visible"); //this should mean that all are visible
     });
+
+    //test that toggle off works 
+    this.thenClick(selector);
+    this.then(function() {
+        selector = '.cell-urls-container';
+        this.test.assertNotVisible(selector, "Cell toolbar has been toggled off successfully");
+    });
+
+    this.thenClick(selector);
 
     selector = ".cell";
     this.thenClick(selector); //click on first cell again
