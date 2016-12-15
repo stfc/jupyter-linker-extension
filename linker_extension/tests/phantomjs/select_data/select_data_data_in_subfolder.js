@@ -155,9 +155,18 @@ casper.notebook_test(function() {
     		}
     	});
     	this.test.assert(metadata.exists,"Data bundle exists in metadata");
-    	this.test.assertEquals(metadata.databundle[0].name,"sub ∂ir 1a","sub ∂ir 1a exists in metadata");
-        this.test.assertEquals(metadata.databundle[1].name,"file_in_sub_∂ir1.txt","file_in_sub_∂ir1.txt exists in metadata");
-        this.test.assertEquals(metadata.databundle[2].name,"file_in_sub_∂ir1a.txt","file_in_sub_∂ir1a.txt exists in metadata");
 
+        var check_arr = ["sub ∂ir 1a","file_in_sub_∂ir1a.txt","file_in_sub_∂ir1.txt"];
+        var that = this;
+
+        metadata.databundle.forEach(function(item) {
+            var match = false;
+            check_arr.forEach(function(check_item) {
+                if (item.name === check_item) {
+                    match = true;
+                }
+            });
+            that.test.assert(match,item.name + " exists in metadata");
+        });
     });
 });
