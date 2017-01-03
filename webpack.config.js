@@ -2,6 +2,7 @@ module.exports = {
 	entry: {
 		'linker_extension/static/tree/linker_extension_tree': "./linker_extension/static/tree/tree_index.js",
 		'linker_extension/static/notebook/linker_extension_notebook': "./linker_extension/static/notebook/notebook_index.js",
+		'linker_extension/static/common/linker_extension_common': "./linker_extension/static/common/common_index.js",
 	},
 	output: {
 		path: "./",
