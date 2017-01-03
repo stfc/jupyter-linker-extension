@@ -1,4 +1,5 @@
-"""Main extension file. Sets up the url to handler mappings and specifies the JS extensions."""
+"""Main extension file. Sets up the url to handler mappings and
+specifies the JS extensions."""
 
 
 from notebook.utils import url_path_join
@@ -28,23 +29,41 @@ def load_jupyter_server_extension(nbapp):
     Called when the extension is loaded.
 
     Args:
-        nbapp (NotebookWebApplication): handle to the Notebook webserver instance.
+        nbapp (NotebookWebApplication): handle to the
+        Notebook webserver instance.
     """
     nbapp.log.info("Custom server extension module enabled!")
     web_app = nbapp.web_app
     host_pattern = '.*$'
-    route_pattern_dspace = url_path_join(web_app.settings['base_url'], '/dspace')
+    route_pattern_dspace = url_path_join(web_app.settings['base_url'],
+                                         '/dspace')
     web_app.add_handlers(host_pattern, [(route_pattern_dspace, DSpaceHandler)])
-    route_pattern_sword = url_path_join(web_app.settings['base_url'], '/sword')
+
+    route_pattern_sword = url_path_join(web_app.settings['base_url'],
+                                        '/sword')
     web_app.add_handlers(host_pattern, [(route_pattern_sword, SWORDHandler)])
-    route_pattern_uploadbundle = url_path_join(web_app.settings['base_url'], '/uploadbundle')
-    web_app.add_handlers(host_pattern, [(route_pattern_uploadbundle, UploadBundleHandler)])
-    route_pattern_dspace_test = url_path_join(web_app.settings['base_url'], '/dspacetest')
-    web_app.add_handlers(host_pattern, [(route_pattern_dspace_test, TestDSpaceHandler)])
-    route_pattern_ldap = url_path_join(web_app.settings['base_url'], '/ldap')
+
+    route_pattern_uploadbundle = url_path_join(web_app.settings['base_url'],
+                                               '/uploadbundle')
+    web_app.add_handlers(host_pattern, [(route_pattern_uploadbundle,
+                                         UploadBundleHandler)])
+
+    route_pattern_dspace_test = url_path_join(web_app.settings['base_url'],
+                                              '/dspacetest')
+    web_app.add_handlers(host_pattern, [(route_pattern_dspace_test,
+                                         TestDSpaceHandler)])
+
+    route_pattern_ldap = url_path_join(web_app.settings['base_url'],
+                                       '/ldap')
     web_app.add_handlers(host_pattern, [(route_pattern_ldap, LDAPHandler)])
-    route_pattern_nbconvert = url_path_join(web_app.settings['base_url'], r"/nbconvert/%s/%s%s" % (_format_regex, _template_regex, path_regex))
-    web_app.add_handlers(host_pattern, [(route_pattern_nbconvert, CustomNbconvertHandler)])
+
+    route_pattern_nbconvert = url_path_join(web_app.settings['base_url'],
+                                            r"/nbconvert/%s/%s%s"
+                                            % (_format_regex,
+                                               _template_regex,
+                                               path_regex))
+    web_app.add_handlers(host_pattern, [(route_pattern_nbconvert,
+                                         CustomNbconvertHandler)])
 
 
 def _jupyter_server_extension_paths():
@@ -55,6 +74,14 @@ def _jupyter_server_extension_paths():
 
 def _jupyter_nbextension_paths():
     return [
+        dict(
+            section="common",
+            # the path is relative to the `my_fancy_module` directory
+            src="static/common/",
+            # directory in the `nbextension/` namespace
+            dest="linker_extension/common/",
+            # _also_ in the `nbextension/` namespace
+            require="linker_extension/common/linker_extension_common"),
         dict(
             section="tree",
             # the path is relative to the `my_fancy_module` directory
