@@ -10,3 +10,4 @@ MANIFEST
 admin.txt
 linker_extension/static/notebook/linker_extension_notebook.js
 linker_extension/static/tree/linker_extension_tree.js
+linker_extension/static/common/linker_extension_common.js
