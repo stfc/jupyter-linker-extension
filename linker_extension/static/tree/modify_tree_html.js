@@ -1,13 +1,13 @@
 define(['base/js/namespace','../custom_utils'],function(Jupyter,custom_utils){
 
 	var load = function() {
-        //applies to all pages - need to repeat for notebook and edit
+        /*//applies to all pages - need to repeat for notebook and edit
         var header_container = $('#header-container').detach();
         var header_container_container = $('<div/>').attr("id","header-container-container").addClass("container");
         header_container_container.append(header_container);
         $('#header').prepend(header_container_container);
 
-        var file_tree_button = $('<a/>').addClass("btn btn-default btn-sm navbar-btn pull-right file-tree-button").css("margin-right","2px").css("margin-left","2px").attr("href",Jupyter.session_list.base_url).text("File Tree");
+        var file_tree_button = $('<a/>').addClass("btn btn-default btn-sm navbar-btn pull-right file-tree-button").css("margin-right","2px").css("margin-left","2px").attr("href",utils.get_body_data("baseUrl")).text("File Tree");
         $('#login_widget').after(file_tree_button);
         
     	$('#ipython_notebook').children("a").attr("href","https://www.stfc.ac.uk/");
@@ -17,10 +17,8 @@ define(['base/js/namespace','../custom_utils'],function(Jupyter,custom_utils){
             $('<link>')
             .attr('rel', 'stylesheet')
             .attr('type', 'text/css')
-            .attr('href', Jupyter.session_list.base_url + 'nbextensions/linker_extension/tree/tree_style.css')
-        );
-
-        $('head').prepend($('<link>').attr("lel",'lelelelleellel'));
+            .attr('href', utils.get_body_data("baseUrl") + 'nbextensions/linker_extension/tree/tree_style.css')
+        );*/
 
         var bundle_instructions = $("<div/>").addClass("bundle-instructions").text("Select files and directories to associate with your chosen notebook. Note: you cannot associate notebooks with other notebooks.\n");
         $('.dynamic-instructions').after(bundle_instructions);

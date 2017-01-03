@@ -1,14 +1,13 @@
 define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
 
 	var load = function() {
-        //applies to all pages - need to repeat for tree and edit
-        console.log('Modify notebook html loaded');
+        /*//applies to all pages - need to repeat for tree and edit and terminal
         var header_container = $('#header-container').detach();
         var header_container_container = $('<div/>').attr("id","header-container-container").addClass("container");
         header_container_container.append(header_container);
         $('#header').prepend(header_container_container);
 
-        var file_tree_button = $('<a/>').addClass("btn btn-default btn-sm navbar-btn pull-right file-tree-button").css("margin-right","2px").css("margin-left","2px").attr("href",Jupyter.notebook.base_url).text("File Tree");
+        var file_tree_button = $('<a/>').addClass("btn btn-default btn-sm navbar-btn pull-right file-tree-button").css("margin-right","2px").css("margin-left","2px").attr("href",utils.get_body_data("baseUrl")).text("File Tree");
         $('#login_widget').after(file_tree_button);
         
     	$('#ipython_notebook').children("a").attr("href","https://www.stfc.ac.uk/");
@@ -18,8 +17,8 @@ define(['base/js/namespace','base/js/utils'],function(Jupyter,utils){
             $('<link>')
             .attr('rel', 'stylesheet')
             .attr('type', 'text/css')
-            .attr('href', Jupyter.notebook.base_url + 'nbextensions/linker_extension/notebook/notebook_style.css')
-        );
+            .attr('href', utils.get_body_data("baseUrl") + 'nbextensions/linker_extension/notebook/notebook_style.css')
+        );*/
 
         var menubar_container = $('#menubar-container').detach();
         var menubar_container_container = $('<div/>').attr("id","menubar-container-container").addClass("container");
