@@ -7,7 +7,14 @@ define([
     "./view_data_dialog",
     "./select_data_notebook",
     "./modify_notebook_html"
-],function(Jupyter,utils,dialog,custom_utils,custom_contents,view_data){
+],function(
+    Jupyter,
+    utils,
+    dialog,
+    custom_utils,
+    custom_contents,
+    view_data,
+    select_data) {
 
     var upload_data_dialog = function () {
         var upload_data_info = upload_data_form();
@@ -256,5 +263,9 @@ define([
         });
     };
 
-    module.exports = {load: load, upload_data_form: upload_data_form};
+    module.exports = {
+        load: load, 
+        upload_data_form: upload_data_form,
+        upload_data: upload_data,
+    };
 });
