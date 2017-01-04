@@ -3,6 +3,7 @@
 import os
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist
+from setuptools.command.install import install
 
 
 class CustomsdistCommand(sdist):
@@ -12,6 +13,19 @@ class CustomsdistCommand(sdist):
         import subprocess
         subprocess.call(['webpack'])
         sdist.run(self)
+
+class CustomInstallCommand(install):
+
+    def run(self):
+        # insert custom code here
+        install.run(self)
+        import subprocess
+        subprocess.call(['sudo jupyter serverextension enable --py '
+                         'linker_extension --system'], shell=True)
+        subprocess.call(['sudo jupyter nbextension install --py --overwrite '
+                         'linker_extension --system'], shell=True)
+        subprocess.call(['sudo jupyter nbextension enable --py '
+                         'linker_extension --system'], shell=True)
 
 
 def package_files(directory):
@@ -49,6 +63,7 @@ setup_args = dict(
         'ldap3'
     ],
     cmdclass={
+        'install': CustomInstallCommand,
         'sdist': CustomsdistCommand,
     }
 )
