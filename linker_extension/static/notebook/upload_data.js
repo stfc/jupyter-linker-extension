@@ -1,4 +1,13 @@
-define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','../custom_contents','./view_data_dialog','./select_data_notebook','./modify_notebook_html'],function(Jupyter,utils,dialog,custom_utils,custom_contents,view_data,select_data_notebook){
+define([
+    "base/js/namespace",
+    "base/js/utils",
+    "base/js/dialog",
+    "../custom_utils",
+    "../custom_contents",
+    "./view_data_dialog",
+    "./select_data_notebook",
+    "./modify_notebook_html"
+],function(Jupyter,utils,dialog,custom_utils,custom_contents,view_data){
 
     var upload_data_dialog = function () {
         var upload_data_info = upload_data_form();
@@ -11,9 +20,15 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
             default_button: "Cancel",
             buttons: {
                 Cancel: {},
-                Upload: { class : "btn-primary",
+                Upload: { 
+                    class : "btn-primary",
                     click: function() { //todo: remove this button or sort out username
-                        upload_data("mnf98541",upload_data_info.file_names,upload_data_info.file_paths,upload_data_info.file_types);
+                        upload_data(
+                            "mnf98541",
+                            upload_data_info.file_names,
+                            upload_data_info.file_paths,
+                            upload_data_info.file_types
+                        );
                     }
                 },
             },
@@ -25,8 +40,11 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
     var upload_data = function(username, file_names,file_paths,file_types) {
         var md = Jupyter.notebook.metadata;
         if ("databundle_url" in md) {
-            //already uploaded to dspace so... TODO: do we want to block them if it's already been uplaoded? should I grey out the button?
-            custom_utils.create_alert("alert-warning","You have already uploaded the associate data for this notebook to eData and it will not be reuploaded.");
+            //already uploaded to dspace so... TODO: do we want to block them if it"s already been uplaoded? should I grey out the button?
+            custom_utils.create_alert("alert-warning",
+                                      "You have already uploaded the associate " +
+                                      "data for this notebook to eData and it " +
+                                      "will not be reuploaded.");
         }
         else if ("reportmetadata" in md && "databundle" in md) {
             var stringauthors = [];
@@ -37,13 +55,12 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
             });
 
             var referencedBy_URLs = [];
-            $('.data_referencedBy').each(function(i,e) {
+            $(".data_referencedBy").each(function(i,e) {
                 if($(e).val() !== "") {
                     referencedBy_URLs.push($(e).val());
                 }
             });
 
-            var contents = Jupyter.notebook.contents;
             var options = {
                 "username": username,
                 "notebookpath": Jupyter.notebook.notebook_path,
@@ -52,7 +69,7 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                 "file_types": file_types,
                 "abstract": $("#data_abstract").val(),
                 "referencedBy": referencedBy_URLs,
-                "title":md.reportmetadata.title, //rest are grabbed from the notebook metadata
+                "title":md.reportmetadata.title,
                 "authors":stringauthors,
                 "tags":md.reportmetadata.tags,
                 "date":md.reportmetadata.date,
@@ -69,7 +86,7 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                     var id = "";
                     var xml_str = response.split("\n");
                     xml_str.forEach(function(item) {
-                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
+                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it"s not in the string
                             var endtag = item.lastIndexOf("<");
                             var without_endtag = item.slice(0,endtag);
                             var starttag = without_endtag.indexOf(">");
@@ -79,28 +96,41 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                     });
                     md.databundle_url = id;
                     Jupyter.notebook.save_notebook();
-                    custom_utils.create_alert("alert-success","Success! Item created in DSpace via SWORD!").attr('item-id',id);
-                }, function(reason) {
-                    custom_utils.create_alert("alert-danger","Error! " + reason.message + ", please try again. If it continues to fail please contact the developers.");
+                    custom_utils.create_alert("alert-success",
+                                              "Success! Item created in DSpace via SWORD!")
+                                .attr("item-id",id);
+                },
+                function(reason) {
+                    custom_utils.create_alert("alert-danger",
+                                              "Error! " + reason.message + 
+                                              ", please try again. If it " + 
+                                              "continues to fail please " + 
+                                              "contact the developers.");
                 }
             );
         } else { 
             if (!("reportmetadata" in md)) {
-                custom_utils.create_alert("alert-danger","Error! No report metadata - please fill in the report metadata first.");
+                custom_utils.create_alert("alert-danger",
+                                          "Error! No report metadata - please " +
+                                          " fill in the report metadata first.");
             }
             if(!("databundle" in md)) {
-                custom_utils.create_alert("alert-danger","Error! No data associated with this notebook. You must select data to upload before you an upload it."); //TODO: be a little less sassy?
+                custom_utils.create_alert("alert-danger",
+                                          "Error! No data associated with this " +
+                                          "notebook. You must select data to " + 
+                                          "upload before you an upload it."); 
             }
         }
     };
     
 
     var upload_data_form = function() {
-        var display_files = $('<div/>').append(
-            $('<p/>').addClass("bundle-message")
-                .text('These are the files currently associated with ' + notebook.notebook_name + " :")
+        var display_files = $("<div/>").append(
+            $("<p/>").addClass("bundle-message")
+                .text("These are the files currently associated with " + 
+                      Jupyter.notebook.notebook_name + " :")
         ).append(
-            $('<br/>')
+            $("<br/>")
         );
 
         var view_data_info = view_data.view_data();
@@ -111,15 +141,18 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
         var file_paths = view_data_info.file_paths;
         var file_types = view_data_info.file_types;
 
-        var data_abstract_label = $('<label/>')
-            .attr('for','data_abstract')
-            .text("Please write an abstract here (You may want to write something to describe each file in the bundle): ");
+        var data_abstract_label = $("<label/>")
+            .attr("for","data_abstract")
+            .text("Please write an abstract here (You may want to write " +
+                  " something to describe each file in the bundle): ");
 
-        var data_abstract = $('<textarea/>').attr('name','data_abstract').attr('id','data_abstract');
+        var data_abstract = $("<textarea/>")
+            .attr("name","data_abstract")
+            .attr("id","data_abstract");
 
         var default_abstract = "";
         file_names.forEach(function(item,index) {
-            if(file_types[index] === 'file') {
+            if(file_types[index] === "file") {
                 default_abstract = default_abstract + item;
                 if(index < file_names.length -1) {
                     default_abstract = default_abstract + "\n\n";
@@ -129,18 +162,22 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
 
         data_abstract.val(default_abstract);
 
-        var data_referencedBy_label = $('<label/>')
-            .attr('for','data_referencedBy')
+        var data_referencedBy_label = $("<label/>")
+            .attr("for","data_referencedBy")
             .text("Related publication persistent URLs: ");
 
-        var data_referencedBy = $('<input/>').addClass("data_referencedBy").attr('name','data_referencedBy').attr('id','data_referencedBy-0');
+        var data_referencedBy = $("<input/>")
+            .addClass("data_referencedBy")
+            .attr("name","data_referencedBy")
+            .attr("id","data_referencedBy-0");
 
-        var data_referencedBy_div = $('<div/>').addClass("data_referencedBy_div");
+        var data_referencedBy_div = $("<div/>")
+            .addClass("data_referencedBy_div");
 
-        var addURLButton = $('<button/>').text("Add")
-            .addClass('btn btn-xs btn-default')
-            .attr('id','add-url-button')
-            .attr('type','button')
+        var addURLButton = $("<button/>").text("Add")
+            .addClass("btn btn-xs btn-default")
+            .attr("id","add-url-button")
+            .attr("type","button")
             .bind("click",addURL);
 
         data_referencedBy_div.append(data_referencedBy);
@@ -148,26 +185,28 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
 
         var urlcount = 1;
 
-        var data_fields = $('<fieldset/>').attr('title','data_fields').attr('id','data_fields')
+        var data_fields = $("<fieldset/>")
+            .attr("title","data_fields").attr("id","data_fields")
             .append(data_abstract_label)
             .append(data_abstract)
             .append(data_referencedBy_label)
             .append(data_referencedBy_div);
 
         function addURL() {
-            var newURL = ($('<div/>')).addClass("data_referencedBy_div");
-            var currcount = urlcount;
-            var URL = $('<input/>')
-                .attr('class','data_referencedBy')
-                .attr('type','text')
-                .attr('id','data_referencedBy-' + urlcount);
+            var newURL = ($("<div/>")).addClass("data_referencedBy_div");
+            var URL = $("<input/>")
+                .attr("class","data_referencedBy")
+                .attr("type","text")
+                .attr("id","data_referencedBy-" + urlcount);
 
-            var previousURL = $('.data_referencedBy_div').last();
-            addURLButton.detach(); //detach from the previously last url input so we can put it back on the new one
-            var deleteURL = $('<button/>').text("Remove")
-                .addClass('btn btn-xs btn-default')
-                .attr('id','remove-url-button')
-                .attr('type','button')
+            var previousURL = $(".data_referencedBy_div").last();
+            //detach from the previously last url input
+            // so we can put it back on the new one
+            addURLButton.detach();
+            var deleteURL = $("<button/>").text("Remove")
+                .addClass("btn btn-xs btn-default")
+                .attr("id","remove-url-button")
+                .attr("type","button")
                     .click(function() {
                         previousURL.remove();
                         $(this).remove();
@@ -180,8 +219,8 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
         }
 
         var select_data_button = $("<button/>")
-            .addClass('btn btn-xs btn-default select-data-button')
-            .attr('type','button')
+            .addClass("btn btn-xs btn-default select-data-button")
+            .attr("type","button")
             .text("Select data")
             .attr("title","Select data to associate with this notebook")
             .attr("aria-label","Select data to associate with this notebook")
@@ -189,27 +228,30 @@ define(['base/js/namespace','base/js/utils','base/js/dialog','../custom_utils','
                 select_data.select_data();
             });
 
-        var dialog_body = $('<div/>')
+        var dialog_body = $("<div/>")
             .append(display_files)
             .append(select_data_button)
             .append(data_fields);
 
-        return {dialog_body: dialog_body, file_names: file_names, file_paths: file_paths, file_types: file_types};
+        return {dialog_body: dialog_body,
+                file_names: file_names,
+                file_paths: file_paths, 
+                file_types: file_types};
     };
     
     var action = {
-        help: 'Upload associated data',
-        help_index: 'b',
-        icon: 'fa-upload',
+        help: "Upload associated data",
+        help_index: "b",
+        icon: "fa-upload",
         handler : upload_data_dialog,
     };
 
     var prefix = "linker_extension";
     var action_name = "upload-associated-data";
-    var full_action_name = Jupyter.actions.register(action,action_name,prefix);
 
     var load = function () {
-        $('#upload_data').click(function () {
+        Jupyter.actions.register(action,action_name,prefix);
+        $("#upload_data").click(function () {
             upload_data_dialog();
         });
     };

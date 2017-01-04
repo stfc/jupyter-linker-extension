@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Notebook Javascript Test Controller
 
-This module runs one or more subprocesses which will actually run the Javascript
-test suite.
+This module runs one or more subprocesses which will actually run the
+Javascript test suite.
 """
 
 # Copyright (c) Jupyter Development Team.
@@ -26,7 +26,7 @@ from threading import Thread, Lock, Event
 try:
     from unittest.mock import patch
 except ImportError:
-    from mock import patch # py3
+    from mock import patch  # py3
 
 from jupyter_core.paths import jupyter_runtime_dir
 from ipython_genutils.py3compat import bytes_to_str, which
@@ -36,11 +36,13 @@ from ipython_genutils.tempdir import TemporaryDirectory
 try:
     # Python >= 3.3
     from subprocess import TimeoutExpired
+
     def popen_wait(p, timeout):
         return p.wait(timeout)
 except ImportError:
     class TimeoutExpired(Exception):
         pass
+
     def popen_wait(p, timeout):
         """backport of Popen.wait from Python 3"""
         for i in range(int(10 * timeout)):
@@ -57,9 +59,11 @@ have['casperjs'] = bool(which('casperjs'))
 have['phantomjs'] = bool(which('phantomjs'))
 have['slimerjs'] = bool(which('slimerjs'))
 
+
 class StreamCapturer(Thread):
     daemon = True  # Don't hang if main thread crashes
     started = False
+
     def __init__(self, echo=False):
         super(StreamCapturer, self).__init__()
         self.echo = echo
@@ -79,7 +83,7 @@ class StreamCapturer(Thread):
                 self.buffer.write(chunk)
             if self.echo:
                 sys.stdout.write(bytes_to_str(chunk))
-    
+
         os.close(self.readfd)
         os.close(self.writefd)
 
@@ -129,7 +133,7 @@ class TestController(object):
 
     def setup(self):
         """Create temporary directories etc.
-        
+
         This is only called when we know the test group will be run. Things
         created here may be cleaned up by self.cleanup().
         """
@@ -147,7 +151,7 @@ class TestController(object):
         stdout = c.writefd if capture_output else None
         stderr = subprocess.STDOUT if capture_output else None
         self.process = subprocess.Popen(self.cmd, stdout=stdout,
-                stderr=stderr, env=env)
+                                        stderr=stderr, env=env)
 
     def wait(self):
         self.process.wait()
@@ -157,11 +161,11 @@ class TestController(object):
 
     def print_extra_info(self):
         """Print extra information about this test run.
-        
+
         If we're running in parallel and showing the concise view, this is only
         called if the test group fails. Otherwise, it's called before the test
         group is started.
-        
+
         The base implementation does nothing, but it can be overridden by
         subclasses.
         """
@@ -176,7 +180,7 @@ class TestController(object):
         try:
             print('Cleaning up stale PID: %d' % subp.pid)
             subp.kill()
-        except: # (OSError, WindowsError) ?
+        except:  # (OSError, WindowsError) ?
             # This is just a best effort, if we fail or the process was
             # really gone, ignore it.
             pass
@@ -204,16 +208,18 @@ def get_js_test_dir():
     import linker_extension.tests as t
     return os.path.join(os.path.dirname(t.__file__), '')
 
+
 def all_js_groups():
     import glob
     test_dir = get_js_test_dir()
     all_subdirs = glob.glob(test_dir + '[!_]*/')
     return [os.path.relpath(x, test_dir) for x in all_subdirs]
 
+
 class JSController(TestController):
     """Run CasperJS tests """
-    
-    requirements =  ['casperjs']
+
+    requirements = ['casperjs']
 
     def __init__(self, section, xunit=True, engine='phantomjs', url=None):
         """Create new test runner."""
@@ -227,9 +233,10 @@ class JSController(TestController):
         self.base_url = '/a@b/'
         self.slimer_failure = re.compile('^FAIL.*', flags=re.MULTILINE)
         js_test_dir = get_js_test_dir()
-        includes = '--includes=' + os.path.join(js_test_dir,'util.js')
+        includes = '--includes=' + os.path.join(js_test_dir, 'util.js')
         test_cases = os.path.join(js_test_dir, self.section)
-        self.cmd = ['casperjs', 'test', includes, test_cases, '--engine=%s' % self.engine]
+        self.cmd = ['casperjs', 'test', includes,
+                    test_cases, '--engine=%s' % self.engine]
 
     def setup(self):
         self.ipydir = TemporaryDirectory()
@@ -245,15 +252,33 @@ class JSController(TestController):
         self.dirs.append(self.home)
         self.dirs.append(self.config_dir)
         self.dirs.append(self.nbdir)
-        os.makedirs(os.path.join(self.nbdir.name, os.path.join(u'sub ∂ir1', u'sub ∂ir 1a')))
-        os.makedirs(os.path.join(self.nbdir.name, os.path.join(u'sub ∂ir2', u'sub ∂ir 1b')))
-        f1 = os.open(os.path.join(self.nbdir.name, u'file_in_nbdir.txt'), os.O_CREAT | os.O_RDWR)
+        os.makedirs(os.path.join(self.nbdir.name, os.path.join(u'sub ∂ir1',
+                                                               u'sub ∂ir 1a')))
+        os.makedirs(os.path.join(self.nbdir.name, os.path.join(u'sub ∂ir2',
+                                                               u'sub ∂ir 1b')))
+        f1 = os.open(os.path.join(self.nbdir.name, u'file_in_nbdir.txt'),
+                     os.O_CREAT | os.O_RDWR)
+
         os.write(f1, b"Text in file_in_nbdir.txt")
         os.close(f1)
-        f2 = os.open(os.path.join(self.nbdir.name, os.path.join(u'sub ∂ir1', u'file_in_sub_∂ir1.txt')), os.O_CREAT | os.O_RDWR)
+        f2 = os.open(os.path.join(
+                        self.nbdir.name,
+                        os.path.join(
+                            u'sub ∂ir1',
+                            u'file_in_sub_∂ir1.txt')),
+                     os.O_CREAT | os.O_RDWR)
+
         os.write(f2, b"Text in file_in_sub_dir1.txt")
         os.close(f2)
-        f3 = os.open(os.path.join(self.nbdir.name, os.path.join(u'sub ∂ir1', os.path.join(u'sub ∂ir 1a', u'file_in_sub_∂ir1a.txt'))), os.O_CREAT | os.O_RDWR)
+        f3 = os.open(os.path.join(
+                        self.nbdir.name,
+                        os.path.join(
+                            u'sub ∂ir1',
+                            os.path.join(
+                                u'sub ∂ir 1a',
+                                u'file_in_sub_∂ir1a.txt'))),
+                     os.O_CREAT | os.O_RDWR)
+
         os.write(f3, b"Text in file_in_sub_dir1a.txt")
         os.close(f3)
 
@@ -276,13 +301,15 @@ class JSController(TestController):
             self.server_port = 0
             self._init_server()
             if self.server_port:
-                self.cmd.append('--url=http://localhost:%i%s' % (self.server_port, self.base_url))
+                self.cmd.append('--url=http://localhost:%i%s'
+                                % (self.server_port, self.base_url))
             else:
                 # don't launch tests if the server didn't start
                 self.cmd = [sys.executable, '-c', 'raise SystemExit(1)']
 
     def add_xunit(self):
-        xunit_file = os.path.abspath(self.section.replace('/','.') + '.xunit.xml')
+        xunit_file = os.path.abspath(self.section.replace('/', '.')
+                                     + '.xunit.xml')
         self.cmd.append('--xunit=%s' % xunit_file)
 
     def launch(self, buffer_output):
@@ -292,7 +319,8 @@ class JSController(TestController):
             return super(JSController, self).launch(capture_output=True)
 
         else:
-            return super(JSController, self).launch(buffer_output=buffer_output)
+            return super(JSController, self).launch(
+                                                buffer_output=buffer_output)
 
     def wait(self, *pargs, **kwargs):
         """Wait for the JSController to finish"""
@@ -318,12 +346,13 @@ class JSController(TestController):
 
     def _init_server(self):
         "Start the notebook server in a separate process"
-        self.server_command = command = [sys.executable,
+        self.server_command = command = [
+            sys.executable,
             '-m', 'notebook',
             '--no-browser',
             '--notebook-dir', self.nbdir.name,
             '--NotebookApp.token=',
-            '--NotebookApp.base_url=%s' % self.base_url,            
+            '--NotebookApp.base_url=%s' % self.base_url,
         ]
         # ipc doesn't work on Windows, and darwin has crazy-long temp paths,
         # which run afoul of ipc's maximum path length.
@@ -335,19 +364,22 @@ class JSController(TestController):
         env.update(self.env)
         if self.engine == 'phantomjs':
             env['IPYTHON_ALLOW_DRAFT_WEBSOCKETS_FOR_PHANTOMJS'] = '1'
-        self.server = subprocess.Popen(command,
-            stdout = c.writefd,
-            stderr = subprocess.STDOUT,
+        self.server = subprocess.Popen(
+            command,
+            stdout=c.writefd,
+            stderr=subprocess.STDOUT,
             cwd=self.nbdir.name,
-            env=env,
+            env=env
         )
+
         with patch.dict('os.environ', {'HOME': self.home.name}):
             runtime_dir = jupyter_runtime_dir()
-        self.server_info_file = os.path.join(runtime_dir,
+        self.server_info_file = os.path.join(
+            runtime_dir,
             'nbserver-%i.json' % self.server.pid
         )
         self._wait_for_server()
-    
+
     def _wait_for_server(self):
         """Wait 30 seconds for the notebook server to start"""
         for i in range(300):
@@ -363,17 +395,16 @@ class JSController(TestController):
                 else:
                     return
             time.sleep(0.1)
-        print("Notebook server-info file never arrived: %s" % self.server_info_file,
-            file=sys.stderr
-        )
-    
+        print("Notebook server-info file never arrived: %s"
+              % self.server_info_file, file=sys.stderr)
+
     def _failed_to_start(self):
         """Notebook server exited prematurely"""
         captured = self.stream_capturer.get_buffer().decode('utf-8', 'replace')
         print("Notebook failed to start: ", file=sys.stderr)
         print(self.server_command)
         print(captured, file=sys.stderr)
-    
+
     def _load_server_info(self):
         """Notebook server started, load connection info from JSON"""
         with open(self.server_info_file) as f:
@@ -394,8 +425,7 @@ class JSController(TestController):
                 # server didn't terminate, kill it
                 try:
                     print("Failed to terminate notebook server, killing it.",
-                        file=sys.stderr
-                    )
+                          file=sys.stderr)
                     self.server.kill()
                 except OSError:
                     # already dead
@@ -404,10 +434,9 @@ class JSController(TestController):
             try:
                 popen_wait(self.server, NOTEBOOK_SHUTDOWN_TIMEOUT)
             except TimeoutExpired:
-                print("Notebook server still running (%s)" % self.server_info_file,
-                    file=sys.stderr
-                )
-              
+                print("Notebook server still running (%s)"
+                      % self.server_info_file, file=sys.stderr)
+
             self.stream_capturer.halt()
         TestController.cleanup(self)
 
@@ -420,20 +449,24 @@ def prepare_controllers(options):
         testgroups = all_js_groups()
 
     engine = 'slimerjs' if options.slimerjs else 'phantomjs'
-    c_js = [JSController(name, xunit=options.xunit, engine=engine, url=options.url) for name in testgroups]
+    c_js = [JSController(
+                name, xunit=options.xunit,
+                engine=engine, url=options.url) for name in testgroups
+            ]
 
     controllers = c_js
     to_run = [c for c in controllers if c.will_run]
     not_run = [c for c in controllers if not c.will_run]
     return to_run, not_run
 
+
 def do_run(controller, buffer_output=True):
     """Setup and run a test controller.
-    
+
     If buffer_output is True, no output is displayed, to avoid it appearing
     interleaved. In this case, the caller is responsible for displaying test
     output on failure.
-    
+
     Returns
     -------
     controller : TestController
@@ -461,19 +494,21 @@ def do_run(controller, buffer_output=True):
     finally:
         controller.cleanup()
 
+
 def report():
     """Return a string with a summary report of test-related variables."""
     inf = get_sys_info()
     out = []
+
     def _add(name, value):
         out.append((name, value))
 
-    _add('Python version', inf['sys_version'].replace('\n',''))
+    _add('Python version', inf['sys_version'].replace('\n', ''))
     _add('sys.executable', inf['sys_executable'])
     _add('Platform', inf['platform'])
 
-    width = max(len(n) for (n,v) in out)
-    out = ["{:<{width}}: {}\n".format(n, v, width=width) for (n,v) in out]
+    width = max(len(n) for (n, v) in out)
+    out = ["{:<{width}}: {}\n".format(n, v, width=width) for (n, v) in out]
 
     avail = []
     not_avail = []
@@ -496,9 +531,10 @@ def report():
 
     return ''.join(out)
 
+
 def run_jstestall(options):
     """Run the entire Javascript test suite.
-    
+
     This function constructs TestControllers and runs them in subprocesses.
 
     Parameters
@@ -507,8 +543,8 @@ def run_jstestall(options):
     All parameters are passed as attributes of the options object.
 
     testgroups : list of str
-      Run only these sections of the test suite. If empty, run all the available
-      sections.
+      Run only these sections of the test suite. If empty, run all the
+      available sections.
 
     fast : int or None
       Run the test suite in parallel, using n simultaneous processes. If None
@@ -524,7 +560,8 @@ def run_jstestall(options):
       Address:port to use when running the JS tests.
 
     xunit : bool
-      Produce Xunit XML output. This is written to multiple foo.xunit.xml files.
+      Produce Xunit XML output. This is written to multiple
+      foo.xunit.xml files.
 
     extra_args : list
       Extra arguments to pass to the test subprocesses, e.g. '-v'
@@ -590,8 +627,9 @@ def run_jstestall(options):
         # If anything went wrong, point out what command to rerun manually to
         # see the actual errors and individual summary
         failed_sections = [c.section for c in failed]
-        print('ERROR - {} out of {} test groups failed ({}).'.format(nfail,
-                                  nrunners, ', '.join(failed_sections)), took)
+        error_msg = 'ERROR - {} out of {} test groups failed ({}).'
+        print(error_msg.format(nfail, nrunners, ', '.join(failed_sections)),
+              took)
         print()
         print('You may wish to rerun these, with:')
         print('  python -m notebook.jstest', *failed_sections)
@@ -601,21 +639,35 @@ def run_jstestall(options):
         # Ensure that our exit code indicates failure
         sys.exit(1)
 
-argparser = argparse.ArgumentParser(description='Run Jupyter Notebook Javascript tests')
+
+argparser = argparse.ArgumentParser(
+                description='Run Jupyter Notebook Javascript tests'
+            )
+
 argparser.add_argument('testgroups', nargs='*',
-                    help='Run specified groups of tests. If omitted, run '
-                    'all tests.')
+                       help='Run specified groups of tests. If omitted, run '
+                       'all tests.')
+
 argparser.add_argument('--slimerjs', action='store_true',
-                    help="Use slimerjs if it's installed instead of phantomjs for casperjs tests.")
+                       help="Use slimerjs if it's installed "
+                            "instead of phantomjs for casperjs tests.")
+
 argparser.add_argument('--url', help="URL to use for the JS tests.")
-argparser.add_argument('-j', '--fast', nargs='?', const=None, default=1, type=int,
-                    help='Run test sections in parallel. This starts as many '
-                    'processes as you have cores, or you can specify a number.')
+
+argparser.add_argument('-j', '--fast', nargs='?', const=None,
+                       default=1, type=int,
+                       help='Run test sections in parallel. '
+                       'This starts as many processes as you have cores, '
+                       'or you can specify a number.')
+
 argparser.add_argument('--xunit', action='store_true',
-                    help='Produce Xunit XML results')
+                       help='Produce Xunit XML results')
+
 argparser.add_argument('--subproc-streams', default='capture',
-                    help="What to do with stdout/stderr from subprocesses. "
-                    "'capture' (default), 'show' and 'discard' are the options.")
+                       help="What to do with stdout/stderr from subprocesses. "
+                       "'capture' (default), 'show' and "
+                       "'discard' are the options.")
+
 
 def default_options():
     """Get an argparse Namespace object with the default arguments, to pass to
@@ -624,6 +676,7 @@ def default_options():
     options = argparser.parse_args([])
     options.extra_args = []
     return options
+
 
 def main():
     try:

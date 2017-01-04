@@ -1,82 +1,89 @@
-
-define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
+define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
     "use strict";
 
     function load_ipython_extension(){
-        console.log('Custom contents loaded');
+        console.log("Custom contents loaded");
     }
 
     var dspace_new_item = function(options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspace']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspace"]);
         var settings = {
             type : "POST",
             processData : false,
-            contentType: 'application/json',
+            contentType: "application/json",
         };
-        return utils.promising_ajax(url + '?' + $.param(options), settings);
+        return utils.promising_ajax(url + "?" + $.param(options), settings);
     };
 
     var sword_new_item = function(options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/sword']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/sword"]);
         var settings = {
             type : "POST",
             processData : false,
-            contentType: 'application/json',
+            contentType: "application/json",
         };
-        return utils.promising_ajax(url + '?' + $.param(options), settings);
+        return utils.promising_ajax(url + "?" + $.param(options), settings);
     };
 
     var upload_data = function(options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/uploadbundle']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/uploadbundle"]);
         var settings = {
             type : "POST",
             processData : false,
-            contentType: 'application/json',
+            contentType: "application/json",
         };
-        return utils.promising_ajax(url + '?' + $.param(options), settings);
+        return utils.promising_ajax(url + "?" + $.param(options), settings);
     };
 
     var sword_get_item = function (options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspacetest"]);
         var settings = {
             processData : false,
             cache : false,
             type : "GET",
         };
-        return utils.promising_ajax(url + '?' + $.param(options), settings);
+        return utils.promising_ajax(url + "?" + $.param(options), settings);
     };
 
     var sword_delete_item = function (options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspacetest"]);
         var settings = {
             processData : false,
             type : "DELETE",
         };
-        return utils.promising_ajax(url + '?' + $.param(options), settings);
+        return utils.promising_ajax(url + "?" + $.param(options), settings);
     };
 
     var sword_get_bitstreams = function (options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspacetest"]);
         var settings = {
             processData : false,
             cache : false,
             type : "PUT",
         };
-        return utils.promising_ajax(url + '?' + $.param(options), settings);
+        return utils.promising_ajax(url + "?" + $.param(options), settings);
     };
 
     var sword_get_bitstream_data = function (options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspacetest"]);
         var settings = {
             processData : false,
             cache : false,
             type : "POST",
         };
-        return utils.promising_ajax(url + '?' + $.param(options), settings);
+        return utils.promising_ajax(url + "?" + $.param(options), settings);
     };
 
     var sword_get_servicedocument = function () {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/sword']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/sword"]);
         var settings = {
             processData : false,
             cache : false,
@@ -86,13 +93,14 @@ define(['base/js/namespace','base/js/utils'], function(Jupyter,utils){
     };
 
     var ldap_auth = function(options) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url, '/ldap']);
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/ldap"]);
         var settings = {
             processData : false,
             cache : false,
             type : "POST",
             data: options,
-            contentType: 'application/json',
+            contentType: "application/json",
         };
         return utils.promising_ajax(url, settings);
     };

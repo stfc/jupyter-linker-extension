@@ -1,5 +1,5 @@
-var custom_contents = require("../custom_contents.js");
-var custom_utils = require("../custom_utils.js");
+require("../custom_contents.js");
+require("../custom_utils.js");
 var add_metadata = require("./add_metadata.js");
 var custom_cell_toolbar = require("./custom_cell_toolbar.js");
 var modify_notebook_html = require("./modify_notebook_html.js");
@@ -12,7 +12,7 @@ var generate_references = require("./generate_references.js");
 
 
 function load_ipython_extension(){
-    console.log('Linker extension (notebook) loaded');
+    console.log("Linker extension (notebook) loaded");
 
     modify_notebook_html.load();
     add_metadata.load();
