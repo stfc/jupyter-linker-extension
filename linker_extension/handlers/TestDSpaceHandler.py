@@ -1,6 +1,7 @@
 """DSpace Tornado handlers used for testing."""
 
 import requests
+import os
 
 from tornado import web, gen
 
@@ -16,7 +17,7 @@ class TestDSpaceHandler(IPythonHandler):
     @gen.coroutine
     def get(self):
         try:
-            with open("/srv/jupyterhub/admin.txt", "r") as f:
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
                 un = f.readline().strip()
                 pw = f.readline().strip()
         except IOError:
@@ -37,7 +38,7 @@ class TestDSpaceHandler(IPythonHandler):
     def delete(self):
         ID = self.get_query_argument("ID")
         try:
-            with open("/srv/jupyterhub/admin.txt", "r") as f:
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
                 un = f.readline().strip()
                 pw = f.readline().strip()
         except IOError:
@@ -59,7 +60,7 @@ class TestDSpaceHandler(IPythonHandler):
     def put(self):
         ID = self.get_query_argument("ID")
         try:
-            with open("/srv/jupyterhub/admin.txt", "r") as f:
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
                 un = f.readline().strip()
                 pw = f.readline().strip()
         except IOError:
@@ -80,7 +81,7 @@ class TestDSpaceHandler(IPythonHandler):
     def post(self):
         IDs = self.get_query_arguments("IDs[]")
         try:
-            with open("/srv/jupyterhub/admin.txt", "r") as f:
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
                 un = f.readline().strip()
                 pw = f.readline().strip()
         except IOError:

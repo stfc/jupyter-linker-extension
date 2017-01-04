@@ -21,7 +21,7 @@ class DSpaceHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
-        login_file = open("/srv/jupyterhub/admin.txt", "r")
+        login_file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r")
         un = login_file.readline().strip()
         pw = login_file.readline().strip()
         login = requests.request('POST', 'https://epublicns05.esc.rl.ac.uk/rest/login', headers={'Content-Type': 'application/json', 'Accept': 'application/json'}, json={"email": un, "password": pw}, verify=False)

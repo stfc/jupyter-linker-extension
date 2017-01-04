@@ -23,7 +23,7 @@ class UploadBundleHandler(IPythonHandler):
 
         repository = self.get_query_argument('repository')
         try:
-            with open("/srv/jupyterhub/admin.txt", "r") as f:
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
                     un = f.readline().strip()
                     pw = f.readline().strip()
         except IOError:
@@ -35,7 +35,7 @@ class UploadBundleHandler(IPythonHandler):
         ET.register_namespace("dcterms", "http://purl.org/dc/terms/")
 
         try:
-            tree = ET.ElementTree(file="/srv/jupyterhub/blank.xml")
+            tree = ET.ElementTree(file=os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","blank.xml"))
         except ET.ParseError:
             raise web.HTTPError(500, "IndexError occured when fetching metadata node")
 
