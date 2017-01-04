@@ -71,7 +71,9 @@ define(["base/js/namespace",
             var password_label = $("<label/>")
                 .attr("for","password")
                 .text("Password: ");
-            var password_field = $("<input/>").attr("id","password");
+            var password_field = $("<input/>")
+                .attr("id","password")
+                .attr("type","password");
 
             login_fields.append(username_label)
                         .append(username_field)
@@ -279,7 +281,9 @@ define(["base/js/namespace",
             var password_label = $("<label/>")
                 .attr("for","password")
                 .text("Password: ");
-            var password_field = $("<input/>").attr("id","password");
+            var password_field = $("<input/>")
+                .attr("id","password")
+                .attr("type","password");
 
             login_fields.append(username_label)
                         .append(username_field)
@@ -442,7 +446,9 @@ define(["base/js/namespace",
             var password_label = $("<label/>")
                 .attr("for","password")
                 .text("Password: ");
-            var password_field = $("<input/>").attr("id","password");
+            var password_field = $("<input/>")
+                .attr("id","password")
+                .attr("type","password");
 
             login_fields.append(username_label)
                         .append(username_field)
