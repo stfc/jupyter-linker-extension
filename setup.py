@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import nbconvert
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist
 from setuptools.command.install import install
@@ -26,6 +27,30 @@ class CustomInstallCommand(install):
                          'linker_extension --system'], shell=True)
         subprocess.call(['sudo jupyter nbextension enable --py '
                          'linker_extension --system'], shell=True)
+
+        nbconvert_loc = os.path.dirname(nbconvert.__file__)
+        template_path = os.path.join(nbconvert_loc, 'templates', 'latex')
+        os.rename(os.path.join('linker_extension',
+                               'resources',
+                               'templates',
+                               'custom_base.tplx'),
+                  os.path.join(template_path,'custom_base.tplx'))
+
+        os.rename(os.path.join('linker_extension',
+                               'resources',
+                               'templates',
+                               'custom_article.tplx'),
+
+                  os.path.join(template_path,'custom_article.tplx'))
+
+        os.rename(os.path.join('linker_extension',
+                               'resources',
+                               'templates',
+                               'custom_style_ipython.tplx'),
+                  os.path.join(template_path,'custom_style_ipython.tplx'))
+
+
+
 
 
 def package_files(directory):
@@ -60,6 +85,7 @@ setup_args = dict(
     },
     install_requires=[
         'notebook>=4',
+        'nbconvert',
         'ldap3'
     ],
     cmdclass={
