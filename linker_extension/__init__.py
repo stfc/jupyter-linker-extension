@@ -35,6 +35,8 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Custom server extension module enabled!")
     web_app = nbapp.web_app
     host_pattern = '.*$'
+
+    # create the route mappings for our handlers
     route_pattern_dspace = url_path_join(web_app.settings['base_url'],
                                          '/dspace')
     web_app.add_handlers(host_pattern, [(route_pattern_dspace, DSpaceHandler)])
@@ -72,11 +74,12 @@ def _jupyter_server_extension_paths():
     }]
 
 
+# define the sections and paths of our js extensions
 def _jupyter_nbextension_paths():
     return [
         dict(
             section="common",
-            # the path is relative to the `my_fancy_module` directory
+            # the path is relative to the `linker_extension` directory
             src="static/common/",
             # directory in the `nbextension/` namespace
             dest="linker_extension/common/",
@@ -84,7 +87,7 @@ def _jupyter_nbextension_paths():
             require="linker_extension/common/linker_extension_common"),
         dict(
             section="tree",
-            # the path is relative to the `my_fancy_module` directory
+            # the path is relative to the `linker_extension` directory
             src="static/tree/",
             # directory in the `nbextension/` namespace
             dest="linker_extension/tree/",
@@ -92,7 +95,7 @@ def _jupyter_nbextension_paths():
             require="linker_extension/tree/linker_extension_tree"),
         dict(
             section="notebook",
-            # the path is relative to the `my_fancy_module` directory
+            # the path is relative to the `linker_extension` directory
             src="static/notebook/",
             # directory in the `nbextension/` namespace
             dest="linker_extension/notebook/",
