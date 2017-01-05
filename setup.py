@@ -7,6 +7,7 @@ from setuptools.command.sdist import sdist
 from setuptools.command.install import install
 
 
+# On build, build the javascript files
 class CustomsdistCommand(sdist):
 
     def run(self):
@@ -15,6 +16,9 @@ class CustomsdistCommand(sdist):
         subprocess.call(['webpack'])
         sdist.run(self)
 
+
+# on install, install and enable the extension and copy the template files
+# to their proper location
 class CustomInstallCommand(install):
 
     def run(self):
@@ -34,25 +38,23 @@ class CustomInstallCommand(install):
                                'resources',
                                'templates',
                                'custom_base.tplx'),
-                  os.path.join(template_path,'custom_base.tplx'))
+                  os.path.join(template_path, 'custom_base.tplx'))
 
         os.rename(os.path.join('linker_extension',
                                'resources',
                                'templates',
                                'custom_article.tplx'),
 
-                  os.path.join(template_path,'custom_article.tplx'))
+                  os.path.join(template_path, 'custom_article.tplx'))
 
         os.rename(os.path.join('linker_extension',
                                'resources',
                                'templates',
                                'custom_style_ipython.tplx'),
-                  os.path.join(template_path,'custom_style_ipython.tplx'))
+                  os.path.join(template_path, 'custom_style_ipython.tplx'))
 
 
-
-
-
+# return an array of paths of all files in the specified directory
 def package_files(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
@@ -80,7 +82,7 @@ setup_args = dict(
     url='http://www.stfc.ac.uk/',
     packages=find_packages(),
     package_data={
-        '': (jsfiles + cssfiles + ['tests/*.js', 'tests/*.md'] +
+        '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
              phantomjs_files + slimerjs_files + resource_files)
     },
     install_requires=[
