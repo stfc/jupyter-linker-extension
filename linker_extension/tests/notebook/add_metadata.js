@@ -151,7 +151,7 @@ casper.notebook_test(function() {
             '#citation': 'test citation',
             '#referencedBy-0': "URL1",
             '#referencedBy-2': "URL2",
-            '#repository': "8" //8 is SCD
+            '#repository': "edata/8" //the handle for SCD
         });
     }); //TODO: add funders and sponsors if we can use them
     this.thenClick('#next');
@@ -174,7 +174,7 @@ casper.notebook_test(function() {
                     publisher: '',
                     citation: '',
                     referencedBy: [],
-                    repository: "" //8 is SCD
+                    repository: ""
                 };
             } else {
                 return {
@@ -201,7 +201,7 @@ casper.notebook_test(function() {
         this.test.assertEquals(metadata.publisher,"test publisher","Publisher has been set correctly");
         this.test.assertEquals(metadata.citation,"test citation","Citation has been set correctly");
         this.test.assertEquals(metadata.referencedBy,["URL1","URL2"],"ReferencedBy had been set correctly");
-        this.test.assertEquals(metadata.repository,"8","Repository has been set correctly");
+        this.test.assertEquals(metadata.repository,"edata/8","Repository has been set correctly");
     });
 
     //shutdown
@@ -271,7 +271,7 @@ casper.notebook_test(function() {
                     publisher: '',
                     citation: '',
                     referencedBy: [],
-                    repository: "" //8 is SCD
+                    repository: ""
                 };
             } else {
                 return {
@@ -298,7 +298,7 @@ casper.notebook_test(function() {
         this.test.assertEquals(metadata.publisher,"test publisher","Publisher has been saved correctly");
         this.test.assertEquals(metadata.citation,"test citation","Citation has been saved correctly");
         this.test.assertEquals(metadata.referencedBy,["URL1","URL2"],"ReferencedBy had been saved correctly");
-        this.test.assertEquals(metadata.repository,"8","Repository has been saved correctly");
+        this.test.assertEquals(metadata.repository,"edata/8","Repository has been saved correctly");
     });
 
     // Click on menuitem
@@ -346,7 +346,7 @@ casper.notebook_test(function() {
         this.test.assertEquals(vals.citationval,"test citation","Citation displays properly in the form once set");
         this.test.assertEquals(vals.reference0val,"URL1","Reference 0 displays properly in the form once set");
         this.test.assertEquals(vals.reference1val,"URL2","Reference 1 displays properly in the form once set");
-        this.test.assertEquals(vals.repositoryval,"8","Repository displays properly in the form once set");
+        this.test.assertEquals(vals.repositoryval,"edata/8","Repository displays properly in the form once set");
     });
 
     //testing deletion of the multi-field vairables

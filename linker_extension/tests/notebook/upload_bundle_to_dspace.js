@@ -39,7 +39,7 @@ casper.notebook_test(function() {
                 ],
                 "date": "2016-11-14",
                 "title": "BUNDLE TO BE DELETED",
-                "repository": "8",
+                "repository": "edata/8",
             };
             md.databundle = [
                 {

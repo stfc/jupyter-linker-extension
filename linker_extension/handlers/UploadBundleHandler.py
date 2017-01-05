@@ -223,7 +223,7 @@ class UploadBundleHandler(IPythonHandler):
 
         notebook_name_no_extension = notebook_name.split(".")[0]
 
-        url = ("https://epublicns05.esc.rl.ac.uk/sword/deposit/edata/" +
+        url = ("https://epublicns05.esc.rl.ac.uk/sword/deposit/" +
                repository)
 
         headers = {"Content-Disposition": ("filename=" +

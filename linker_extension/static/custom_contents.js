@@ -1,10 +1,6 @@
 define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
     "use strict";
 
-    function load_ipython_extension(){
-        console.log("Custom contents loaded");
-    }
-
     var dspace_new_item = function(options) {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
                                                   "/dspace"]);
@@ -14,6 +10,17 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
             contentType: "application/json",
         };
         return utils.promising_ajax(url + "?" + $.param(options), settings);
+    };
+
+    var get_collections = function() {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspace"]);
+        var settings = {
+            type : "GET",
+            processData : false,
+            cache : false,
+        };
+        return utils.promising_ajax(url, settings);
     };
 
     var sword_new_item = function(options) {
@@ -106,8 +113,8 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
     };
 
     module.exports = {
-        load_ipython_extension: load_ipython_extension,
         sword_get_servicedocument: sword_get_servicedocument,
+        get_collections: get_collections,
         sword_new_item: sword_new_item,
         sword_get_item: sword_get_item,
         sword_get_bitstreams: sword_get_bitstreams,

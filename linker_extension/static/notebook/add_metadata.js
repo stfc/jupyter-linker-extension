@@ -544,18 +544,12 @@ define(["base/js/namespace",
             .attr("id","repository")
             .append($("<option/>").attr("value","").text(""));
 
-        custom_contents.sword_get_servicedocument().then(function(response) {
-            var xml = $.parseXML(response);
-            var collections = $(xml).find("app\\:collection");
-            collections.each(function(index, item) {
-                var last_slash = $(item).attr("href").lastIndexOf("/");
-                var collection_id = $(item).attr("href").slice(last_slash + 1);
-
-                var collection_name = $(item).find("atom\\:title").get(0);
-
+        custom_contents.get_collections().then(function(response) {
+            var collections = JSON.parse(response);
+            collections.forEach(function(collection) {
                 var collection_option = $("<option/>");
-                collection_option.attr("value",collection_id);
-                collection_option.text(collection_name.textContent);
+                collection_option.attr("value",collection.handle);
+                collection_option.text(collection.name);
                 repository.append(collection_option);
             });
 
@@ -563,14 +557,14 @@ define(["base/js/namespace",
                 repository.val(md.reportmetadata.repository);
             }
             $(document.body).append($("<div/>").attr("id","collections_loaded"));
-        }, function(reason) { //error
-            console.log("Error getting service document: ");
+        },function(reason) { //error
+            console.log("Error fetching collections from eData: ");
             console.log(reason.xhr);
             var repository_fetch_error = $("<div/>")
                 .addClass("repository-fetch-error")
                 .text("Couldn't download the repository information from eData." +
                       " Please reload and if the error persists contact the developers.");
-            $('label[for="abstract"]').after(repository_fetch_error);
+            $("label[for=\"abstract\"]").after(repository_fetch_error);
         });
 
         var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2")

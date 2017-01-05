@@ -20,6 +20,14 @@ class DSpaceHandler(IPythonHandler):
     @web.authenticated
     @json_errors
     @gen.coroutine
+    def get(self):
+        url = 'https://epublicns05.esc.rl.ac.uk/rest/collections'
+        r = requests.request('GET', url, verify=False)
+        self.finish(r.text)
+
+    @web.authenticated
+    @json_errors
+    @gen.coroutine
     def post(self):
         login_file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
                                        "resources",

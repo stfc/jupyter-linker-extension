@@ -39,7 +39,7 @@ casper.notebook_test(function() {
                 ],
                 "date": "2016-11-14",
                 "title": "TO BE DELETED",
-                "repository": "8",
+                "repository": "edata/8",
             };
             Jupyter._save_success = Jupyter._save_failed = false;
             events.on('notebook_saved.Notebook', function () {
