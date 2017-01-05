@@ -1,4 +1,5 @@
-"""DSpace Tornado handlers that upload a notebook to DSpace and get the service document."""
+"""DSpace Tornado handlers that upload a notebook to DSpace and
+get the service document."""
 
 import json
 import requests
@@ -15,20 +16,29 @@ from notebook.base.handlers import (
 
 class SWORDHandler(IPythonHandler):
 
+    admin_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                              "resources",
+                              "admin.txt")
+
+    blank_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                              "resources",
+                              "blank.xml")
+
     @web.authenticated
     @json_errors
     @gen.coroutine
     def get(self):
         try:
-            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
+            with open(SWORDHandler.admin_file, "r") as f:
                 un = f.readline().strip()
                 pw = f.readline().strip()
         except IOError:
-            raise web.HTTPError(500, "IOError occured when opening login details file")
+            raise web.HTTPError(500, "IOError occured when opening"
+                                     "login details file")
 
-        r = requests.request('GET', 'https://epublicns05.esc.rl.ac.uk/sword/servicedocument', verify=False, auth=(un, pw))
+        url = 'https://epublicns05.esc.rl.ac.uk/sword/servicedocument'
+        r = requests.request('GET', url, verify=False, auth=(un, pw))
         self.finish(r.text)
-
 
     @web.authenticated
     @json_errors
@@ -37,12 +47,14 @@ class SWORDHandler(IPythonHandler):
         username = self.get_query_argument('username')
 
         repository = self.get_query_argument('repository')
+
         try:
-            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
+            with open(SWORDHandler.admin_file, "r") as f:
                 un = f.readline().strip()
                 pw = f.readline().strip()
         except IOError:
-            raise web.HTTPError(500, "IOError occured when opening login details file")
+            raise web.HTTPError(500, "IOError occured when opening"
+                                     "login details file")
 
         ET.register_namespace("", "http://www.loc.gov/METS/")
         ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
@@ -50,9 +62,10 @@ class SWORDHandler(IPythonHandler):
         ET.register_namespace("dcterms", "http://purl.org/dc/terms/")
 
         try:
-            tree = ET.ElementTree(file=os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","blank.xml"))
+            tree = ET.ElementTree(file=SWORDHandler.blank_file)
         except ET.ParseError:
-            raise web.HTTPError(500, "IndexError occured when fetching metadata node")
+            raise web.HTTPError(500, "IndexError occured when "
+                                     "fetching metadata node")
 
         root = tree.getroot()
         root.set("xmlns:xlink", "http://www.w3.org/1999/xlink")
@@ -62,10 +75,14 @@ class SWORDHandler(IPythonHandler):
         try:
             metadata = tree.getroot()[1][0][0]
         except IndexError:
-            raise web.HTTPError(500, "IndexError occured when fetching metadata node")
+            raise web.HTTPError(500, "IndexError occured when "
+                                     "fetching metadata node")
 
         title = self.get_query_argument('title', default=None)
-        if title is not None:  # should never happen but just in case TODO: publishing needs to check that required fields are filled before sending (i.e that they're not sending empty metadata)
+        # should never happen but just in case
+        # TODO: publishing needs to check that required fields are filled
+        # before sending (i.e that they're not sending empty metadata)
+        if title is not None:
             title_xml = ET.Element("dc:title")
             title_xml.text = title
             metadata.append(title_xml)
@@ -125,6 +142,8 @@ class SWORDHandler(IPythonHandler):
                     reference_xml.text = referencedBy
                     metadata.append(reference_xml)
 
+        # TODO: figure out a way to do funders and sponsors?
+        # or get rid of them
         #funders = self.get_query_argument('funders', default=None)
         #if funders is not None:
         #    metadata.append({"key": "dc.contributor.funder", "value": funders})
@@ -140,32 +159,52 @@ class SWORDHandler(IPythonHandler):
             notebook_dir = os.getcwd()
             full_path = notebook_dir + "/" + notebook_path
         except web.MissingArgumentError:
-            raise web.HTTPError(500, "MissingArgumentError occured - notebook path isn't specified")
+            raise web.HTTPError(500, "MissingArgumentError occured - "
+                                     "notebook path isn't specified")
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
         try:
             files = tree.getroot()[2][0]
-            files_xml = ET.Element('file', {"GROUPID": "sword-mets-fgid-0", "ID": "sword-mets-file-1", "MIMETYPE":"application/octet-stream"})
-            FLocat_xml = ET.Element('FLocat', {"LOCTYPE": "URL", "xlink:href": notebook_name})
+
+            file_attr = {"GROUPID": "sword-mets-fgid-0",
+                         "ID": "sword-mets-file-1",
+                         "MIMETYPE": "application/octet-stream"}
+            files_xml = ET.Element('file', file_attr)
+
+            FLocat_attr = {"LOCTYPE": "URL", "xlink:href": notebook_name}
+            FLocat_xml = ET.Element('FLocat', FLocat_attr)
+
             files_xml.append(FLocat_xml)
             files.append(files_xml)
         except IndexError:
-            raise web.HTTPError(500, "IndexError when getting 'files' root node")
+            raise web.HTTPError(500, "IndexError when getting "
+                                     "'files' root node")
 
         try:
             struct = tree.getroot()[3]
-            struct_xml = ET.Element('div', {"ID": "sword-mets-div-1", "DMDID": "sword-mets-dmd-1", "TYPE": "SWORD Object"})
-            struct_xml_child = ET.Element('div', {"ID": "sword-mets-div-2", "TYPE": "File"})
+
+            struct_attr = {"ID": "sword-mets-div-1",
+                           "DMDID": "sword-mets-dmd-1",
+                           "TYPE": "SWORD Object"}
+            struct_xml = ET.Element('div', struct_attr)
+
+            struct_child_attr = {"ID": "sword-mets-div-2", "TYPE": "File"}
+            struct_xml_child = ET.Element('div', struct_child_attr)
+
             fptr_xml = ET.Element("ftpr", {"FILEID": "sword-mets-file-1"})
+
             struct_xml_child.append(fptr_xml)
             struct_xml.append(struct_xml_child)
             struct.append(struct_xml)
         except IndexError:
-            raise web.HTTPError(500, "IndexError when getting 'struct' root node")
+            raise web.HTTPError(500, "IndexError when getting"
+                                     "'struct' root node")
 
         try:
-            tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)  # this is writing to the cwd - might need to change?
+            # this is writing to the cwd - might need to change?
+            # TODO: check that this is still sensible
+            tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except IOError:
             raise web.HTTPError(500, "IOError when writing tree to mets.xml")
 
@@ -181,11 +220,28 @@ class SWORDHandler(IPythonHandler):
             with open("notebook.zip", "rb") as f:
                 binary_zip_file = f.read()
         except IOError:
-            raise web.HTTPError(500, "IOError when reading zip file as binary data")
+            raise web.HTTPError(500, "IOError when reading zip file "
+                                     "as binary data")
 
         notebook_name_no_extension = notebook_name.split(".")[0]
+
+        url = ("https://epublicns05.esc.rl.ac.uk/sword/deposit/edata/" +
+               repository)
+
+        headers = {"Content-Disposition": ("filename=" +
+                                           notebook_name_no_extension +
+                                           ".zip"),
+                   "Content-Type": "application/zip",
+                   "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP",
+                   "X-On-Behalf-Of": username}
         try:
-            r = requests.request('POST', 'https://epublicns05.esc.rl.ac.uk/sword/deposit/edata/' + repository, headers={"Content-Disposition": "filename=" + notebook_name_no_extension + ".zip", "Content-Type": "application/zip", "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP", "X-On-Behalf-Of": username}, data=binary_zip_file, verify=False, auth=(un, pw))
+            r = requests.request('POST',
+                                 url,
+                                 headers=headers,
+                                 data=binary_zip_file,
+                                 verify=False,
+                                 auth=(un, pw))
+
             # TODO: add authenication to the request
         except requests.exceptions.RequestException:
             raise web.HTTPError(500, "Requests made an error")
@@ -193,9 +249,18 @@ class SWORDHandler(IPythonHandler):
         print(r.status_code)  # TODO: remove later
         retries = 5
 
-        while (r.status_code != 201 and r.status_code != 202 and retries >= 0):  # SWORD sometimes randomly fails to send a request so retry a couple of times
+        while (r.status_code != 201 and
+               r.status_code != 202 and
+               retries >= 0):
+            # SWORD sometimes randomly fails to send a request so retry
+            # a couple of times
             try:
-                r = requests.request('POST', 'https://epublicns05.esc.rl.ac.uk/sword/deposit/edata/' + repository, headers={"Content-Disposition": "filename=" + notebook_name_no_extension + ".zip", "Content-Type": "application/zip", "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP", "X-On-Behalf-Of": username}, data=binary_zip_file, verify=False, auth=(un, pw))
+                r = requests.request('POST',
+                                     url,
+                                     headers=headers,
+                                     data=binary_zip_file,
+                                     verify=False,
+                                     auth=(un, pw))
             except requests.exceptions.RequestException:
                 raise web.HTTPError(500, "Requests made an error")
 

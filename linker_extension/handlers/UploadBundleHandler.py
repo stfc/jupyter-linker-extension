@@ -15,6 +15,14 @@ from notebook.base.handlers import (
 
 class UploadBundleHandler(IPythonHandler):
 
+    admin_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                              "resources",
+                              "admin.txt")
+
+    blank_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                              "resources",
+                              "blank.xml")
+
     @web.authenticated
     @json_errors
     @gen.coroutine
@@ -23,11 +31,12 @@ class UploadBundleHandler(IPythonHandler):
 
         repository = self.get_query_argument('repository')
         try:
-            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","admin.txt"), "r") as f:
+            with open(UploadBundleHandler.admin_file, "r") as f:
                     un = f.readline().strip()
                     pw = f.readline().strip()
         except IOError:
-            raise web.HTTPError(500, "IOError occured when opening login details file")
+            raise web.HTTPError(500, "IOError occured when opening"
+                                     "login details file")
 
         ET.register_namespace("", "http://www.loc.gov/METS/")
         ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
@@ -35,9 +44,10 @@ class UploadBundleHandler(IPythonHandler):
         ET.register_namespace("dcterms", "http://purl.org/dc/terms/")
 
         try:
-            tree = ET.ElementTree(file=os.path.join(os.path.dirname(os.path.dirname(__file__)),"resources","blank.xml"))
+            tree = ET.ElementTree(file=UploadBundleHandler.blank_file)
         except ET.ParseError:
-            raise web.HTTPError(500, "IndexError occured when fetching metadata node")
+            raise web.HTTPError(500, "IndexError occured when "
+                                     "fetching metadata node")
 
         root = tree.getroot()
         root.set("xmlns:xlink", "http://www.w3.org/1999/xlink")
@@ -47,10 +57,15 @@ class UploadBundleHandler(IPythonHandler):
         try:
             metadata = tree.getroot()[1][0][0]
         except IndexError:
-            raise web.HTTPError(500, "IndexError occured when fetching metadata node")
+            raise web.HTTPError(500, "IndexError occured when "
+                                     "fetching metadata node")
 
         title = self.get_query_argument('title', default=None)
-        if title is not None:  # should never happen but just in case TODO: publishing needs to check that required fields are filled before sending (i.e that they're not sending empty metadata)
+
+        # should never happen but just in case
+        # TODO: publishing needs to check that required fields are filled
+        # before sending (i.e that they're not sending empty metadata)
+        if title is not None:
             title_xml = ET.Element("dc:title")
             title_xml.text = title
             metadata.append(title_xml)
@@ -110,7 +125,8 @@ class UploadBundleHandler(IPythonHandler):
                     reference_xml.text = referencedBy
                     metadata.append(reference_xml)
 
-
+        # TODO: figure out a way to do funders and sponsors?
+        # or get rid of them
         #funders = self.get_query_argument('funders', default=None)
         #if funders is not None:
         #    metadata.append({"key": "dc.contributor.funder", "value": funders})
@@ -126,7 +142,8 @@ class UploadBundleHandler(IPythonHandler):
             notebook_dir = os.getcwd()
             full_path = notebook_dir + "/" + notebook_path
         except web.MissingArgumentError:
-            raise web.HTTPError(500, "MissingArgumentError occured - notebook path isn't specified")
+            raise web.HTTPError(500, "MissingArgumentError occured - "
+                                     "notebook path isn't specified")
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
@@ -140,32 +157,47 @@ class UploadBundleHandler(IPythonHandler):
                 if len(file_names) > 0:
                     for index, file_path in enumerate(file_paths):
                         if(file_types[index] == 'file'):
-                            files_xml = ET.Element('file', {"GROUPID": "sword-mets-fgid-" + str(id_count), "ID": file_path, "MIMETYPE":"application/octet-stream"})
-                            FLocat_xml = ET.Element('FLocat', {"LOCTYPE": "URL", "xlink:href": file_path})
+                            file_attr = {"GROUPID": "sword-mets-fgid-" + str(id_count),
+                                         "ID": file_path,
+                                         "MIMETYPE": "application/octet-stream"}
+                            files_xml = ET.Element('file', file_attr)
+
+                            FLocat_attr = {"LOCTYPE": "URL",
+                                           "xlink:href": file_path}
+                            FLocat_xml = ET.Element('FLocat', FLocat_attr)
+
                             files_xml.append(FLocat_xml)
                             files.append(files_xml)
                             id_count += 1
         except IndexError:
-            raise web.HTTPError(500, "IndexError when getting 'files' root node")
+            raise web.HTTPError(500, "IndexError when getting"
+                                     "'files' root node")
 
         try:
             struct = tree.getroot()[3]
-            id_count = 1
 
-            struct_xml = ET.Element('div', {"ID": "sword-mets-div-1", "DMDID": "sword-mets-dmd-1", "TYPE": "SWORD Object"})
+            struct_attr = {"ID": "sword-mets-div-1",
+                           "DMDID": "sword-mets-dmd-1",
+                           "TYPE": "SWORD Object"}
+            struct_xml = ET.Element('div', struct_attr)
+
             if file_paths is not []:
                 if len(file_names) > 0:
                     for index, file_path in enumerate(file_paths):
                         file_type = file_types[index]
-                        end_id_count = helper.dir_search(file_path, file_type, struct_xml, id_count)
-                        id_count = end_id_count
+                        helper.dir_search(file_path,
+                                          file_type,
+                                          struct_xml)
             struct.append(struct_xml)
 
         except IndexError:
-            raise web.HTTPError(500, "IndexError when getting 'struct' root node")
+            raise web.HTTPError(500, "IndexError when getting "
+                                     "'struct' root node")
 
         try:
-            tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)  # this is writing to the cwd - might need to change?
+            # this is writing to the cwd - might need to change?
+            # TODO: check that this is still sensible
+            tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except IOError:
             raise web.HTTPError(500, "IOError when writing tree to mets.xml")
 
@@ -186,21 +218,48 @@ class UploadBundleHandler(IPythonHandler):
             with open("data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
         except IOError:
-            raise web.HTTPError(500, "IOError when reading zip file as binary data")
+            raise web.HTTPError(500, "IOError when reading zip file"
+                                     "as binary data")
 
         notebook_name_no_extension = notebook_name.split(".")[0]
+
+        url = ("https://epublicns05.esc.rl.ac.uk/sword/deposit/edata/" +
+               repository)
+
+        headers = {"Content-Disposition": ("filename=" +
+                                           notebook_name_no_extension +
+                                           " Data.zip"),
+                   "Content-Type": "application/zip",
+                   "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP",
+                   "X-On-Behalf-Of": username}
+
         try:
-            r = requests.request('POST', 'https://epublicns05.esc.rl.ac.uk/sword/deposit/edata/' + repository, headers={"Content-Disposition": "filename=" + notebook_name_no_extension + " Data.zip", "Content-Type": "application/zip", "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP", "X-On-Behalf-Of": username}, data=binary_zip_file, verify=False, auth=(un, pw))
-            # TODO: add authenication to the request"
+            r = requests.request('POST',
+                                 url,
+                                 headers=headers,
+                                 data=binary_zip_file,
+                                 verify=False,
+                                 auth=(un, pw))
+            # TODO: add authenication to the request
         except requests.exceptions.RequestException:
             raise web.HTTPError(500, "Requests made an error")
 
         print(r.status_code)  # TODO: remove later
         retries = 5
 
-        while (r.status_code != 201 and r.status_code != 202 and retries >= 0):  # SWORD sometimes randomly fails to send a request so retry a couple of times
+        while (r.status_code != 201 and
+               r.status_code != 202 and
+               retries >= 0):
+            # SWORD sometimes randomly fails to send a request so retry
+            # a couple of times
             try:
-                r = requests.request('POST', 'https://epublicns05.esc.rl.ac.uk/sword/deposit/edata/' + repository, headers={"Content-Disposition": "filename=" + notebook_name_no_extension + " Data.zip", "Content-Type": "application/zip", "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP", "X-On-Behalf-Of": username}, data=binary_zip_file, verify=False, auth=(un, pw))
+                r = requests.request('POST',
+                                     url,
+                                     headers=headers,
+                                     data=binary_zip_file,
+                                     verify=False,
+                                     auth=(un, pw))
+
             except requests.exceptions.RequestException:
                 raise web.HTTPError(500, "Requests made an error")
 
@@ -220,11 +279,15 @@ class UploadBundleHandler(IPythonHandler):
 
 
 class helper:
+    # helper method that given a file path creates the xml nodes for each
+    # directory on the path as chidren to the parent node supplied. It searches
+    # to see if a directory already exists and if it does then adds any new
+    # directories and files to the existing node, otherwise it just creates
+    # one. This creates the correct structure that SWORD requires.
     @staticmethod
-    def dir_search(path, file_type, parent_node, id_count):
+    def dir_search(path, file_type, parent_node):
         path_arr = path.split("/")
         curr_node = parent_node
-        end_id_count = id_count
         for index, item in enumerate(path_arr, start=0):
             # Need to check if directory already exists
             existing_div = None
@@ -232,19 +295,21 @@ class helper:
                 if(div.get("ID") == "/".join(path_arr[:(index+1)])):
                     existing_div = div
 
-            if existing_div is not None:  # We only create a new div if there is no existing directory div, otherwise we use the old one
+            # We only create a new div if there is no existing directory div,
+            # otherwise we use the old one
+            if existing_div is not None:
                 curr_node = existing_div
             else:
                 if(file_type == 'file'):
-                    struct_xml_child = ET.Element('div', {"ID": path, "TYPE": "File"})
+                    struct_xml_child = ET.Element('div', {"ID": path,
+                                                          "TYPE": "File"})
                     fptr_xml = ET.Element("ftpr", {"FILEID": path})
                     struct_xml_child.append(fptr_xml)
                     curr_node.append(struct_xml_child)
-                    end_id_count += 1
 
                 else:
-                    struct_xml_child = ET.Element('div', {"ID": "/".join(path_arr[:(index+1)]), "TYPE": "Directory"})
+                    struct_child_attr = {"ID": "/".join(path_arr[:(index+1)]),
+                                         "TYPE": "Directory"}
+                    struct_xml_child = ET.Element('div', struct_child_attr)
                     curr_node.append(struct_xml_child)
                     curr_node = struct_xml_child
-                    end_id_count += 1
-        return end_id_count

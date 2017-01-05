@@ -32,15 +32,21 @@ class LDAPHandler(IPythonHandler):
         result = []
 
         if firstname and not lastname:
-            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk', '(givenName=*' + firstname + '*)', attributes=['sn', 'givenName'])
+            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
+                        '(givenName=*' + firstname + '*)',
+                        attributes=['sn', 'givenName'])
             result = conn.entries
 
         if lastname and not firstname:
-            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk', '(sn=*' + lastname + '*)', attributes=['sn', 'givenName'])
+            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
+                        '(sn=*' + lastname + '*)',
+                        attributes=['sn', 'givenName'])
             result = conn.entries
 
         if lastname and firstname:
-            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk', '(&(sn=*' + lastname + '*)(givenName=*' + firstname + '*))', attributes=['sn', 'givenName'])
+            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
+                        '(&(sn=*' + lastname + '*)(givenName=*' + firstname + '*))',
+                        attributes=['sn', 'givenName'])
             result = conn.entries
 
         json_entries = []
