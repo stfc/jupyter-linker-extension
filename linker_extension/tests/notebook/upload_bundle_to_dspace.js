@@ -1,5 +1,6 @@
 
-
+var system = require('system');
+var fs = require("fs");
 
 casper.notebook_test(function() {
     "use strict";
@@ -8,12 +9,29 @@ casper.notebook_test(function() {
 
     this.viewport(1024, 768);
 
-    //wait for notebook to load
-    this.waitFor(this.kernel_running);
-    this.waitFor(function() {
-        return this.evaluate(function () {
-            return Jupyter && Jupyter.notebook && true;
-        });
+    var username = "";
+    var password = "";
+    this.then(function() {
+        var path_parts = fs.absolute(this.test.currentTestFile).split("/");
+        path_parts.pop();
+        path_parts.pop();
+        var test_path = path_parts.join("/") + "/";
+
+        if (fs.exists(test_path + "login_credentials.txt")) {
+            var text = fs.read(test_path + "login_credentials.txt");
+            var lines = text.split(/\r\n|[\r\n]/g);
+            username = lines[1];
+            password = lines[3];
+        }
+        if (username == "[Your Username Here]" || username == "" &&
+            password == "[Your Password Here]" || username == "") 
+        {
+            system.stdout.writeLine("Username: ");
+            username = system.stdin.readLine();
+            system.stdout.writeLine("Password: ");
+            password = system.stdin.readLine();
+            system.stdout.write("\x1b[1APasswor                            \n");
+        }
     });
 
     var nbname = "Untitled.ipynb";
@@ -40,6 +58,8 @@ casper.notebook_test(function() {
                 "date": "2016-11-14",
                 "title": "BUNDLE TO BE DELETED",
                 "repository": "edata/8",
+                "publisher":"Publisheroni",
+                "citation":"Citationnaire",
             };
             md.databundle = [
                 {
@@ -160,9 +180,13 @@ casper.notebook_test(function() {
     });
 
     this.thenClick("#add-url-button");
-    this.thenEvaluate(function() {
-        $('data_referencedBy-0').val("URL1");
-        $('data_referencedBy-1').val("URL2");
+    this.then(function() {
+        this.evaluate(function(un,pw) {
+            $('#data_referencedBy-0').val("URL1");
+            $('#data_referencedBy-1').val("URL2");
+            $('#username-upload-data').val(un);
+            $('#password-upload-data').val(pw);
+        },username,password);
     });
 
     var button = ".btn-primary";
@@ -194,21 +218,22 @@ casper.notebook_test(function() {
     var id = "";
 
     this.then(function() {
-        this.evaluate(function() {
+        this.evaluate(function(un,pw) {
             var id_url = $('.alert-success').attr("item-id");
 
-            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspace/findid']);
             var settings = {
                 processData : false,
                 cache : false,
-                type : "GET",
-                dataType : "json",
+                type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"ID":id_url, "username": un, "password": pw}),
             };
-            var request = require("base/js/utils").promising_ajax(request_url + '?' + $.param({"ID":id_url}), settings);
+            var request = require("base/js/utils").promising_ajax(request_url, settings);
             request.then(function(result) {
                 $(document.body).append($('<div/>').attr('id','test-item-id').attr('item-id',result.id));
             });
-        });
+        }, username, password);
     });
 
     this.waitForSelector("#test-item-id");
@@ -216,19 +241,20 @@ casper.notebook_test(function() {
 
     this.then(function() {
         id = this.getElementAttribute('#test-item-id',"item-id");
-        this.test.assertNotEquals(id,"","The item exists in DSpace with the ID " + id);
+        this.test.assertNotEquals(id,null,"The item exists in DSpace with the ID " + id);
     });
 
     this.then(function() {
-        this.evaluate(function(id) {
-            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+        this.evaluate(function(id,un,pw) {
+            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspace/getbistreams']);
             var settings = {
                 processData : false,
                 cache : false,
-                type : "PUT",
-                dataType : "json",
+                type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"ID":id, "username": un, "password": pw}),
             };
-            var request = require("base/js/utils").promising_ajax(request_url + '?' + $.param({"ID":id}), settings);
+            var request = require("base/js/utils").promising_ajax(request_url, settings);
 
             request.then(function(result) {
                 for (var key in result) {
@@ -238,33 +264,35 @@ casper.notebook_test(function() {
                     }
                 }
             });
-        }, {id:id});
+        }, id,username,password);
     });
 
     this.waitForSelector('.test-bitstream-id');
 
     this.then(function() {
-        this.evaluate(function() {
+        this.evaluate(function(un,pw) {
             var bitstreams = $('.test-bitstream-id');
             var IDs = [];
             bitstreams.each(function(index,item) {
                 IDs.push($(item).attr('item-id'));
             });
 
-            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspace/getbistreamdata']);
             var settings = {
                 processData : false,
                 cache : false,
                 type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"IDs":IDs, "username": un, "password": pw}),
             };
-            var request = require("base/js/utils").promising_ajax(request_url + '?' + $.param({"IDs":IDs}), settings);
+            var request = require("base/js/utils").promising_ajax(request_url, settings);
 
             request.then(function(result) {
                 for (var key in result) {
                     $(document.body).append($('<div/>').addClass('test-bitstream-content').attr('bitstream-content',result[key]));
                 }
             });
-        });
+        }, username, password);
     });
 
     this.waitForSelector('.test-bitstream-content');
@@ -280,19 +308,20 @@ casper.notebook_test(function() {
 
     if (delete_once_finished) {
         this.then(function() {
-            this.evaluate(function(id) {
-                var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+            this.evaluate(function(id,un,pw) {
+                var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspace/delete']);
                 var settings = {
                     processData : false,
-                    type : "DELETE",
-                    dataType : "json",
+                    type : "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({"ID":id, "username": un, "password": pw}),
                 };
-                var request = require("base/js/utils").promising_ajax(request_url + '?' + $.param({"ID":id}), settings);
+                var request = require("base/js/utils").promising_ajax(request_url, settings);
 
                 request.then(function(result) {
                     $(document.body).append($('<div/>').attr('id','test-delete-status').attr('status-code',result));
                 });
-            }, {id:id});
+            }, id,username,password);
         });
 
         this.waitForSelector("#test-delete-status");

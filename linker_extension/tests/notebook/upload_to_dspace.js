@@ -1,5 +1,6 @@
 
-
+var system = require('system');
+var fs = require("fs");
 
 casper.notebook_test(function() {
     "use strict";
@@ -7,6 +8,31 @@ casper.notebook_test(function() {
     casper.test.info("Testing uploading notebook to DSpace");
 
     this.viewport(1024, 768);
+
+    var username = "";
+    var password = "";
+    this.then(function() {
+        var path_parts = fs.absolute(this.test.currentTestFile).split("/");
+        path_parts.pop();
+        path_parts.pop();
+        var test_path = path_parts.join("/") + "/";
+
+        if (fs.exists(test_path + "login_credentials.txt")) {
+            var text = fs.read(test_path + "login_credentials.txt");
+            var lines = text.split(/\r\n|[\r\n]/g);
+            username = lines[1];
+            password = lines[3];
+        }
+        if (username == "[Your Username Here]" || username == "" &&
+            password == "[Your Password Here]" || username == "") 
+        {
+            system.stdout.writeLine("Username: ");
+            username = system.stdin.readLine();
+            system.stdout.writeLine("Password: ");
+            password = system.stdin.readLine();
+            system.stdout.write("\x1b[1APasswor                            \n");
+        }
+    });
 
     //wait for notebook to load
     this.waitFor(this.kernel_running);
@@ -40,6 +66,8 @@ casper.notebook_test(function() {
                 "date": "2016-11-14",
                 "title": "TO BE DELETED",
                 "repository": "edata/8",
+                "publisher":"Publisheroni",
+                "citation":"Citationnaire",
             };
             Jupyter._save_success = Jupyter._save_failed = false;
             events.on('notebook_saved.Notebook', function () {
@@ -72,6 +100,18 @@ casper.notebook_test(function() {
     this.waitForSelector(selector);
     this.thenClick(selector);
 
+    this.waitForSelector('#username-new-item');
+    this.then(function() {
+        this.evaluate(function(un,pw) {
+            $('#username-new-item').val(un);
+            $('#password-new-item').val(pw);
+        }, username, password);
+    });
+
+    var button = ".btn-primary";
+    this.waitForSelector(button);
+    this.thenClick(button);
+
     var alert = '.alert';
     this.waitForSelector(alert);
     this.then(function() {
@@ -82,20 +122,21 @@ casper.notebook_test(function() {
     var id = "";
 
     this.then(function() {
-        this.evaluate(function() {
+        this.evaluate(function(un,pw) {
             var id_url = $('.alert-success').attr("item-id");
-            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
+            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspace/findid']);
             var settings = {
                 processData : false,
                 cache : false,
-                type : "GET",
-                dataType : "json",
+                type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"ID":id_url,"username": un, "password": pw}),
             };
-            var request = require("base/js/utils").promising_ajax(request_url + '?' + $.param({"ID":id_url}), settings);
+            var request = require("base/js/utils").promising_ajax(request_url, settings);
             request.then(function(result) {
                 $(document.body).append($('<div/>').attr('id','test-item-id').attr('item-id',result.id));
             });
-        });
+        }, username, password);
     });
 
     this.waitForSelector("#test-item-id");
@@ -103,23 +144,24 @@ casper.notebook_test(function() {
 
     this.then(function() {
         id = this.getElementAttribute('#test-item-id',"item-id");
-        this.test.assertNotEquals(id,"","The item exists in DSpace with the ID " + id);
+        this.test.assertNotEquals(id,null,"The item exists in DSpace with the ID " + id);
     });
 
     this.then(function() {
-        this.evaluate(function(id) {
-            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspacetest']);
-                var settings = {
-                    processData : false,
-                    type : "DELETE",
-                    dataType : "json",
-                };
-                var request = require("base/js/utils").promising_ajax(request_url + '?' + $.param({"ID":id}), settings);
+        this.evaluate(function(id,un,pw) {
+            var request_url = require("base/js/utils").url_path_join.apply(null,[Jupyter.notebook.base_url, '/dspace/delete']);
+            var settings = {
+                processData : false,
+                type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"ID":id, "username": un, "password": pw}),
+            };
+            var request = require("base/js/utils").promising_ajax(request_url, settings);
 
-                request.then(function(result) {
+            request.then(function(result) {
                 $(document.body).append($('<div/>').attr('id','test-delete-status').attr('status-code',result));
             });
-        }, {id:id});
+        }, id, username, password);
     });
 
     this.waitForSelector("#test-delete-status");
