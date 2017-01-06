@@ -45,11 +45,6 @@ define([
                                              .attr("href","#")
                                              .text("Add Metadata")))
 
-                   .append($("<li/>").attr("id","dspace_new_item")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("New DSpace item")))
-
                    .append($("<li/>").attr("id","sword_new_item")
                                      .append($("<a/>")
                                              .attr("href","#")
