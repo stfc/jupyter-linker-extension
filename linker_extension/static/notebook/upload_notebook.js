@@ -7,7 +7,7 @@ define([
     "./modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_utils,custom_contents){
 
-    var upload_notebook = function(username) {
+    var upload_notebook = function(username,password) {
         if ("reportmetadata" in Jupyter.notebook.metadata) {
             var stringauthors = [];
             var authors = Jupyter.notebook.metadata.reportmetadata.authors;
@@ -16,8 +16,9 @@ define([
                 stringauthors.push(authorstring); 
             });
 
-            var options = {
+            var data = JSON.stringify({
                 "username": username,
+                "password": password,
                 "notebookpath": Jupyter.notebook.notebook_path,
                 "title":Jupyter.notebook.metadata.reportmetadata.title,
                 "authors":stringauthors,
@@ -31,8 +32,8 @@ define([
                 "funders":Jupyter.notebook.metadata.reportmetadata.funders,
                 "sponsors":Jupyter.notebook.metadata.reportmetadata.sponsors,
                 "repository":Jupyter.notebook.metadata.reportmetadata.repository
-            };
-            custom_contents.sword_new_item(options).then(
+            });
+            custom_contents.sword_new_item(data).then(
                 function(response) {
                     var id = "";
                     var xml_str = response.split("\n");
@@ -66,6 +67,44 @@ define([
                                       "the metadata for this report");
         }
     };
+
+    var upload_notebook_dialog = function() {
+        var login_fields = $("<div/>").attr("id","login-fields-new-item");
+        var username_label = $("<label/>")
+            .attr("for","username")
+            .text("Username: ");
+        var username_field = $("<input/>").attr("id","username-new-item");
+
+        var password_label = $("<label/>")
+            .attr("for","password")
+            .text("Password: ");
+        var password_field = $("<input/>")
+            .attr("id","password-new-item")
+            .attr("type","password");
+
+        login_fields.append(username_label)
+                    .append(username_field)
+                    .append(password_label)
+                    .append(password_field);
+
+        var d = dialog.modal({
+            title: "Upload Notebook",
+            body: login_fields,
+            default_button: "Cancel",
+            buttons: {
+                Upload:  {
+                    class : "btn-primary",
+                    click: function() {
+                        upload_notebook($("#username-new-item").val(),
+                                        $("#password-new-item").val());
+                    }
+                },
+                Cancel: {},
+            },
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.keyboard_manager,
+        });
+    };
     
     var action = {
         help: "Upload notebook",
@@ -80,7 +119,7 @@ define([
     var load = function () {
         Jupyter.actions.register(action,action_name,prefix);
         $("#sword_new_item").click(function () {
-            upload_notebook("mnf98541"); //todo: username storage? or we can probably get rid of this button
+            upload_notebook_dialog();
         });
     };
 

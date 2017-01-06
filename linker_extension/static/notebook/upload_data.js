@@ -21,6 +21,26 @@ define([
 
         var dialog_body = upload_data_info.dialog_body;
 
+        var login_fields = $("<div/>").attr("id","login-fields-upload-data");
+        var username_label = $("<label/>")
+            .attr("for","username")
+            .text("Username: ");
+        var username_field = $("<input/>").attr("id","username-upload-data");
+
+        var password_label = $("<label/>")
+            .attr("for","password")
+            .text("Password: ");
+        var password_field = $("<input/>")
+            .attr("id","password-upload-data")
+            .attr("type","password");
+
+        login_fields.append(username_label)
+                    .append(username_field)
+                    .append(password_label)
+                    .append(password_field);
+
+        dialog_body.append(login_fields);
+
         var modal_obj = dialog.modal({
             title: "Upload Associated Data",
             body: dialog_body,
@@ -31,7 +51,8 @@ define([
                     class : "btn-primary",
                     click: function() { //todo: remove this button or sort out username
                         upload_data(
-                            "mnf98541",
+                            $("#username-upload-data").val(),
+                            $("#password-upload-data").val(),
                             upload_data_info.file_names,
                             upload_data_info.file_paths,
                             upload_data_info.file_types
@@ -44,7 +65,7 @@ define([
         });
     };
 
-    var upload_data = function(username, file_names,file_paths,file_types) {
+    var upload_data = function(username,password,file_names,file_paths,file_types) {
         var md = Jupyter.notebook.metadata;
         if ("databundle_url" in md) {
             //already uploaded to dspace so... TODO: do we want to block them if it"s already been uplaoded? should I grey out the button?
@@ -68,8 +89,9 @@ define([
                 }
             });
 
-            var options = {
+            var data = JSON.stringify({
                 "username": username,
+                "password": password,
                 "notebookpath": Jupyter.notebook.notebook_path,
                 "file_names": file_names,
                 "file_paths": file_paths,
@@ -86,9 +108,9 @@ define([
                 "funders":md.reportmetadata.funders,
                 "sponsors":md.reportmetadata.sponsors,
                 "repository":md.reportmetadata.repository
-            };
+            });
             
-            custom_contents.upload_data(options).then(
+            custom_contents.upload_data(data).then(
                 function(response) {
                     var id = "";
                     var xml_str = response.split("\n");
