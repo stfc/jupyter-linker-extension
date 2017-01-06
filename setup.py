@@ -6,6 +6,7 @@ import nbconvert
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist
 from setuptools.command.install import install
+from distutils.cmd import Command
 
 
 # On build, build the javascript files
@@ -18,13 +19,17 @@ class CustomsdistCommand(sdist):
         sdist.run(self)
 
 
-# on install, install and enable the extension and copy the template files
-# to their proper location
-class CustomInstallCommand(install):
+class CustomInstallExtenstionsCommand(Command):
+    description = "Install and enable the extension"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
 
     def run(self):
-        # insert custom code here
-        install.run(self)
         import subprocess
         subprocess.call('jupyter serverextension enable --py '
                         'linker_extension --system', shell=True)
@@ -33,25 +38,53 @@ class CustomInstallCommand(install):
         subprocess.call('jupyter nbextension enable --py '
                         'linker_extension --system', shell=True)
 
+
+class CustomUninstallExtenstionsCommand(Command):
+    description = "Uninstall and disable the extension"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import subprocess
+        subprocess.call('jupyter nbextension disable --py '
+                        'linker_extension --system', shell=True)
+        subprocess.call('jupyter nbextension uninstall --py '
+                        'linker_extension --system', shell=True)
+        subprocess.call('jupyter serverextension disable --py '
+                        'linker_extension --system', shell=True)
+
+
+# on install, install and enable the extension and copy the template files
+# to their proper location
+class CustomInstallCommand(install):
+
+    def run(self):
+        install.run(self)
+        # insert custom code here
         nbconvert_loc = os.path.dirname(nbconvert.__file__)
         template_path = os.path.join(nbconvert_loc, 'templates', 'latex')
         shutil.move(os.path.join('linker_extension',
-                               'resources',
-                               'templates',
-                               'custom_base.tplx'),
+                                 'resources',
+                                 'templates',
+                                 'custom_base.tplx'),
                     os.path.join(template_path, 'custom_base.tplx'))
 
         shutil.move(os.path.join('linker_extension',
-                               'resources',
-                               'templates',
-                               'custom_article.tplx'),
+                                 'resources',
+                                 'templates',
+                                 'custom_article.tplx'),
 
                     os.path.join(template_path, 'custom_article.tplx'))
 
         shutil.move(os.path.join('linker_extension',
-                               'resources',
-                               'templates',
-                               'custom_style_ipython.tplx'),
+                                 'resources',
+                                 'templates',
+                                 'custom_style_ipython.tplx'),
                     os.path.join(template_path, 'custom_style_ipython.tplx'))
 
 
@@ -95,6 +128,8 @@ setup_args = dict(
     cmdclass={
         'install': CustomInstallCommand,
         'sdist': CustomsdistCommand,
+        'installextensions': CustomInstallExtenstionsCommand,
+        'uninstallextensions': CustomUninstallExtenstionsCommand,
     }
 )
 
