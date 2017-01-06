@@ -88,7 +88,8 @@ setup_args = dict(
     install_requires=[
         'notebook>=4',
         'nbconvert',
-        'ldap3'
+        'ldap3',
+        'requests',
     ],
     cmdclass={
         'install': CustomInstallCommand,
