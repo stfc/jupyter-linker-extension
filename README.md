@@ -4,9 +4,9 @@ This is the Jupyter Notebook extension for the linker project.
 
 ### INSTALLATION INSTRUCTIONS
 
-Download and extract or clone this git repo.
+Download and extract the tar or zip file in the dist folder. Navigate to this extracted folder.
 
-Install by using `pip install dist/LinkerExtension-1.0.tar.gz`
+Install by using `pip install .`
 
 The install will automatically enable the server extension and install and enable the javascript extensions. This means that every notebook is set to load these extensions by default.
 
