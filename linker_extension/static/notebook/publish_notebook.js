@@ -52,37 +52,28 @@ define(["base/js/namespace",
                     .append(add_metadata_form_fields.form2)
         );
 
-        var url_arr = window.location.pathname.split("/");
-        var username = "";
-
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");
         
-        //means we're in jupyterhub
-        //so we don"t need to request for username or pass
-        if(url_arr[0] === "user") {
-            username = url_arr[1];
-        } else {
-            var login_fields = $("<div/>").attr("id","login-fields");
-            var username_label = $("<label/>")
-                .attr("for","username")
-                .text("Username: ");
-            var username_field = $("<input/>").attr("id","username");
+        var login_fields = $("<div/>").attr("id","login-fields");
+        var username_label = $("<label/>")
+            .attr("for","username")
+            .text("Username: ");
+        var username_field = $("<input/>").attr("id","username");
 
-            var password_label = $("<label/>")
-                .attr("for","password")
-                .text("Password: ");
-            var password_field = $("<input/>")
-                .attr("id","password")
-                .attr("type","password");
+        var password_label = $("<label/>")
+            .attr("for","password")
+            .text("Password: ");
+        var password_field = $("<input/>")
+            .attr("id","password")
+            .attr("type","password");
 
-            login_fields.append(username_label)
-                        .append(username_field)
-                        .append(password_label)
-                        .append(password_field);
+        login_fields.append(username_label)
+                    .append(username_field)
+                    .append(password_label)
+                    .append(password_field);
 
-            final_page.append(login_fields);
-        }
+        final_page.append(login_fields);
 
         form_body.append(final_page);
 
@@ -167,61 +158,50 @@ define(["base/js/namespace",
                         else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
                             $(".login-error").remove();
-                            if(!username) {
-                                var login_details = JSON.stringify({
-                                    username: $("#username").val(),
-                                    password: $("#password").val()
-                                });
+                            var login_details = JSON.stringify({
+                                username: $("#username").val(),
+                                password: $("#password").val()
+                            });
 
-                                var request = custom_contents.ldap_auth(login_details);
+                            var request = custom_contents.ldap_auth(login_details);
 
-                                request.then(
-                                    function() { //success function
-                                        upload_notebook.upload_notebook(
-                                            $("#username").val()
-                                        );
+                            request.then(
+                                function() { //success function
+                                    upload_notebook.upload_notebook(
+                                        $("#username").val(),
+                                        $("#password").val()
+                                    );
 
-                                        upload_data.upload_data(
-                                            $("#username").val(),
-                                            upload_data_info.file_names,
-                                            upload_data_info.file_paths,
-                                            upload_data_info.file_types
-                                        );
+                                    upload_data.upload_data(
+                                        $("#username").val(),
+                                        $("#password").val(),
+                                        upload_data_info.file_names,
+                                        upload_data_info.file_paths,
+                                        upload_data_info.file_types
+                                    );
 
-                                        $(".modal").modal("hide");
-                                    },
-                                    function(reason) { //fail function
-                                        var error = $("<div/>")
-                                            .addClass("login-error")
-                                            .css("color","red");
+                                    $(".modal").modal("hide");
+                                },
+                                function(reason) { //fail function
+                                    var error = $("<div/>")
+                                        .addClass("login-error")
+                                        .css("color","red");
 
-                                        if (reason.xhr.status === 401) { //unauthorised
-                                            //you dun goofed on ur login
-                                            error.text("Login details not receognised.");
-                                            instructions.after(error);
-                                        } else if (reason.xhr.status === 400) { //unauthorised
-                                            //you dun goofed on ur login
-                                            error.text("Login details not valid.");
-                                            instructions.after(error);
-                                        } else {
-                                            //shouldn't really get here?
-                                            error.text("Login failed - please try again.");
-                                            instructions.after(error);
-                                        }
+                                    if (reason.xhr.status === 401) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not receognised.");
+                                        instructions.after(error);
+                                    } else if (reason.xhr.status === 400) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not valid.");
+                                        instructions.after(error);
+                                    } else {
+                                        //shouldn't really get here?
+                                        error.text("Login failed - please try again.");
+                                        instructions.after(error);
                                     }
-                                );
-                            } else {
-                                //if we're in jupyterhub don't have to authenticate
-                                //again - just use username we got from URL
-                                upload_notebook.upload_notebook(username);
-                                upload_data.upload_data(
-                                    username,
-                                    upload_data_info.file_names,
-                                    upload_data_info.file_paths,
-                                    upload_data_info.file_types
-                                );
-                                $(".modal").modal("hide");
-                            }
+                                }
+                            );
                         }
                     },
                 }
@@ -262,37 +242,29 @@ define(["base/js/namespace",
                     .append(add_metadata_form_fields.form2)
         );
 
-        var url_arr = window.location.pathname.split("/");
-        var username = "";
 
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");
-        
-        //means we're in jupyterhub
-        //so we don"t need to request for username or pass
-        if(url_arr[0] === "user") {
-            username = url_arr[1];
-        } else {
-            var login_fields = $("<div/>").attr("id","login-fields");
-            var username_label = $("<label/>")
-                .attr("for","username")
-                .text("Username: ");
-            var username_field = $("<input/>").attr("id","username");
 
-            var password_label = $("<label/>")
-                .attr("for","password")
-                .text("Password: ");
-            var password_field = $("<input/>")
-                .attr("id","password")
-                .attr("type","password");
+        var login_fields = $("<div/>").attr("id","login-fields");
+        var username_label = $("<label/>")
+            .attr("for","username")
+            .text("Username: ");
+        var username_field = $("<input/>").attr("id","username");
 
-            login_fields.append(username_label)
-                        .append(username_field)
-                        .append(password_label)
-                        .append(password_field);
+        var password_label = $("<label/>")
+            .attr("for","password")
+            .text("Password: ");
+        var password_field = $("<input/>")
+            .attr("id","password")
+            .attr("type","password");
 
-            final_page.append(login_fields);
-        }
+        login_fields.append(username_label)
+                    .append(username_field)
+                    .append(password_label)
+                    .append(password_field);
+
+        final_page.append(login_fields);
 
         form_body.append(final_page);
 
@@ -347,48 +319,42 @@ define(["base/js/namespace",
                         else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
                             $(".login-error").remove();
-                            if(!username) {
-                                var login_details = JSON.stringify({
-                                    username: $("#username").val(),
-                                    password: $("#password").val()
-                                });
+                            var login_details = JSON.stringify({
+                                username: $("#username").val(),
+                                password: $("#password").val()
+                            });
 
-                                var request = custom_contents.ldap_auth(login_details);
+                            var request = custom_contents.ldap_auth(login_details);
 
-                                request.then(
-                                    function() { //success function
-                                        upload_notebook.upload_notebook(
-                                            $("#username").val()
-                                        );
+                            request.then(
+                                function() { //success function
+                                    upload_notebook.upload_notebook(
+                                        $("#username").val(),
+                                        $("#password").val()
+                                    );
 
-                                        $(".modal").modal("hide");
-                                    },
-                                    function(reason) { //fail function
-                                        var error = $("<div/>")
-                                            .addClass("login-error")
-                                            .css("color","red");
+                                    $(".modal").modal("hide");
+                                },
+                                function(reason) { //fail function
+                                    var error = $("<div/>")
+                                        .addClass("login-error")
+                                        .css("color","red");
 
-                                        if (reason.xhr.status === 401) { //unauthorised
-                                            //you dun goofed on ur login
-                                            error.text("Login details not receognised.");
-                                            instructions.after(error);
-                                        } else if (reason.xhr.status === 400) { //unauthorised
-                                            //you dun goofed on ur login
-                                            error.text("Login details not valid.");
-                                            instructions.after(error);
-                                        } else {
-                                            //shouldn't really get here?
-                                            error.text("Login failed - please try again.");
-                                            instructions.after(error);
-                                        }
+                                    if (reason.xhr.status === 401) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not receognised.");
+                                        instructions.after(error);
+                                    } else if (reason.xhr.status === 400) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not valid.");
+                                        instructions.after(error);
+                                    } else {
+                                        //shouldn't really get here?
+                                        error.text("Login failed - please try again.");
+                                        instructions.after(error);
                                     }
-                                );
-                            } else {
-                                //if we're in jupyterhub don't have to authenticate
-                                //again - just use username we got from URL
-                                upload_notebook.upload_notebook(username);
-                                $(".modal").modal("hide");
-                            }
+                                }
+                            );
                         }
                     },
                 }
@@ -431,36 +397,29 @@ define(["base/js/namespace",
                     .append(upload_data_container)
         );
 
-        var url_arr = window.location.pathname.split("/");
-        var username = "";
-
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");
         
-        if(url_arr[0] === "user") { //means we"re in jupyterhub - so we don"t need to request for username or pass
-            username = url_arr[1];
-        } else {
-            var login_fields = $("<div/>").attr("id","login-fields");
-            var username_label = $("<label/>")
-                .attr("for","username")
-                .text("Username: ");
-            var username_field = $("<input/>").attr("id","username");
+        var login_fields = $("<div/>").attr("id","login-fields");
+        var username_label = $("<label/>")
+            .attr("for","username")
+            .text("Username: ");
+        var username_field = $("<input/>").attr("id","username");
 
-            var password_label = $("<label/>")
-                .attr("for","password")
-                .text("Password: ");
-            var password_field = $("<input/>")
-                .attr("id","password")
-                .attr("type","password");
+        var password_label = $("<label/>")
+            .attr("for","password")
+            .text("Password: ");
+        var password_field = $("<input/>")
+            .attr("id","password")
+            .attr("type","password");
 
-            login_fields.append(username_label)
-                        .append(username_field)
-                        .append(password_label)
-                        .append(password_field);
+        login_fields.append(username_label)
+                    .append(username_field)
+                    .append(password_label)
+                    .append(password_field);
 
-            final_page.append(login_fields);
-        }
-
+        final_page.append(login_fields);
+        
         form_body.append(final_page);
 
         var modal = dialog.modal({
@@ -515,57 +474,46 @@ define(["base/js/namespace",
                         else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
                             $(".login-error").remove();
-                            if(!username) {
-                                console.log(login_details);
-                                var login_details = JSON.stringify({
-                                    username: $("#username").val(),
-                                    password: $("#password").val()
-                                });
+                            console.log(login_details);
+                            var login_details = JSON.stringify({
+                                username: $("#username").val(),
+                                password: $("#password").val()
+                            });
 
-                                var request = custom_contents.ldap_auth(login_details);
+                            var request = custom_contents.ldap_auth(login_details);
 
-                                request.then(
-                                    function() { //success function
-                                        upload_data.upload_data(
-                                            $("#username").val(),
-                                            upload_data_info.file_names,
-                                            upload_data_info.file_paths,
-                                            upload_data_info.file_types
-                                        );
+                            request.then(
+                                function() { //success function
+                                    upload_data.upload_data(
+                                        $("#username").val(),
+                                        $("#password").val(),
+                                        upload_data_info.file_names,
+                                        upload_data_info.file_paths,
+                                        upload_data_info.file_types
+                                    );
 
-                                        $(".modal").modal("hide");
-                                    },
-                                    function(reason) { //fail function
-                                        var error = $("<div/>")
-                                            .addClass("login-error")
-                                            .css("color","red");
+                                    $(".modal").modal("hide");
+                                },
+                                function(reason) { //fail function
+                                    var error = $("<div/>")
+                                        .addClass("login-error")
+                                        .css("color","red");
 
-                                        if (reason.xhr.status === 401) { //unauthorised
-                                            //you dun goofed on ur login
-                                            error.text("Login details not receognised.");
-                                            instructions.after(error);
-                                        } else if (reason.xhr.status === 400) { //unauthorised
-                                            //you dun goofed on ur login
-                                            error.text("Login details not valid.");
-                                            instructions.after(error);
-                                        } else {
-                                            //shouldn't really get here?
-                                            error.text("Login failed - please try again.");
-                                            instructions.after(error);
-                                        }
+                                    if (reason.xhr.status === 401) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not receognised.");
+                                        instructions.after(error);
+                                    } else if (reason.xhr.status === 400) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not valid.");
+                                        instructions.after(error);
+                                    } else {
+                                        //shouldn't really get here?
+                                        error.text("Login failed - please try again.");
+                                        instructions.after(error);
                                     }
-                                );
-                            } else {
-                                //if we're in jupyterhub don't have to authenticate
-                                //again - just use username we got from URL
-                                upload_data.upload_data(
-                                    username,
-                                    upload_data_info.file_names,
-                                    upload_data_info.file_paths,
-                                    upload_data_info.file_types
-                                );
-                                $(".modal").modal("hide");
-                            }
+                                }
+                            );
                         }
                     },
                 }
