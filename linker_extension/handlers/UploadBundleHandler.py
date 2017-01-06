@@ -6,7 +6,7 @@ import os
 import xml.etree.ElementTree as ET
 import zipfile
 
-from tornado import web, gen
+from tornado import web, gen, escape
 
 from notebook.base.handlers import (
     IPythonHandler, json_errors
@@ -14,10 +14,6 @@ from notebook.base.handlers import (
 
 
 class UploadBundleHandler(IPythonHandler):
-
-    admin_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                              "resources",
-                              "admin.txt")
 
     blank_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                               "resources",
@@ -27,16 +23,12 @@ class UploadBundleHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
-        username = self.get_query_argument('username')
+        arguments = escape.json_decode(self.request.body)
 
-        repository = self.get_query_argument('repository')
-        try:
-            with open(UploadBundleHandler.admin_file, "r") as f:
-                    un = f.readline().strip()
-                    pw = f.readline().strip()
-        except IOError:
-            raise web.HTTPError(500, "IOError occured when opening"
-                                     "login details file")
+        un = arguments['username']
+        pw = arguments['password']
+
+        repository = arguments['repository']
 
         ET.register_namespace("", "http://www.loc.gov/METS/")
         ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
@@ -60,17 +52,17 @@ class UploadBundleHandler(IPythonHandler):
             raise web.HTTPError(500, "IndexError occured when "
                                      "fetching metadata node")
 
-        title = self.get_query_argument('title', default=None)
+        title = arguments['title']
 
         # should never happen but just in case
         # TODO: publishing needs to check that required fields are filled
         # before sending (i.e that they're not sending empty metadata)
-        if title is not None:
+        if title is not '':
             title_xml = ET.Element("dc:title")
             title_xml.text = title
             metadata.append(title_xml)
 
-        authors = self.get_query_arguments('authors[]')
+        authors = arguments['authors']
         if authors is not []:
             if len(authors) > 0:
                 for author in authors:
@@ -78,13 +70,13 @@ class UploadBundleHandler(IPythonHandler):
                     author_xml.text = author
                     metadata.append(author_xml)
 
-        abstract = self.get_query_argument('abstract', default=None)
-        if abstract is not None:  # shouldn't happen
+        abstract = arguments['abstract']
+        if abstract is not '':  # shouldn't happen
             abstract_xml = ET.Element("dcterms:abstract")
             abstract_xml.text = abstract
             metadata.append(abstract_xml)
 
-        tags = self.get_query_arguments('tags[]')
+        tags = arguments['tags']
         if tags is not []:
             if len(tags) > 0:
                 for tag in tags:
@@ -92,32 +84,32 @@ class UploadBundleHandler(IPythonHandler):
                     tag_xml.text = tag
                     metadata.append(tag_xml)
 
-        date = self.get_query_argument('date', default=None)
-        if date is not None:  # shouldn't happen
+        date = arguments['date']
+        if date is not '':  # shouldn't happen
             # date string is already in the format we need
             date_xml = ET.Element("dcterms:issued")
             date_xml.text = date
             metadata.append(date_xml)
 
-        language = self.get_query_argument('language')
-        if language is not None:
+        language = arguments['language']
+        if language is not '':
             language_xml = ET.Element("dc:language")
             language_xml.text = language
             metadata.append(language_xml)
 
-        publisher = self.get_query_argument('publisher', default=None)
-        if publisher is not None:
+        publisher = arguments['publisher']
+        if publisher is not '':
             publisher_xml = ET.Element("dc:publisher")
             publisher_xml.text = publisher
             metadata.append(publisher_xml)
 
-        citation = self.get_query_argument('citation', default=None)
-        if citation is not None:
+        citation = arguments['citation']
+        if citation is not '':
             citation_xml = ET.Element("dcterms:bibliographicCitation")
             citation_xml.text = citation
             metadata.append(citation_xml)
 
-        referencedBys = self.get_query_arguments('referencedBy[]')
+        referencedBys = arguments['referencedBy']
         if referencedBys is not []:
             if len(referencedBys) > 0:
                 for referencedBy in referencedBys:
@@ -127,16 +119,16 @@ class UploadBundleHandler(IPythonHandler):
 
         # TODO: figure out a way to do funders and sponsors?
         # or get rid of them
-        #funders = self.get_query_argument('funders', default=None)
+        #funders = arguments['funders']
         #if funders is not None:
         #    metadata.append({"key": "dc.contributor.funder", "value": funders})
 
-        #sponsors = self.get_query_argument('sponsors', default=None)
+        #sponsors = arguments['sponsors']
         #if funders is not None:
         #    metadata.append({"key": "dc.description.sponsorship", "value": sponsors})
 
         try:
-            notebook_path = self.get_query_argument("notebookpath")
+            notebook_path = arguments['notebookpath']
             notebook_split = notebook_path.split('/')
             notebook_name = notebook_split[-1]
             notebook_dir = os.getcwd()
@@ -147,9 +139,9 @@ class UploadBundleHandler(IPythonHandler):
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
-        file_names = self.get_query_arguments('file_names[]')
-        file_paths = self.get_query_arguments('file_paths[]')
-        file_types = self.get_query_arguments('file_types[]')
+        file_names = arguments['file_names']
+        file_paths = arguments['file_paths']
+        file_types = arguments['file_types']
         try:
             files = tree.getroot()[2][0]
             id_count = 0
@@ -231,7 +223,7 @@ class UploadBundleHandler(IPythonHandler):
                                            " Data.zip"),
                    "Content-Type": "application/zip",
                    "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP",
-                   "X-On-Behalf-Of": username}
+                   "X-On-Behalf-Of": un}
 
         try:
             r = requests.request('POST',
