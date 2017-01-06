@@ -27,7 +27,7 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
             .attr("rel", "stylesheet")
             .attr("type", "text/css")
             .attr("href", utils.get_body_data("baseUrl")
-                          + "nbextensions/linker_extension/base/base_style.css")
+                          + "nbextensions/linker_extension/common/common_style.css")
         );
     };
 
