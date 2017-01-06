@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import shutil
 import nbconvert
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist
@@ -25,33 +26,33 @@ class CustomInstallCommand(install):
         # insert custom code here
         install.run(self)
         import subprocess
-        subprocess.call(['sudo jupyter serverextension enable --py '
+        subprocess.call(['jupyter serverextension enable --py '
                          'linker_extension --system'], shell=True)
-        subprocess.call(['sudo jupyter nbextension install --py --overwrite '
+        subprocess.call(['jupyter nbextension install --py --overwrite '
                          'linker_extension --system'], shell=True)
-        subprocess.call(['sudo jupyter nbextension enable --py '
+        subprocess.call(['jupyter nbextension enable --py '
                          'linker_extension --system'], shell=True)
 
         nbconvert_loc = os.path.dirname(nbconvert.__file__)
         template_path = os.path.join(nbconvert_loc, 'templates', 'latex')
-        os.rename(os.path.join('linker_extension',
+        shutil.move(os.path.join('linker_extension',
                                'resources',
                                'templates',
                                'custom_base.tplx'),
-                  os.path.join(template_path, 'custom_base.tplx'))
+                    os.path.join(template_path, 'custom_base.tplx'))
 
-        os.rename(os.path.join('linker_extension',
+        shutil.move(os.path.join('linker_extension',
                                'resources',
                                'templates',
                                'custom_article.tplx'),
 
-                  os.path.join(template_path, 'custom_article.tplx'))
+                    os.path.join(template_path, 'custom_article.tplx'))
 
-        os.rename(os.path.join('linker_extension',
+        shutil.move(os.path.join('linker_extension',
                                'resources',
                                'templates',
                                'custom_style_ipython.tplx'),
-                  os.path.join(template_path, 'custom_style_ipython.tplx'))
+                    os.path.join(template_path, 'custom_style_ipython.tplx'))
 
 
 # return an array of paths of all files in the specified directory
