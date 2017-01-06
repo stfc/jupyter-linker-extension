@@ -9,7 +9,9 @@ from notebook.base.handlers import (
 
 from linker_extension.handlers.DSpaceHandler import DSpaceHandler
 from linker_extension.handlers.SWORDHandler import SWORDHandler
-from linker_extension.handlers.TestDSpaceHandler import TestDSpaceHandler
+from linker_extension.handlers.TestDSpaceHandlers import (
+    FindIDViaMetadata, DeleteItem, GetBitstreams, GetBitstreamData
+)
 from linker_extension.handlers.UploadBundleHandler import UploadBundleHandler
 from linker_extension.handlers.LDAPHandler import LDAPHandler
 from linker_extension.handlers.CustomNbconvertHandler import CustomNbconvertHandler
@@ -37,10 +39,6 @@ def load_jupyter_server_extension(nbapp):
     host_pattern = '.*$'
 
     # create the route mappings for our handlers
-    route_pattern_dspace = url_path_join(web_app.settings['base_url'],
-                                         '/dspace')
-    web_app.add_handlers(host_pattern, [(route_pattern_dspace, DSpaceHandler)])
-
     route_pattern_sword = url_path_join(web_app.settings['base_url'],
                                         '/sword')
     web_app.add_handlers(host_pattern, [(route_pattern_sword, SWORDHandler)])
@@ -50,10 +48,29 @@ def load_jupyter_server_extension(nbapp):
     web_app.add_handlers(host_pattern, [(route_pattern_uploadbundle,
                                          UploadBundleHandler)])
 
-    route_pattern_dspace_test = url_path_join(web_app.settings['base_url'],
-                                              '/dspacetest')
-    web_app.add_handlers(host_pattern, [(route_pattern_dspace_test,
-                                         TestDSpaceHandler)])
+    route_pattern_find_id = url_path_join(web_app.settings['base_url'],
+                                          '/dspace/findid')
+    web_app.add_handlers(host_pattern, [(route_pattern_find_id,
+                                         FindIDViaMetadata)])
+
+    route_pattern_delete = url_path_join(web_app.settings['base_url'],
+                                         '/dspace/delete')
+    web_app.add_handlers(host_pattern, [(route_pattern_delete,
+                                         DeleteItem)])
+
+    route_pattern_get_bistreams = url_path_join(web_app.settings['base_url'],
+                                                '/dspace/getbistreams')
+    web_app.add_handlers(host_pattern, [(route_pattern_get_bistreams,
+                                         GetBitstreams)])
+
+    route_pattern_get_bistream_data = url_path_join(web_app.settings['base_url'],
+                                              '/dspace/getbistreamdata')
+    web_app.add_handlers(host_pattern, [(route_pattern_get_bistream_data,
+                                         GetBitstreamData)])
+
+    route_pattern_dspace = url_path_join(web_app.settings['base_url'],
+                                         '/dspace')
+    web_app.add_handlers(host_pattern, [(route_pattern_dspace, DSpaceHandler)])
 
     route_pattern_ldap = url_path_join(web_app.settings['base_url'],
                                        '/ldap')
