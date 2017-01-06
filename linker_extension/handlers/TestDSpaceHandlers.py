@@ -3,34 +3,25 @@
 import requests
 import os
 
-from tornado import web, gen
+from tornado import web, gen, escape
 
 from notebook.base.handlers import (
     IPythonHandler, json_errors
 )
 
 
-class TestDSpaceHandler(IPythonHandler):
-
-    admin_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                              "resources",
-                              "admin.txt")
-
-    blank_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                              "resources",
-                              "blank.xml")
+class FindIDViaMetadata(IPythonHandler):
 
     @web.authenticated
     @json_errors
     @gen.coroutine
-    def get(self):
-        try:
-            with open(TestDSpaceHandler.admin_file, "r") as f:
-                un = f.readline().strip()
-                pw = f.readline().strip()
-        except IOError:
-            raise web.HTTPError(500, "IOError occured when opening"
-                                     "login details file")
+    def post(self):
+        print(self.request)
+        print(self.request.body)
+        arguments = escape.json_decode(self.request.body)
+
+        un = arguments['username']
+        pw = arguments['password']
 
         url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
         headers = {'Content-Type': 'application/json',
@@ -44,7 +35,7 @@ class TestDSpaceHandler(IPythonHandler):
         print(login.status_code)
         token = login.text
 
-        URL = self.get_query_argument("ID")
+        URL = arguments["ID"]
 
         url = 'https://epublicns05.esc.rl.ac.uk/rest/items/find-by-metadata-field'
         headers = {'Content-Type': 'application/json',
@@ -59,18 +50,18 @@ class TestDSpaceHandler(IPythonHandler):
                                            verify=False)
         self.finish(get_item_by_url.json()[0])
 
+
+class DeleteItem(IPythonHandler):
+
     @web.authenticated
     @json_errors
     @gen.coroutine
-    def delete(self):
-        ID = self.get_query_argument("ID")
-        try:
-            with open(TestDSpaceHandler.admin_file, "r") as f:
-                un = f.readline().strip()
-                pw = f.readline().strip()
-        except IOError:
-            raise web.HTTPError(500, "IOError occured when opening"
-                                     "login details file")
+    def post(self):
+        arguments = escape.json_decode(self.request.body)
+
+        un = arguments['username']
+        pw = arguments['password']
+        ID = arguments["ID"]
 
         login_url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
         login_headers = {'Content-Type': 'application/json',
@@ -100,18 +91,18 @@ class TestDSpaceHandler(IPythonHandler):
         unicode_status = str(get_deleted_item.status_code)
         self.finish(unicode_status)
 
+
+class GetBitstreams(IPythonHandler):
+
     @web.authenticated
     @json_errors
     @gen.coroutine
-    def put(self):
-        ID = self.get_query_argument("ID")
-        try:
-            with open(TestDSpaceHandler.admin_file, "r") as f:
-                un = f.readline().strip()
-                pw = f.readline().strip()
-        except IOError:
-            raise web.HTTPError(500, "IOError occured when opening"
-                                     "login details file")
+    def post(self):
+        arguments = escape.json_decode(self.request.body)
+
+        un = arguments['username']
+        pw = arguments['password']
+        ID = arguments["ID"]
 
         login_url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
         login_headers = {'Content-Type': 'application/json',
@@ -137,18 +128,18 @@ class TestDSpaceHandler(IPythonHandler):
             output_dict[str(index)] = value
         self.finish(output_dict)
 
+
+class GetBitstreamData(IPythonHandler):
+
     @web.authenticated
     @json_errors
     @gen.coroutine
     def post(self):
-        IDs = self.get_query_arguments("IDs[]")
-        try:
-            with open(TestDSpaceHandler.admin_file, "r") as f:
-                un = f.readline().strip()
-                pw = f.readline().strip()
-        except IOError:
-            raise web.HTTPError(500, "IOError occured when opening"
-                                     "login details file")
+        arguments = escape.json_decode(self.request.body)
+
+        un = arguments['username']
+        pw = arguments['password']
+        IDs = arguments["IDs"]
 
         login_url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
         login_headers = {'Content-Type': 'application/json',
