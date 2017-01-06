@@ -20,7 +20,7 @@ Install webpack via `npm install -g webpack`
 
 Download and extract or clone this git repo.
 
-Navigate into the extracted/cloned folder and run the command `python setup.py sdist`
+Navigate into the extracted/cloned folder and run the command `python setup.py sdist --formats=gztar,zip`
 
 Install by using `pip install .` or `pip install dist/LinkerExtension-1.0.tar.gz`
 
