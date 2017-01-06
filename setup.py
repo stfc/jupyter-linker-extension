@@ -26,12 +26,12 @@ class CustomInstallCommand(install):
         # insert custom code here
         install.run(self)
         import subprocess
-        subprocess.call(['jupyter serverextension enable --py '
-                         'linker_extension --system'], shell=True)
-        subprocess.call(['jupyter nbextension install --py --overwrite '
-                         'linker_extension --system'], shell=True)
-        subprocess.call(['jupyter nbextension enable --py '
-                         'linker_extension --system'], shell=True)
+        subprocess.call('jupyter serverextension enable --py '
+                        'linker_extension --system', shell=True)
+        subprocess.call('jupyter nbextension install --py --overwrite '
+                        'linker_extension --system', shell=True)
+        subprocess.call('jupyter nbextension enable --py '
+                        'linker_extension --system', shell=True)
 
         nbconvert_loc = os.path.dirname(nbconvert.__file__)
         template_path = os.path.join(nbconvert_loc, 'templates', 'latex')
