@@ -97,8 +97,8 @@ def package_files(directory):
     return paths
 
 
-phantomjs_files = package_files('linker_extension/tests/phantomjs')
-slimerjs_files = package_files('linker_extension/tests/slimerjs')
+notebook_tests = package_files('linker_extension/tests/notebook')
+tree_tests = package_files('linker_extension/tests/tree')
 resource_files = package_files('linker_extension/resources')
 jsfiles = ['static/notebook/linker_extension_notebook.js',
            'static/tree/linker_extension_tree.js',
@@ -117,7 +117,7 @@ setup_args = dict(
     packages=find_packages(),
     package_data={
         '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
-             phantomjs_files + slimerjs_files + resource_files)
+             notebook_tests + tree_tests + resource_files + ['tests/login_credentials.txt'])
     },
     install_requires=[
         'notebook>=4',
