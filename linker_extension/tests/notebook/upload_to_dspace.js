@@ -30,7 +30,7 @@ casper.notebook_test(function() {
             username = system.stdin.readLine();
             system.stdout.writeLine("Password: ");
             password = system.stdin.readLine();
-            system.stdout.write("\x1b[1APasswor                            \n");
+            system.stdout.write("\x1b[1APassword                           \n");
         }
     });
 
