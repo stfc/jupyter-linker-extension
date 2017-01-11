@@ -165,8 +165,6 @@ define(["base/js/namespace",
 
                             var request = custom_contents.ldap_auth(login_details);
 
-                            var request = custom_contents.ldap_auth(login_details);
-
                             var licence_file = $("#licence-file").prop("files")[0];
 
                             var licence_file_contents = "";
@@ -517,8 +515,6 @@ define(["base/js/namespace",
                                 username: $("#username").val(),
                                 password: $("#password").val()
                             });
-
-                            var request = custom_contents.ldap_auth(login_details);
 
                             var request = custom_contents.ldap_auth(login_details);
 
