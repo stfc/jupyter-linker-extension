@@ -7,7 +7,12 @@ define([
     "./modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_utils,custom_contents){
 
-    var upload_notebook = function(username,password) {
+    var upload_notebook = function(
+        username,
+        password,
+        licence_file_name,
+        licence_file_contents
+    ) {
         if ("reportmetadata" in Jupyter.notebook.metadata) {
             var stringauthors = [];
             var authors = Jupyter.notebook.metadata.reportmetadata.authors;
@@ -19,6 +24,8 @@ define([
             var data = JSON.stringify({
                 "username": username,
                 "password": password,
+                "licence_file_name":licence_file_name,
+                "licence_file_contents": licence_file_contents,
                 "notebookpath": Jupyter.notebook.notebook_path,
                 "title":Jupyter.notebook.metadata.reportmetadata.title,
                 "authors":stringauthors,
@@ -31,7 +38,9 @@ define([
                 "referencedBy":Jupyter.notebook.metadata.reportmetadata.referencedBy,
                 "funders":Jupyter.notebook.metadata.reportmetadata.funders,
                 "sponsors":Jupyter.notebook.metadata.reportmetadata.sponsors,
-                "repository":Jupyter.notebook.metadata.reportmetadata.repository
+                "repository":Jupyter.notebook.metadata.reportmetadata.repository,
+                "licence_preset":Jupyter.notebook.metadata.reportmetadata.licence.preset,
+                "licence_url": Jupyter.notebook.metadata.reportmetadata.licence.url
             });
             custom_contents.sword_new_item(data).then(
                 function(response) {
@@ -96,7 +105,9 @@ define([
                     class : "btn-primary",
                     click: function() {
                         upload_notebook($("#username-new-item").val(),
-                                        $("#password-new-item").val());
+                                        $("#password-new-item").val(),
+                                        "",
+                                        "");
                     }
                 },
                 Cancel: {},
