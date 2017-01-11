@@ -5,7 +5,7 @@ define(["base/js/namespace",
         "./modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_contents){
 
-    var add_metadata = function () {
+    var add_metadata = function() {
 
         var form_fields = create_fields();
 
@@ -30,7 +30,7 @@ define(["base/js/namespace",
                         if(!$("#fields1").hasClass("hide-me") &&
                             $("#fields2").hasClass("hide-me"))
                         { 
-                            //can't go back when we're on the first page
+                            //can"t go back when we"re on the first page
                             $("#previous").addClass("disabled"); 
                         }
                         else if($("#fields1").hasClass("hide-me") &&
@@ -60,6 +60,10 @@ define(["base/js/namespace",
                                                     .attr("id","previous");
             $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
                                                     .attr("id","next");
+            //we can't store licence file info in metadata so disable it
+            //only allow the option when publishing
+            $("#licence-file-radio").prop("disabled",true);
+            $("#licence-file").prop("disabled",true);
         });
     };
 
@@ -96,7 +100,7 @@ define(["base/js/namespace",
                 if (event.keyCode === $.ui.keyCode.TAB &&
                     $(this).autocomplete().data("ui-autocomplete").menu.active)
                 {
-                    event.preventDefault(); //don't navigate away on tab press
+                    event.preventDefault(); //don"t navigate away on tab press
                 }
             })
             .autocomplete({
@@ -535,6 +539,131 @@ define(["base/js/namespace",
             .attr("name","sponsors")
             .attr("id","sponsors");
 
+        var licenceLabel = $("<label/>")
+            .attr("for","licence")
+            .text("Licence: ");
+
+        var licence = $("<div/>")
+            .attr("name","licence")
+            .attr("id","licence")
+            .attr("type","file");
+
+        //TODO: check that this list is sensible and has all the common
+        //ones that users may select
+        var licenceDropdown = $("<select/>")
+            .attr("name","licence dropdown")
+            .attr("id","licence-dropdown")
+            .attr("type","file")
+            .append($("<option/>").attr("value","").text("n/A"))
+            .append($("<option/>").attr("value","CC0").text("CC0"))
+            .append($("<option/>").attr("value","CC BY").text("CC BY"))
+            .append($("<option/>").attr("value","CC BY-SA").text("CC BY-SA"))
+            .append($("<option/>").attr("value","CC BY-NC").text("CC BY-NC"))
+            .append($("<option/>").attr("value","CC BY-ND").text("CC BY-ND"))
+            .append($("<option/>").attr("value","CC BY-NC-SA").text("CC BY-NC-SA"))
+            .append($("<option/>").attr("value","CC BY-NC-ND").text("CC BY-NC-ND"))
+            .append($("<option/>").attr("value","Apache 2.0").text("Apache-2.0"))
+            .append($("<option/>").attr("value","BSD-3-Clause").text("BSD-3-Clause"))
+            .append($("<option/>").attr("value","BSD-2-Clause").text("BSD-2-Clause"))
+            .append($("<option/>").attr("value","GPL-2.0").text("GPL-2.0"))
+            .append($("<option/>").attr("value","GPL-3.0").text("GPL-3.0"))
+            .append($("<option/>").attr("value","LGPL-2.1").text("LGPL-2.1"))
+            .append($("<option/>").attr("value","LGPL-3.0").text("LGPL-3.0"))
+            .append($("<option/>").attr("value","MIT").text("MIT"))
+            .append($("<option/>").attr("value","MPL-2.0").text("MPL-2.0"))
+            .append($("<option/>").attr("value","CDDL-1.0").text("CDDL-1.0"))
+            .append($("<option/>").attr("value","EPL-1.0").text("EPL-1.0"))
+            .append($("<option/>").attr("value","Other").text("Other"));
+
+        var licenceDropdownLabel = $("<label/>")
+            .attr("for","licence-dropdown")
+            .text("Please select a licence from one of the ones listed below, " + 
+                  "or select \"Other\" and specify your own licence");
+
+        var licenceRadioFile = $("<input/>")
+            .attr("name","licence radio")
+            .attr("type","radio")
+            .attr("id","licence-file-radio")
+            .css("display","none")
+            .val("file");
+
+        var licenceFile = $("<input/>")
+            .attr("name","licence file")
+            .attr("id","licence-file")
+            .css("display","none")
+            .attr("type","file");
+
+        var licenceFileLabel = $("<label/>")
+            .attr("for","licence-file")
+            .text("Upload a licence file")
+            .css("display","none");
+
+        var licenceRadioURL = $("<input/>")
+            .attr("name","licence radio")
+            .attr("type","radio")
+            .attr("id","licence-url-radio")
+            .css("display","none")
+            .val("URL");
+
+        var licenceURL = $("<input/>")
+            .attr("name","licence url")
+            .attr("id","licence-URL")
+            .css("display","none")
+            .attr("type","text");
+
+        var licenceURLLabel = $("<label/>")
+            .attr("for","licence-URL")
+            .text("Provide a URL that links to your licence")
+            .css("display","none");
+
+        licenceDropdown.change(function() { //switch visibility on "Other" selection
+            if($(this).val() === "Other") {
+                licenceRadioFile.css("display","inline");
+                licenceRadioURL.css("display","inline");
+                licenceFileLabel.css("display","inline");
+                licenceURLLabel.css("display","inline");
+                licenceFile.css("display","block");
+                licenceURL.css("display","block");
+            } else {
+                licenceRadioFile.css("display","none");
+                licenceRadioURL.css("display","none");
+                licenceFileLabel.css("display","none");
+                licenceURLLabel.css("display","none");
+                licenceFile.css("display","none");
+                licenceURL.css("display","none");          
+            }
+        });
+
+        licenceRadioFile.click(function() {
+            licenceURL.prop("disabled",true);
+            licenceFile.prop("disabled",false);
+        });
+
+        licenceRadioURL.click(function() {
+            licenceURL.prop("disabled",false);
+            licenceFile.prop("disabled",true);
+        });
+
+        licenceFile.click(function() {
+            licenceRadioFile.click();
+        });
+
+        licenceURL.click(function() {
+            licenceRadioURL.click();
+        });
+
+        licence.append(licenceLabel)
+               .append(licenceDropdownLabel)
+               .append(licenceDropdown)
+               .append($("<br/>"))
+               .append(licenceRadioFile)
+               .append(licenceFileLabel)
+               .append(licenceFile)
+               .append($("<br/>"))
+               .append(licenceRadioURL)
+               .append(licenceURLLabel)
+               .append(licenceURL);
+
         var repositoryLabel = $("<label/>") //TODO: it this the most sensible place to  put this? perhaps before upload?
             .attr("for","repository")
             .text("Repository: ");
@@ -563,8 +692,9 @@ define(["base/js/namespace",
             var repository_fetch_error = $("<div/>")
                 .addClass("repository-fetch-error")
                 .text("Couldn't download the repository information from eData." +
-                      " Please reload and if the error persists contact the developers.");
-            $("label[for=\"abstract\"]").after(repository_fetch_error);
+                      " Please reload and if the error persists contact the developers.")
+                .css("color","red");
+            $("label[for=\"repository\"]").after(repository_fetch_error);
         });
 
         var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2")
@@ -578,6 +708,8 @@ define(["base/js/namespace",
             .append(funders)
             .append(sponsorsLabel)
             .append(sponsors)
+            .append(licenceLabel)
+            .append(licence)
             .append(repositoryLabel)
             .append(repository);
 
@@ -697,13 +829,25 @@ define(["base/js/namespace",
 
             funders.val(md.reportmetadata.funders);
             sponsors.val(md.reportmetadata.sponsors);
+            licenceDropdown.val(md.reportmetadata.licence.preset);
+            if(md.reportmetadata.licence.preset === "Other") {
+                licenceURLLabel.css("display","inline");
+                licenceFileLabel.css("display","inline");
+                licenceRadioURL.css("display","inline");
+                licenceRadioFile.css("display","inline");
+                licenceURL.css("display","block");
+                licenceFile.css("display","block");
+            }
+            licenceURL.val(md.reportmetadata.licence.url);
+            if (licenceURL.val()) {
+                licenceRadioURL.click();
+            }
         }
 
         return {form1: form1, form2: form2};
     };
 
     var validate_fields1 = function() {
-        var md = Jupyter.notebook.metadata;
         $(".metadata-form-error").remove(); //clear errors
 
         if($("#title").val() === "") {
@@ -712,7 +856,7 @@ define(["base/js/namespace",
                 .addClass("metadata-form-error")
                 .text("Please enter a title");
 
-            $('label[for="title"]').after(title_error);
+            $("label[for=\"title\"]").after(title_error);
         }
         if($("#abstract").val() === "") {
             var abstract_error = $("<div/>")
@@ -720,7 +864,7 @@ define(["base/js/namespace",
                 .addClass("metadata-form-error")
                 .text("Please enter an abstract");
 
-            $('label[for="abstract"]').after(abstract_error);
+            $("label[for=\"abstract\"]").after(abstract_error);
         }
         var isInteger = function(str,greaterthan,lessthan) {
             var n = ~~Number(str); //convert into a number with no decimal part
@@ -749,21 +893,21 @@ define(["base/js/namespace",
                 .addClass("metadata-form-error")
                 .text("Please enter at least the year of publication");
 
-            $('label[for="date"]').after(no_year_error);
+            $("label[for=\"date\"]").after(no_year_error);
         } else if(!isInteger($("#year").val(),1800,3000)) {
             var bad_year_error = $("<div/>")
                 .attr("id","invalid-year-error")
                 .addClass("metadata-form-error")
                 .text("Please enter a valid year");
 
-            $('label[for="date"]').after(bad_year_error);
+            $("label[for=\"date\"]").after(bad_year_error);
         } else if($("#day").val() !== "" && $("#month").val() === "0") {
             var month_error = $("<div/>")
                 .attr("id","month-missing-error")
                 .addClass("metadata-form-error")
                 .text("Please select a month");
 
-            $('label[for="date"]').after(month_error);
+            $("label[for=\"date\"]").after(month_error);
         } else if($("#day").val() !== "" &&
                   !validDate($("#day").val(),$("#month").val(),$("#year").val()))
         {
@@ -772,7 +916,7 @@ define(["base/js/namespace",
                 .addClass("metadata-form-error")
                 .text("Please enter valid day");
 
-            $('label[for="date"]').after(day_error);
+            $("label[for=\"date\"]").after(day_error);
         }
         $(".metadata-form-error").css("color", "red");
     };
@@ -787,7 +931,46 @@ define(["base/js/namespace",
                 .addClass("metadata-form-error")
                 .text("Please select a repository to deposit to");
 
-            $('label[for="repository"]').after(repository_error);
+            $("label[for=\"repository\"]").after(repository_error);
+        }
+
+        if($("#licence-dropdown").val() === "") {
+            var licence_dropdown_error = $("<div/>")
+                .attr("id","licence-dropdown-error")
+                .addClass("metadata-form-error")
+                .text("Please select a licence or select \"Other\" and specify your own.");
+
+            $("label[for=\"licence\"]").after(licence_dropdown_error);
+        } else if($("#licence-dropdown").val() === "Other" && 
+                  !$("#licence-url-radio").prop("checked") &&
+                  !$("#licence-file-radio").prop("checked"))
+        {
+            var no_licence_error = $("<div/>")
+                .attr("id","no-licence-error")
+                .addClass("metadata-form-error")
+                .text("Please either provide a link to a licence or upload a licence file.");
+
+            $("label[for=\"licence\"]").after(no_licence_error);
+        } else if($("#licence-dropdown").val() === "Other" && 
+                  $("#licence-URL").val() === "" &&
+                  $("#licence-url-radio").prop("checked"))
+        {
+            var no_licence_url_error = $("<div/>")
+                .attr("id","no-licence-url-error")
+                .addClass("metadata-form-error")
+                .text("Please provide a link to a licence file.");
+
+            $("label[for=\"licence-URL\"]").after(no_licence_url_error);
+        } else if($("#licence-dropdown").val() === "Other" && 
+                  $("#licence-file").val() === "" &&
+                  $("#licence-file-radio").prop("checked"))
+        {
+            var no_licence_file_error = $("<div/>")
+                .attr("id","no-licence-url-error")
+                .addClass("metadata-form-error")
+                .text("Please upload a licence file.");
+
+            $("label[for=\"licence-file\"]").after(no_licence_file_error);
         }
 
         $(".metadata-form-error").css("color", "red");
@@ -821,7 +1004,7 @@ define(["base/js/namespace",
 
             var monthstring = "";
             if ($("#month").val() < 10) {
-                //we need a leading zero to match DSpace's date format
+                //we need a leading zero to match DSpace"s date format
                 monthstring = "0" + $("#month").val();
             } else {
                 monthstring = $("#month").val();
@@ -848,6 +1031,11 @@ define(["base/js/namespace",
 
             md.reportmetadata.funders = $("#funders").val();
             md.reportmetadata.sponsors = $("#sponsors").val();
+
+            md.reportmetadata.licence = {
+                "preset": $("#licence-dropdown").val(),
+                "url": $("#licence-URL").val()
+            };
 
             md.reportmetadata.repository = $("#repository").val();
 
