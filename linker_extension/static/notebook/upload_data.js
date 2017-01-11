@@ -65,7 +65,13 @@ define([
         });
     };
 
-    var upload_data = function(username,password,file_names,file_paths,file_types) {
+    var upload_data = function(
+        username,
+        password,
+        file_names,
+        file_paths,
+        file_types
+    ) {
         var md = Jupyter.notebook.metadata;
         if ("databundle_url" in md) {
             //already uploaded to dspace so... TODO: do we want to block them if it"s already been uplaoded? should I grey out the button?
@@ -107,7 +113,7 @@ define([
                 "citation":md.reportmetadata.citation,
                 "funders":md.reportmetadata.funders,
                 "sponsors":md.reportmetadata.sponsors,
-                "repository":md.reportmetadata.repository
+                "repository":md.reportmetadata.repository,
             });
             
             custom_contents.upload_data(data).then(
