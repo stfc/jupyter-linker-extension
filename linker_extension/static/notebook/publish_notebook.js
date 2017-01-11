@@ -165,11 +165,31 @@ define(["base/js/namespace",
 
                             var request = custom_contents.ldap_auth(login_details);
 
+                            var request = custom_contents.ldap_auth(login_details);
+
+                            var licence_file = $("#licence-file").prop("files")[0];
+
+                            var licence_file_contents = "";
+                            if ($("#licence-file").val()) {
+                                var reader = new FileReader();
+
+                                reader.onload = function() {
+                                    licence_file_contents = reader.result;
+                                };
+                                reader.onerror = function() {
+                                    //TODO: handle error
+                                };
+
+                                reader.readAsDataURL(licence_file);
+                            }
+
                             request.then(
                                 function() { //success function
                                     upload_notebook.upload_notebook(
                                         $("#username").val(),
-                                        $("#password").val()
+                                        $("#password").val(),
+                                        $("#licence-file").val(),
+                                        licence_file_contents
                                     );
 
                                     upload_data.upload_data(
@@ -326,11 +346,29 @@ define(["base/js/namespace",
 
                             var request = custom_contents.ldap_auth(login_details);
 
+                            var licence_file = $("#licence-file").prop("files")[0];
+
+                            var licence_file_contents = "";
+                            if ($("#licence-file").val()) {
+                                var reader = new FileReader();
+
+                                reader.onload = function() {
+                                    licence_file_contents = reader.result;
+                                };
+                                reader.onerror = function() {
+                                    //TODO: handle error
+                                };
+
+                                reader.readAsDataURL(licence_file);
+                            }
+
                             request.then(
                                 function() { //success function
                                     upload_notebook.upload_notebook(
                                         $("#username").val(),
-                                        $("#password").val()
+                                        $("#password").val(),
+                                        $("#licence-file").val(),
+                                        licence_file_contents
                                     );
 
                                     $(".modal").modal("hide");
@@ -479,6 +517,8 @@ define(["base/js/namespace",
                                 username: $("#username").val(),
                                 password: $("#password").val()
                             });
+
+                            var request = custom_contents.ldap_auth(login_details);
 
                             var request = custom_contents.ldap_auth(login_details);
 
