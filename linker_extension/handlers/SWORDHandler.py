@@ -6,6 +6,7 @@ import requests
 import os
 import xml.etree.ElementTree as ET
 import zipfile
+import base64
 
 from tornado import web, gen, escape
 
@@ -139,6 +140,39 @@ class SWORDHandler(IPythonHandler):
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
+        licence_file_name = arguments['licence_file_name']
+        licence_file_contents = arguments['licence_file_contents']
+        licence_preset = arguments['licence_preset']
+        licence_url = arguments['licence_url']
+
+        licence_file_path = ""
+
+        try:
+            if licence_preset == "Other":
+                if licence_url != "":
+                    with open("LICENSE.txt", "w") as f:
+                        f.write("Licence located at: ")
+                        f.write(licence_url)
+                else:
+                    base64_data = licence_file_contents.split(",")[1]
+
+                    encoding_info = licence_file_contents.split(",")[0]
+                    encoding_info = encoding_info.split(";")[0]
+                    encoding_info = encoding_info.split(":")[1]
+
+                    with open(licence_file_name, "wb") as f:
+                        f.write(base64.decodestring(base64_data.encode("utf-8")))
+            else:
+                licence_file_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "resources",
+                    "licences",
+                    licence_preset,
+                    "LICENSE.txt"
+                )
+        except:
+            raise web.HTTPError(500, "IOError when sorting out licence file")
+
         try:
             files = tree.getroot()[2][0]
 
@@ -152,6 +186,26 @@ class SWORDHandler(IPythonHandler):
 
             files_xml.append(FLocat_xml)
             files.append(files_xml)
+
+            if licence_preset == "Other" and licence_url == "":
+                licence_attr = {"GROUPID": "sword-mets-fgid-1",
+                                "ID": "sword-mets-file-2",
+                                "MIMETYPE": encoding_info}
+                licence_xml = ET.Element('file', licence_attr)
+
+                licence_FLocat_attr = {"LOCTYPE": "URL", "xlink:href": licence_file_name}
+                licence_FLocat_xml = ET.Element('FLocat', licence_FLocat_attr)
+            else:
+                licence_attr = {"GROUPID": "sword-mets-fgid-1",
+                                "ID": "sword-mets-file-2",
+                                "MIMETYPE": "text/plain"}
+                licence_xml = ET.Element('file', licence_attr)
+
+                licence_FLocat_attr = {"LOCTYPE": "URL", "xlink:href": "LICENSE.txt"}
+                licence_FLocat_xml = ET.Element('FLocat', licence_FLocat_attr)
+
+            licence_xml.append(licence_FLocat_xml)
+            files.append(licence_xml)
         except IndexError:
             raise web.HTTPError(500, "IndexError when getting "
                                      "'files' root node")
@@ -172,6 +226,20 @@ class SWORDHandler(IPythonHandler):
             struct_xml_child.append(fptr_xml)
             struct_xml.append(struct_xml_child)
             struct.append(struct_xml)
+
+            licence_struct_attr = {"ID": "sword-mets-div-2",
+                                   "DMDID": "sword-mets-dmd-2",
+                                   "TYPE": "License"}
+            licence_struct_xml = ET.Element('div', licence_struct_attr)
+
+            licence_struct_child_attr = {"ID": "sword-mets-div-2", "TYPE": "File"}
+            licence_struct_xml_child = ET.Element('div', licence_struct_child_attr)
+
+            licence_fptr_xml = ET.Element("ftpr", {"FILEID": "sword-mets-file-2"})
+
+            licence_struct_xml_child.append(licence_fptr_xml)
+            licence_struct_xml.append(licence_struct_xml_child)
+            struct.append(licence_struct_xml)
         except IndexError:
             raise web.HTTPError(500, "IndexError when getting"
                                      "'struct' root node")
@@ -187,6 +255,15 @@ class SWORDHandler(IPythonHandler):
             created_zip_file = zipfile.ZipFile("notebook.zip", "w")
             created_zip_file.write("mets.xml")
             created_zip_file.write(notebook_path, notebook_name)
+
+            if licence_preset == "Other":
+                if licence_url != "":
+                    created_zip_file.write("LICENSE.txt")
+                else:
+                    created_zip_file.write(licence_file_name)
+            else:
+                created_zip_file.write(licence_file_path, "LICENSE.txt")
+
         except:  # dunno what exceptions we might encounter here
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
