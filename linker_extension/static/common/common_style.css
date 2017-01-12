@@ -170,7 +170,7 @@ span#login_widget {
   margin-left: 4px; 
 }
 
-#fields1 > input, #fields2 > input, .referencedBy {
+#fields1 > input, #fields2 > input, .referencedBy, #licence-URL {
   margin-bottom: 8px;
   width: 600px;
 }
@@ -178,6 +178,12 @@ span#login_widget {
 #fields1 > label, #fields2 > label {
   margin-bottom: 2px;
   display: block;
+}
+
+[for=licence-file], [for=licence-URL]{
+  margin-left: 3px;
+  position: relative;
+  bottom: 4px;
 }
 
 [for=defaultAuthorFirstName] {
@@ -247,48 +253,6 @@ textarea {
 
 .remove-cell-url-button, .add-cell-url-button {
   margin-left: 3px;
-}
-
-
-
-
-
-
-
-#ipython_notebook img {
-  height: 70px;
-  margin-top: -16px;
-  margin-left: -9px;
-}
-
-#header #header-container-container {
-    width: 100%;
-    background:#07375b;
-    background:-moz-linear-gradient(top,#10498C 0,#022E67 100%);
-    background:-webkit-gradient(left top,left bottom,color-stop(0,#10498C),color-stop(100%,#022E67));
-    background:-webkit-linear-gradient(top,#10498C 0,#022E67 100%);
-    background:-o-linear-gradient(top,#10498C 0,#022E67 100%);
-    background:-ms-linear-gradient(top,#10498C 0,#022E67 100%);
-    background:linear-gradient(to bottom,#10498C 0,#022E67 100%);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#10498C', endColorstr='#022E67', GradientType=0);
-}
-
-body > #header #header-container {
-    height:100px;
-    padding-bottom: 57px;
-    padding-top: 25px; 
-}
-
-body {
-  overflow: hidden
-}
-
-span#login_widget, a.btn.btn {
-  margin-top: 25px;
-}
-
-span#login_widget {
-  margin-left: 4px; 
 }
 
 .bundle-button, .bundle-cancel-button {
