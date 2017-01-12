@@ -4,13 +4,6 @@ define([
 ],function(Jupyter,utils){
 
     var load = function() {
-        var menubar_container = $("#menubar-container").detach();
-        var menubar_container_container = $("<div/>")
-                                          .attr("id","menubar-container-container")
-                                          .addClass("container");
-        menubar_container_container.append(menubar_container);
-        $(".header-bar").after(menubar_container_container);
-
         //make publish menu
         var dropdown = $("<li/>").addClass("dropdown")
             .append($("<a/>")
@@ -97,10 +90,11 @@ define([
                                              .text("Publish Notebook and associated data")));
 
         $("#download_pdf").remove();
-        var new_pdf_menu_item = $("<li>").attr("id","#download_pdf")
-                                         .append($("<a/>")
-                                                 .attr("href","#")
-                                                 .text("PDF via LaTeX (.pdf)"));
+        var new_pdf_menu_item = $("<li>")
+            .attr("id","#download_pdf")
+            .append($("<a/>")
+                    .attr("href","#")
+                    .text("PDF via LaTeX (.pdf)"));
 
         new_pdf_menu_item.click(function() {
             var notebook_path = utils.encode_uri_components(Jupyter.notebook.notebook_path);
