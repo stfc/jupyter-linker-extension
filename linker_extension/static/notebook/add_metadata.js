@@ -523,6 +523,8 @@ define(["base/js/namespace",
             return [URL,newURL];
         }
 
+        //TODO: i've removed these fields fro the form for now. Do we need them?
+        //if we do - figure out a way to use them
         var fundersLabel = $("<label/>")
             .attr("for","funders")
             .text("Funders: ");
@@ -593,9 +595,16 @@ define(["base/js/namespace",
             .css("display","none")
             .attr("type","file");
 
+        //TODO: do we keep the "Add Metadata" button? is it okay they can't
+        //specfity a file in advance? Should I either try to allow file upload
+        //in the "Add Metadata" stage or remove the button and only have the
+        //users specify metadata before publishing?
         var licenceFileLabel = $("<label/>")
             .attr("for","licence-file")
-            .text("Upload a licence file")
+            .text("Upload a licence file. Note: you can only upload a file " +
+                  "when ready to publish. If you are adding metadata in " +
+                  "advance, please just select a licence type and change " +
+                  "back to \"Other\" and upload your file when publishing.")
             .css("display","none");
 
         var licenceRadioURL = $("<input/>")
@@ -659,7 +668,6 @@ define(["base/js/namespace",
                .append(licenceRadioFile)
                .append(licenceFileLabel)
                .append(licenceFile)
-               .append($("<br/>"))
                .append(licenceRadioURL)
                .append(licenceURLLabel)
                .append(licenceURL);
@@ -704,10 +712,10 @@ define(["base/js/namespace",
             .append(citation)
             .append(referencedByLabel)
             .append(referencedBy_divs)
-            .append(fundersLabel)
-            .append(funders)
-            .append(sponsorsLabel)
-            .append(sponsors)
+            //.append(fundersLabel)
+            //.append(funders)
+            //.append(sponsorsLabel)
+            //.append(sponsors)
             .append(licenceLabel)
             .append(licence)
             .append(repositoryLabel)
