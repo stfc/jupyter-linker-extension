@@ -61,6 +61,10 @@ casper.notebook_test(function() {
                 "repository": "edata/8",
                 "publisher":"Publisheroni",
                 "citation":"Citationnaire",
+                "licence": {
+                  "preset":"CCO",
+                  "url": ""
+                }
             };
             md.databundle = [
                 {
