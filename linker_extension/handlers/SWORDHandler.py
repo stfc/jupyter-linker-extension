@@ -7,6 +7,8 @@ import os
 import xml.etree.ElementTree as ET
 import zipfile
 import base64
+import tempfile
+import shutil
 
 from tornado import web, gen, escape
 
@@ -131,9 +133,9 @@ class SWORDHandler(IPythonHandler):
         try:
             notebook_path = arguments['notebookpath']
             notebook_split = notebook_path.split('/')
-            notebook_name = notebook_split[-1]
+            notebook_name = notebook_split[-1]  # get last bit of path
             notebook_dir = os.getcwd()
-            full_path = notebook_dir + "/" + notebook_path
+            notebook_full_path = notebook_dir + "/" + notebook_path
         except web.MissingArgumentError:
             raise web.HTTPError(500, "MissingArgumentError occured - "
                                      "notebook path isn't specified")
@@ -146,6 +148,12 @@ class SWORDHandler(IPythonHandler):
         licence_url = arguments['licence_url']
 
         licence_file_path = ""
+        try:
+            tempdir = tempfile.mkdtemp()
+            os.chdir(tempdir)
+        except IOError:
+            shutil.rmtree(tempdir)
+            raise web.HTTPError(500, "IOError when opening tem dir")
 
         try:
             if licence_preset == "Other":
@@ -171,6 +179,7 @@ class SWORDHandler(IPythonHandler):
                     "LICENSE.txt"
                 )
         except:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when sorting out licence file")
 
         try:
@@ -207,6 +216,7 @@ class SWORDHandler(IPythonHandler):
             licence_xml.append(licence_FLocat_xml)
             files.append(licence_xml)
         except IndexError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IndexError when getting "
                                      "'files' root node")
 
@@ -241,6 +251,7 @@ class SWORDHandler(IPythonHandler):
             licence_struct_xml.append(licence_struct_xml_child)
             struct.append(licence_struct_xml)
         except IndexError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IndexError when getting"
                                      "'struct' root node")
 
@@ -249,12 +260,13 @@ class SWORDHandler(IPythonHandler):
             # TODO: check that this is still sensible
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except IOError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when writing tree to mets.xml")
 
         try:
             created_zip_file = zipfile.ZipFile("notebook.zip", "w")
             created_zip_file.write("mets.xml")
-            created_zip_file.write(notebook_path, notebook_name)
+            created_zip_file.write(notebook_full_path, notebook_name)
 
             if licence_preset == "Other":
                 if licence_url != "":
@@ -265,6 +277,7 @@ class SWORDHandler(IPythonHandler):
                 created_zip_file.write(licence_file_path, "LICENSE.txt")
 
         except:  # dunno what exceptions we might encounter here
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
             created_zip_file.close()
@@ -272,8 +285,10 @@ class SWORDHandler(IPythonHandler):
             with open("notebook.zip", "rb") as f:
                 binary_zip_file = f.read()
         except IOError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when reading zip file "
                                      "as binary data")
+        os.chdir(notebook_dir)
 
         notebook_name_no_extension = notebook_name.split(".")[0]
 
@@ -296,6 +311,7 @@ class SWORDHandler(IPythonHandler):
 
             # TODO: add authenication to the request
         except requests.exceptions.RequestException:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Requests made an error")
 
         print(r.status_code)  # TODO: remove later
@@ -314,18 +330,22 @@ class SWORDHandler(IPythonHandler):
                                      verify=False,
                                      auth=(un, pw))
             except requests.exceptions.RequestException:
+                shutil.rmtree(tempdir)
                 raise web.HTTPError(500, "Requests made an error")
 
             print(r.status_code)
             retries -= 1
 
         if(r.status_code == 201):
+            shutil.rmtree(tempdir)
             self.clear()
             self.set_status(201)
             self.finish(r.text)
         elif (r.status_code == 202):
+            shutil.rmtree(tempdir)
             self.clear()
             self.set_status(202)
             self.finish(r.text)
         else:  # Still failed even after the retries
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Requests failed after 5 retries")

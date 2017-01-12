@@ -5,6 +5,8 @@ import requests
 import os
 import xml.etree.ElementTree as ET
 import zipfile
+import tempfile
+import shutil
 
 from tornado import web, gen, escape
 
@@ -130,9 +132,8 @@ class UploadBundleHandler(IPythonHandler):
         try:
             notebook_path = arguments['notebookpath']
             notebook_split = notebook_path.split('/')
-            notebook_name = notebook_split[-1]
+            notebook_name = notebook_split[-1]  # get last bit of path
             notebook_dir = os.getcwd()
-            full_path = notebook_dir + "/" + notebook_path
         except web.MissingArgumentError:
             raise web.HTTPError(500, "MissingArgumentError occured - "
                                      "notebook path isn't specified")
@@ -185,12 +186,19 @@ class UploadBundleHandler(IPythonHandler):
         except IndexError:
             raise web.HTTPError(500, "IndexError when getting "
                                      "'struct' root node")
+        try:
+            tempdir = tempfile.mkdtemp()
+            os.chdir(tempdir)
+        except IOError:
+            shutil.rmtree(tempdir)
+            raise web.HTTPError(500, "IOError when opening temp dir")
 
         try:
             # this is writing to the cwd - might need to change?
             # TODO: check that this is still sensible
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except IOError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when writing tree to mets.xml")
 
         try:
@@ -199,9 +207,11 @@ class UploadBundleHandler(IPythonHandler):
             if file_paths is not []:
                 if len(file_paths) > 0:
                     for file_path in file_paths:
-                        created_zip_file.write(file_path)
+                        print(file_path)
+                        created_zip_file.write(notebook_dir + "/" + file_path, file_path)
 
         except:  # dunno what exceptions we might encounter here
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
             created_zip_file.close()
@@ -210,8 +220,11 @@ class UploadBundleHandler(IPythonHandler):
             with open("data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
         except IOError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when reading zip file"
                                      "as binary data")
+
+        os.chdir(notebook_dir)
 
         notebook_name_no_extension = notebook_name.split(".")[0]
 
@@ -234,6 +247,7 @@ class UploadBundleHandler(IPythonHandler):
                                  auth=(un, pw))
             # TODO: add authenication to the request
         except requests.exceptions.RequestException:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Requests made an error")
 
         print(r.status_code)  # TODO: remove later
@@ -253,20 +267,24 @@ class UploadBundleHandler(IPythonHandler):
                                      auth=(un, pw))
 
             except requests.exceptions.RequestException:
+                shutil.rmtree(tempdir)
                 raise web.HTTPError(500, "Requests made an error")
 
             print(r.status_code)
             retries -= 1
 
         if(r.status_code == 201):  # created
+            shutil.rmtree(tempdir)
             self.clear()
             self.set_status(201)
             self.finish(r.text)
         elif (r.status_code == 202):  # accepted (waiting for approval)
+            shutil.rmtree(tempdir)
             self.clear()
             self.set_status(202)
             self.finish(r.text)
         else:  # Still failed even after the retries
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Requests failed after 5 retries")
 
 
