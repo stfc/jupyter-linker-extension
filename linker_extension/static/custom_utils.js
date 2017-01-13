@@ -22,7 +22,7 @@ define([], function(){
                             .addClass("alert alert-dismissible fade in")
                             .addClass(alert_type)
                             .attr("role","alert")
-                            .text(message)
+                            .html(message)
                             .append(
                                 $("<button/>")
                                 .addClass("close")

@@ -132,8 +132,9 @@ define([
                     md.databundle_url = id;
                     Jupyter.notebook.save_notebook();
                     custom_utils.create_alert("alert-success",
-                                              "Success! Item created in eData!" +
-                                              "It is located here: " + id)
+                                              "Success! Item created in eData! " +
+                                              "It is located here: <a href =\"" +
+                                              id + "\">" + id + "</a>")
                                 .attr("item-id",id);
                 },
                 function(reason) {
