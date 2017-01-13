@@ -68,7 +68,10 @@ casper.notebook_test(function() {
                 "title": "TO BE DELETED",
                 "repository": "edata/8",
                 "publisher":"Publisheroni",
-                "citation":"Citationnaire",
+                "citations":[
+                  "citation1",
+                  "citation2",
+                ],
                 "licence": {
                     "preset": "CC0",
                     "url": "",

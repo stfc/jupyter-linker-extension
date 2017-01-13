@@ -60,7 +60,10 @@ casper.notebook_test(function() {
                 "title": "BUNDLE TO BE DELETED",
                 "repository": "edata/8",
                 "publisher":"Publisheroni",
-                "citation":"Citationnaire",
+                "citations":[
+                  "citation1",
+                  "citation2",
+                ],
                 "licence": {
                   "preset":"CCO",
                   "url": ""

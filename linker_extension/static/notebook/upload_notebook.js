@@ -34,7 +34,7 @@ define([
                 "date":Jupyter.notebook.metadata.reportmetadata.date,
                 "language":Jupyter.notebook.metadata.reportmetadata.language,
                 "publisher":Jupyter.notebook.metadata.reportmetadata.publisher,
-                "citation":Jupyter.notebook.metadata.reportmetadata.citation,
+                "citations":Jupyter.notebook.metadata.reportmetadata.citations,
                 "referencedBy":Jupyter.notebook.metadata.reportmetadata.referencedBy,
                 "funders":Jupyter.notebook.metadata.reportmetadata.funders,
                 "sponsors":Jupyter.notebook.metadata.reportmetadata.sponsors,

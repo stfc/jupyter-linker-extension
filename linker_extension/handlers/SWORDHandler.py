@@ -106,11 +106,13 @@ class SWORDHandler(IPythonHandler):
             publisher_xml.text = publisher
             metadata.append(publisher_xml)
 
-        citation = arguments['citation']
-        if citation is not '':
-            citation_xml = ET.Element("dcterms:bibliographicCitation")
-            citation_xml.text = citation
-            metadata.append(citation_xml)
+        citations = arguments['citations']
+        if citations is not []:
+            if len(citations) > 0:
+                for citation in citations:
+                    citation_xml = ET.Element("dcterms:bibliographicCitation")
+                    citation_xml.text = citation
+                    metadata.append(citation_xml)
 
         referencedBys = arguments['referencedBy']
         if referencedBys is not []:

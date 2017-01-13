@@ -202,16 +202,22 @@ casper.notebook_test(function() {
         });
     });
 
-    this.waitForSelector("#add-url-button");
+    this.waitForSelector("#add-referencedBy-button");
     //again, create two extra boxes but we'll only use one
-    this.thenClick("#add-url-button");
-    this.thenClick("#add-url-button");
+    this.thenClick("#add-referencedBy-button");
+    this.thenClick("#add-referencedBy-button");
+
+    this.waitForSelector("#add-citation-button");
+    //again, create two extra boxes but we'll only use one
+    this.thenClick("#add-citation-button");
+    this.thenClick("#add-citation-button");
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
             "#publisher": "test publisher",
-            "#citation": "test citation",
+            "#citation-0": "Citation 1",
+            "#citation-2": "Citation 2",
             "#referencedBy-0": "URL1",
             "#referencedBy-2": "URL2"
         });
@@ -233,7 +239,7 @@ casper.notebook_test(function() {
                     tags: [],
                     authors: [],
                     publisher: "",
-                    citation: "",
+                    citations: "",
                     referencedBy: [],
                     repository: "",
                     licence: "",
@@ -247,7 +253,7 @@ casper.notebook_test(function() {
                     tags: md.reportmetadata.tags,
                     authors: md.reportmetadata.authors,
                     publisher: md.reportmetadata.publisher,
-                    citation: md.reportmetadata.citation,
+                    citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
                     repository: md.reportmetadata.repository,
                     licence: md.reportmetadata.licence.preset,
@@ -291,9 +297,9 @@ casper.notebook_test(function() {
             "Publisher has been set correctly"
         );
         this.test.assertEquals(
-            metadata.citation,
-            "test citation",
-            "Citation has been set correctly"
+            metadata.citations,
+            ["Citation 1","Citation 2"],
+            "Citations has been set correctly"
         );
         this.test.assertEquals(
             metadata.referencedBy,
@@ -388,7 +394,7 @@ casper.notebook_test(function() {
                     tags: [],
                     authors: [],
                     publisher: "",
-                    citation: "",
+                    citations: "",
                     referencedBy: [],
                     repository: "",
                     licence: "",
@@ -402,7 +408,7 @@ casper.notebook_test(function() {
                     tags: md.reportmetadata.tags,
                     authors: md.reportmetadata.authors,
                     publisher: md.reportmetadata.publisher,
-                    citation: md.reportmetadata.citation,
+                    citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
                     repository: md.reportmetadata.repository,
                     licence: md.reportmetadata.licence.preset,
@@ -446,9 +452,9 @@ casper.notebook_test(function() {
             "Publisher has been saved correctly"
         );
         this.test.assertEquals(
-            metadata.citation,
-            "test citation",
-            "Citation has been saved correctly"
+            metadata.citations,
+            ["Citation 1","Citation 2"],
+            "Citations has been set correctly"
         );
         this.test.assertEquals(
             metadata.referencedBy,
@@ -492,7 +498,8 @@ casper.notebook_test(function() {
                 authorln1val: document.getElementById("author-last-name-1").value,
                 languageval: document.getElementById("language").value,
                 publisherval: document.getElementById("publisher").value,
-                citationval: document.getElementById("citation").value,
+                citation0val: document.getElementById("citation-0").value,
+                citation1val: document.getElementById("citation-1").value,
                 reference0val: document.getElementById("referencedBy-0").value,
                 reference1val: document.getElementById("referencedBy-1").value,
                 repositoryval: document.getElementById("repository").value,
@@ -560,9 +567,14 @@ casper.notebook_test(function() {
             "Publisher displays properly in the form once set"
         );
         this.test.assertEquals(
-            vals.citationval,
-            "test citation",
-            "Citation displays properly in the form once set"
+            vals.citation0val,
+            "Citation 1",
+            "Citation 0 displays properly in the form once set"
+        );
+        this.test.assertEquals(
+            vals.citation1val,
+            "Citation 2",
+            "Citation 1 displays properly in the form once set"
         );
         this.test.assertEquals(
             vals.reference0val,
@@ -610,14 +622,21 @@ casper.notebook_test(function() {
 
     this.waitForSelector("#collections_loaded"); //feels dirty...
 
-    this.waitForSelector("#add-url-button");
-    this.thenClick("#add-url-button");
-    this.thenClick("#add-url-button");
+    this.waitForSelector("#add-referencedBy-button");
+    this.thenClick("#add-referencedBy-button");
+    this.thenClick("#add-referencedBy-button");
+
+    this.waitForSelector("#add-citation-button");
+    this.thenClick("#add-citation-button");
+    this.thenClick("#add-citation-button");
+
     this.thenClick("#licence-url-radio");
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
+            "#citation-2": "Citation 3",
+            "#citation-3": "Citation 4",
             "#referencedBy-2": "URL3",
             "#referencedBy-3": "URL4",
             "#licence-dropdown": "Other"
@@ -631,6 +650,8 @@ casper.notebook_test(function() {
     });
 
     this.thenEvaluate(function() {
+        $("#citation-1").parent().find("button").click();
+        $("#citation-2").parent().find("button").click();
         $("#referencedBy-1").parent().find("button").click();
         $("#referencedBy-2").parent().find("button").click();
     });
@@ -646,6 +667,7 @@ casper.notebook_test(function() {
                 __utils__.echo("No reportmetadata");
                 return {
                     authors: [],
+                    citations: [],
                     referencedBy: [],
                     licence_preset: "",
                     licence_url: "",
@@ -653,6 +675,7 @@ casper.notebook_test(function() {
             } else {
                 return {
                     authors: md.reportmetadata.authors,
+                    citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
                     licence_preset: md.reportmetadata.licence.preset,
                     licence_url: md.reportmetadata.licence.url
@@ -666,9 +689,14 @@ casper.notebook_test(function() {
             "Authors have been set correctly after deleting some"
         );
         this.test.assertEquals(
+            metadata.citations,
+            ["Citation 1","Citation 4"],
+            "Citations have been set correctly after deleting some"
+        );
+        this.test.assertEquals(
             metadata.referencedBy,
             ["URL1","URL4"],
-            "ReferencedBy had been set correctly after deleting some"
+            "ReferencedBy have been set correctly after deleting some"
         );
         this.test.assertEquals(
             metadata.licence_preset,

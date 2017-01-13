@@ -455,17 +455,36 @@ define(["base/js/namespace",
             .attr("name","publisher")
             .attr("id","publisher");
 
-        var citationLabel = $("<label/>")
-            .attr("for","citation")
-            .text("Citation: ");
+        var citationsLabel = $("<label/>")
+            .attr("for","citations")
+            .text("Citations: ");
+
+        var citations = $("<div/>");
+
+        var citation_div = $("<div/>").addClass("citation_div");
 
         var citation = $("<input/>")
+            .addClass("citation")
             .attr("name","citation")
-            .attr("id","citation");
+            .attr("id","citation-0");
+
+        var addCitationButton = $("<button/>")
+            .addClass("btn btn-xs btn-default")
+            .attr("id","add-citation-button")
+            .attr("type","button")
+            .bind("click",addCitation)
+            .attr("aria-label","Add citation");
+
+        addCitationButton.append($("<i>").addClass("fa fa-plus"));
+
+        citation_div.append(citation);
+        citation_div.append(addCitationButton);
+
+        citations.append(citation_div);
 
         var referencedByLabel = $("<label/>")
             .attr("for","referencedBy")
-            .text("Related publication persistent URL: ");
+            .text("This document is referenced by: ");
 
         var referencedBy = $("<input/>")
             .addClass("referencedBy")
@@ -476,51 +495,83 @@ define(["base/js/namespace",
 
         var referencedBy_divs = $("<div/>");
 
-        var addURLButton = $("<button/>")
+        var addReferencedByButton = $("<button/>")
             .addClass("btn btn-xs btn-default")
-            .attr("id","add-url-button")
+            .attr("id","add-referencedBy-button")
             .attr("type","button")
-            .bind("click",addURL)
-            .attr("aria-label","Add referenced By URL");
+            .bind("click",addReferencedBy)
+            .attr("aria-label","Add referenced by URL");
 
-        addURLButton.append($("<i>").addClass("fa fa-plus"));
+        addReferencedByButton.append($("<i>").addClass("fa fa-plus"));
 
         referencedBy_div.append(referencedBy);
-        referencedBy_div.append(addURLButton);
+        referencedBy_div.append(addReferencedByButton);
 
         referencedBy_divs.append(referencedBy_div);
 
-        var urlcount = 1;
+        var referencedByCount = 1;
+        var citationCount = 1;
 
-        function addURL() {
-            var newURL = ($("<div/>")).addClass("referencedBy_div");
-            var URL = $("<input/>")
+        function addReferencedBy() {
+            var newReferencedBy_div = ($("<div/>")).addClass("referencedBy_div");
+            var newReferencedBy = $("<input/>")
                 .attr("class","referencedBy")
                 .attr("type","text")
-                .attr("id","referencedBy-" + urlcount);
+                .attr("id","referencedBy-" + referencedByCount);
 
-            var previousURL = $(".referencedBy_div").last();
+            var previousReferencedBy = $(".referencedBy_div").last();
 
             //detach from the previously last url input
             //so we can put it back on the new one
-            addURLButton.detach(); 
-            var deleteURL = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-url-button")
+            addReferencedByButton.detach(); 
+            var deleteReferencedBy = $("<button/>")
+                .addClass("btn btn-xs btn-default remove-referencedBy-button")
                 .attr("type","button")
                 .attr("aria-label","Remove referenced By URL")
                     .click(function() {
-                        previousURL.remove();
+                        previousReferencedBy.remove();
                         $(this).remove();
                     }); //add a remove button to the previously last url
 
-            deleteURL.append($("<i>")
+            deleteReferencedBy.append($("<i>")
                              .addClass("fa fa-trash")
                              .attr("aria-hidden","true"));
-            previousURL.append(deleteURL);
-            referencedBy_divs.append(newURL.append(URL).append(addURLButton));
-            urlcount++;
+            previousReferencedBy.append(deleteReferencedBy);
+            referencedBy_divs.append(newReferencedBy_div.append(newReferencedBy).append(addReferencedByButton));
+            referencedByCount++;
 
-            return [URL,newURL];
+            return [newReferencedBy,newReferencedBy_div];
+        }
+
+        function addCitation() {
+            var newCitation_div = ($("<div/>")).addClass("citation_div");
+            var newCitation = $("<input/>")
+                .attr("class","citation")
+                .attr("type","text")
+                .attr("id","citation-" + citationCount);
+
+            var previousCitation = $(".citation_div").last();
+
+            //detach from the previously last url input
+            //so we can put it back on the new one
+            addCitationButton.detach(); 
+            var deleteCitation = $("<button/>")
+                .addClass("btn btn-xs btn-default remove-citation-button")
+                .attr("type","button")
+                .attr("aria-label","Remove citation")
+                    .click(function() {
+                        previousCitation.remove();
+                        $(this).remove();
+                    }); //add a remove button to the previously last url
+
+            deleteCitation.append($("<i>")
+                             .addClass("fa fa-trash")
+                             .attr("aria-hidden","true"));
+            previousCitation.append(deleteCitation);
+            citations.append(newCitation_div.append(newCitation).append(addCitationButton));
+            citationCount++;
+
+            return [newCitation,newCitation_div];
         }
 
         //TODO: i've removed these fields fro the form for now. Do we need them?
@@ -708,8 +759,8 @@ define(["base/js/namespace",
         var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2")
             .append(publisherLabel)
             .append(publisher)
-            .append(citationLabel)
-            .append(citation)
+            .append(citationsLabel)
+            .append(citations)
             .append(referencedByLabel)
             .append(referencedBy_divs)
             //.append(fundersLabel)
@@ -789,48 +840,91 @@ define(["base/js/namespace",
 
             language.val(md.reportmetadata.language);
             publisher.val(md.reportmetadata.publisher);
-            citation.val(md.reportmetadata.citation);
 
-            var URLarr = md.reportmetadata.referencedBy;
-            var deleteURL;
-            URLarr.forEach(function(item,index) {
+            var citationarr = md.reportmetadata.citations;
+            var deleteCitation;
+            citationarr.forEach(function(item,index) {
                 if(index === 0) {
-                    referencedBy.val(item);
-                    if(URLarr.length > 1) {
+                    citation.val(item);
+                    if(citationarr.length > 1) {
                         //need to manually add delete button since addAuthor
                         //relies on finding the previous author using selectors,
                         //which don"t work here since the modal
                         //is still being created I think...
-                        deleteURL = $("<button/>") 
-                            .addClass("btn btn-xs btn-default remove-url-button") 
+                        deleteCitation = $("<button/>") 
+                            .addClass("btn btn-xs btn-default remove-citation-button") 
+                            .attr("type","button")
+                            .attr("aria-label","Remove citation")
+                                .click(function() {
+                                    citation.remove();
+                                    $(this).remove();
+                                });
+                        deleteCitation.append($("<i>")
+                                         .addClass("fa fa-trash")
+                                         .attr("aria-hidden","true"));
+                        citation_div.append(deleteCitation);
+                    }
+                    
+                } else {
+                    var newCitation = addCitation();
+                    newCitation[0].val(item);
+                    if(index !== citationarr.length - 1) { //if not last element
+                        deleteCitation = $("<button/>")
+                            .addClass("btn btn-xs btn-default remove-citation-button")
+                            .attr("type","button")
+                            .attr("aria-label","Remove citaiton")
+                                .click(function() {
+                                    newCitation[1].remove();
+                                    $(this).remove();
+                                });
+                        deleteCitation.append($("<i>")
+                                         .addClass("fa fa-trash")
+                                         .attr("aria-hidden","true"));
+                        newCitation[1].append(deleteCitation);
+                    }
+                }
+            });
+
+            var referencedByarr = md.reportmetadata.referencedBy;
+            var deleteReferencedBy;
+            referencedByarr.forEach(function(item,index) {
+                if(index === 0) {
+                    referencedBy.val(item);
+                    if(referencedByarr.length > 1) {
+                        //need to manually add delete button since addAuthor
+                        //relies on finding the previous author using selectors,
+                        //which don"t work here since the modal
+                        //is still being created I think...
+                        deleteReferencedBy = $("<button/>") 
+                            .addClass("btn btn-xs btn-default remove-referencedBy-button") 
                             .attr("type","button")
                             .attr("aria-label","Remove referenced By URL")
                                 .click(function() {
                                     referencedBy.remove();
                                     $(this).remove();
                                 });
-                        deleteURL.append($("<i>")
+                        deleteReferencedBy.append($("<i>")
                                          .addClass("fa fa-trash")
                                          .attr("aria-hidden","true"));
-                        referencedBy_div.append(deleteURL);
+                        referencedBy_div.append(deleteReferencedBy);
                     }
                     
                 } else {
-                    var URL = addURL();
-                    URL[0].val(item);
-                    if(index !== URLarr.length - 1) { //if not last element
-                        deleteURL = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-url-button")
+                    var newReferencedBy = addReferencedBy();
+                    newReferencedBy[0].val(item);
+                    if(index !== referencedByarr.length - 1) { //if not last element
+                        deleteReferencedBy = $("<button/>")
+                            .addClass("btn btn-xs btn-default remove-referencedBy-button")
                             .attr("type","button")
                             .attr("aria-label","Remove referenced By URL")
                                 .click(function() {
-                                    URL[1].remove();
+                                    newReferencedBy[1].remove();
                                     $(this).remove();
                                 });
-                        deleteURL.append($("<i>")
+                        deleteReferencedBy.append($("<i>")
                                          .addClass("fa fa-trash")
                                          .attr("aria-hidden","true"));
-                        URL[1].append(deleteURL);
+                        newReferencedBy[1].append(deleteReferencedBy);
                     }
                 }
             });
@@ -1028,7 +1122,13 @@ define(["base/js/namespace",
 
             md.reportmetadata.language = $("#language").val();
             md.reportmetadata.publisher = $("#publisher").val();
-            md.reportmetadata.citation = $("#citation").val();
+
+            md.reportmetadata.citations = [];
+            $(".citation").each(function(i,e) {
+                if($(e).val() !== "") {
+                    md.reportmetadata.citations.push($(e).val());
+                }
+            });
             
             md.reportmetadata.referencedBy = [];
             $(".referencedBy").each(function(i,e) {
