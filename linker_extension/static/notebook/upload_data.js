@@ -110,7 +110,7 @@ define([
                 "date":md.reportmetadata.date,
                 "language":md.reportmetadata.language,
                 "publisher":md.reportmetadata.publisher,
-                "citation":md.reportmetadata.citation,
+                "citations":md.reportmetadata.citations,
                 "funders":md.reportmetadata.funders,
                 "sponsors":md.reportmetadata.sponsors,
                 "repository":md.reportmetadata.repository,
@@ -173,6 +173,16 @@ define([
 
         display_files.append(view_data_info.view_data_div);
 
+        var select_data_button = $("<button/>")
+            .addClass("btn btn-xs btn-default select-data-button")
+            .attr("type","button")
+            .text("Select data")
+            .attr("title","Select data to associate with this notebook")
+            .attr("aria-label","Select data to associate with this notebook")
+            .click(function() {
+                select_data.select_data();
+            });
+
         var file_names = view_data_info.file_names;
         var file_paths = view_data_info.file_paths;
         var file_types = view_data_info.file_types;
@@ -221,13 +231,6 @@ define([
 
         var urlcount = 1;
 
-        var data_fields = $("<fieldset/>")
-            .attr("title","data_fields").attr("id","data_fields")
-            .append(data_abstract_label)
-            .append(data_abstract)
-            .append(data_referencedBy_label)
-            .append(data_referencedBy_div);
-
         function addURL() {
             var newURL = ($("<div/>")).addClass("data_referencedBy_div");
             var URL = $("<input/>")
@@ -254,15 +257,38 @@ define([
             return [URL,newURL];
         }
 
-        var select_data_button = $("<button/>")
-            .addClass("btn btn-xs btn-default select-data-button")
-            .attr("type","button")
-            .text("Select data")
-            .attr("title","Select data to associate with this notebook")
-            .attr("aria-label","Select data to associate with this notebook")
-            .click(function() {
-                select_data.select_data();
-            });
+        var data_licences_label = $("<label/>")
+            .attr("for","data-licences")
+            .text("Licences: ");
+
+        //TODO: add licences fields
+
+        var data_TOS_label = $("<label/>")
+            .attr("for","data-TOS")
+            .text("Terms of Service: ");
+
+        //TODO: add TOS fields
+
+        var data_citationss_label = $("<label/>")
+            .attr("for","data-citationss")
+            .text("Third party citationss: ");
+
+        //TODO: add citationss fields
+
+        var data_copyright_label = $("<label/>")
+            .attr("for","data-copyright")
+            .text("Licences: ");
+
+        var data_fields = $("<fieldset/>")
+            .attr("title","data_fields").attr("id","data_fields")
+            .append(data_abstract_label)
+            .append(data_abstract)
+            .append(data_referencedBy_label)
+            .append(data_referencedBy_div)
+            .append(data_licences_label)
+            .append(data_TOS_label)
+            .append(data_citationss_label)
+            .append(data_copyright_label);
 
         var dialog_body = $("<div/>")
             .append(display_files)
@@ -274,7 +300,7 @@ define([
                 file_paths: file_paths, 
                 file_types: file_types};
     };
-    
+
     var action = {
         help: "Upload associated data",
         help_index: "b",
