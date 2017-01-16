@@ -10,11 +10,12 @@ casper.notebook_test(function() {
 
     var username = "";
     var password = "";
+    var test_path = "";
     this.then(function() {
         var path_parts = fs.absolute(this.test.currentTestFile).split("/");
         path_parts.pop();
         path_parts.pop();
-        var test_path = path_parts.join("/") + "/";
+        test_path = path_parts.join("/") + "/";
 
         if (fs.exists(test_path + "login_credentials.txt")) {
             var text = fs.read(test_path + "login_credentials.txt");
@@ -195,9 +196,16 @@ casper.notebook_test(function() {
         this.evaluate(function(un,pw) {
             $("#data_referencedBy-0").val("URL1");
             $("#data_referencedBy-1").val("URL2");
+            $("#data-citation-0").val("Citation");
+            $("data-copyright").val("Copyright");
             $("#username-upload-data").val(un);
             $("#password-upload-data").val(pw);
         },username,password);
+    });
+
+
+    this.then(function() {
+        this.page.uploadFile("#data-TOS",test_path + "Test.txt");
     });
 
     var button = ".btn-primary";
@@ -330,6 +338,7 @@ casper.notebook_test(function() {
     this.then(function() {
         var bitstream_data = this.getElementsAttribute(".test-bitstream-content",
                                                        "bitstream-content");
+        this.echo(bitstream_data);
 
         this.test.assertNotEquals(
             bitstream_data.indexOf("Text in file_in_nbdir.txt"),
@@ -345,6 +354,11 @@ casper.notebook_test(function() {
             bitstream_data.indexOf("Text in file_in_sub_dir1a.txt"),
             -1,
             "file_in_sub_dir1a.txt has correct content"
+        );
+        this.test.assertNotEquals(
+            bitstream_data.indexOf("This is a test TOS file\n"),
+            -1,
+            "TOS 1.txt has correct content"
         );
     });
 

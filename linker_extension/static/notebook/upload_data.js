@@ -6,7 +6,7 @@ define([
     "../custom_contents",
     "./view_data_dialog",
     "./select_data_notebook",
-    "./modify_notebook_html"
+    "./modify_notebook_html",
 ],function(
     Jupyter,
     utils,
@@ -15,6 +15,8 @@ define([
     custom_contents,
     view_data,
     select_data) {
+
+    var Promise = require("es6-promise").Promise;
 
     var upload_data_dialog = function () {
         var upload_data_info = upload_data_form();
@@ -95,54 +97,105 @@ define([
                 }
             });
 
-            var data = JSON.stringify({
-                "username": username,
-                "password": password,
-                "notebookpath": Jupyter.notebook.notebook_path,
-                "file_names": file_names,
-                "file_paths": file_paths,
-                "file_types": file_types,
-                "abstract": $("#data_abstract").val(),
-                "referencedBy": referencedBy_URLs,
-                "title":md.reportmetadata.title,
-                "authors":stringauthors,
-                "tags":md.reportmetadata.tags,
-                "date":md.reportmetadata.date,
-                "language":md.reportmetadata.language,
-                "publisher":md.reportmetadata.publisher,
-                "citations":md.reportmetadata.citations,
-                "funders":md.reportmetadata.funders,
-                "sponsors":md.reportmetadata.sponsors,
-                "repository":md.reportmetadata.repository,
+            var citations = [];
+            $(".data-citation").each(function(i,e) {
+                if($(e).val() !== "") {
+                    citations.push($(e).val());
+                }
             });
-            
-            custom_contents.upload_data(data).then(
-                function(response) {
-                    var id = "";
-                    var xml_str = response.split("\n");
-                    xml_str.forEach(function(item) {
-                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it"s not in the string
-                            var endtag = item.lastIndexOf("<");
-                            var without_endtag = item.slice(0,endtag);
-                            var starttag = without_endtag.indexOf(">");
-                            var without_starttag = without_endtag.slice(starttag + 1);
-                            id = without_starttag;
-                        }
+
+            var abstract = $("#data_abstract").val();
+            abstract = abstract + "\nCopyright: \n";
+            abstract = abstract + $("#data-copyright").val();
+
+            var TOS_files = $("#data-TOS").prop("files");
+            var TOS_files_contents = [];
+            var promises = [];
+
+            if(TOS_files) {
+                for(var i = 0; i < TOS_files.length; i++) {
+                    var promise = new Promise(function(resolve,reject) {
+                        var reader = new FileReader();
+
+                        reader.onload = function(e) {
+                            TOS_files_contents.push(e.target.result);
+                            resolve(e.target.result);
+                        };
+
+                        reader.onerror = function() {
+                            //TODO: handle error
+                            reject();
+                        };
+
+                        reader.readAsDataURL(TOS_files[i]);
                     });
-                    md.databundle_url = id;
-                    Jupyter.notebook.save_notebook();
-                    custom_utils.create_alert("alert-success",
-                                              "Success! Item created in eData! " +
-                                              "It is located here: <a href =\"" +
-                                              id + "\">" + id + "</a>")
-                                .attr("item-id",id);
+                    promises.push(promise);
+                }
+            }
+
+            var wait_for_files = Promise.all(promises);
+
+            wait_for_files.then(
+                function() {
+                    var data = JSON.stringify({
+                        "username": username,
+                        "password": password,
+                        "notebookpath": Jupyter.notebook.notebook_path,
+                        "file_names": file_names,
+                        "file_paths": file_paths,
+                        "file_types": file_types,
+                        "abstract": abstract,
+                        "referencedBy": referencedBy_URLs,
+                        "title":md.reportmetadata.title,
+                        "authors":stringauthors,
+                        "tags":md.reportmetadata.tags,
+                        "date":md.reportmetadata.date,
+                        "language":md.reportmetadata.language,
+                        "publisher":md.reportmetadata.publisher,
+                        "citations":citations,
+                        "funders":md.reportmetadata.funders,
+                        "sponsors":md.reportmetadata.sponsors,
+                        "repository":md.reportmetadata.repository,
+                        "TOS": TOS_files_contents,
+                    });
+                    
+                    custom_contents.upload_data(data).then(
+                        function(response) {
+                            var id = "";
+                            var xml_str = response.split("\n");
+                            xml_str.forEach(function(item) {
+                                if (item.indexOf("<atom:id>") !== -1) { // -1 means it"s not in the string
+                                    var endtag = item.lastIndexOf("<");
+                                    var without_endtag = item.slice(0,endtag);
+                                    var starttag = without_endtag.indexOf(">");
+                                    var without_starttag = without_endtag.slice(starttag + 1);
+                                    id = without_starttag;
+                                }
+                            });
+                            md.databundle_url = id;
+                            Jupyter.notebook.save_notebook();
+                            custom_utils.create_alert("alert-success",
+                                                      "Success! Item created in eData! " +
+                                                      "It is located here: <a href =\"" +
+                                                      id + "\">" + id + "</a>")
+                                        .attr("item-id",id);
+                        },
+                        function(reason) {
+                            custom_utils.create_alert("alert-danger",
+                                                      "Error! " + reason.message + 
+                                                      ", please try again. If it " + 
+                                                      "continues to fail please " + 
+                                                      "contact the developers.");
+                        }
+                    );
                 },
-                function(reason) {
+                function() {
                     custom_utils.create_alert("alert-danger",
-                                              "Error! " + reason.message + 
-                                              ", please try again. If it " + 
-                                              "continues to fail please " + 
-                                              "contact the developers.");
+                                                      "Error! File upload failed" + 
+                                                      ", please try again. If it " + 
+                                                      "continues to fail please " + 
+                                                      "contact the developers.");
+
                 }
             );
         } else { 
@@ -268,17 +321,79 @@ define([
             .attr("for","data-TOS")
             .text("Terms of Service: ");
 
-        //TODO: add TOS fields
+        var data_TOS = $("<input>")
+            .attr("type","file")
+            .attr("id","data-TOS")
+            .attr("name","TOS[]")
+            .attr("multiple","multiple");
 
-        var data_citationss_label = $("<label/>")
-            .attr("for","data-citationss")
-            .text("Third party citationss: ");
+        var data_citations_label = $("<label/>")
+            .attr("for","data-citation")
+            .text("Citations: ");
 
-        //TODO: add citationss fields
+        var data_citations = $("<div/>");
+
+        var data_citation_div = $("<div/>").addClass("data-citation_div");
+
+        var data_citation = $("<input/>")
+            .addClass("data-citation")
+            .attr("name","data citation")
+            .attr("id","data-citation-0");
+
+        var data_addCitationButton = $("<button/>")
+            .addClass("btn btn-xs btn-default")
+            .attr("id","add-data-citation-button")
+            .attr("type","button")
+            .bind("click",addCitation)
+            .attr("aria-label","Add citation");
+
+        data_addCitationButton.append($("<i>").addClass("fa fa-plus"));
+
+        data_citation_div.append(data_citation);
+        data_citation_div.append(data_addCitationButton);
+
+        data_citations.append(data_citation_div);
+
+        var citationCount = 1;
+
+        function addCitation() {
+            var newCitation_div = ($("<div/>")).addClass("data-citation_div");
+            var newCitation = $("<input/>")
+                .attr("class","data-citation")
+                .attr("type","text")
+                .attr("id","data-citation-" + citationCount);
+
+            var previousCitation = $(".data-citation_div").last();
+
+            //detach from the previously last url input
+            //so we can put it back on the new one
+            data_addCitationButton.detach(); 
+            var deleteCitation = $("<button/>")
+                .addClass("btn btn-xs btn-default remove-data-citation-button")
+                .attr("type","button")
+                .attr("aria-label","Remove citation")
+                    .click(function() {
+                        previousCitation.remove();
+                        $(this).remove();
+                    }); //add a remove button to the previously last url
+
+            deleteCitation.append($("<i>")
+                             .addClass("fa fa-trash")
+                             .attr("aria-hidden","true"));
+            previousCitation.append(deleteCitation);
+            data_citations.append(newCitation_div.append(newCitation).append(data_addCitationButton));
+            citationCount++;
+
+            return [newCitation,newCitation_div];
+        }
 
         var data_copyright_label = $("<label/>")
             .attr("for","data-copyright")
-            .text("Licences: ");
+            .text("Copyright: ");
+
+        var data_copyright = $("<textarea/>")
+            .attr("id","data-copyright")
+            .attr("name","copyright");
 
         var data_fields = $("<fieldset/>")
             .attr("title","data_fields").attr("id","data_fields")
@@ -288,8 +403,11 @@ define([
             .append(data_referencedBy_div)
             .append(data_licences_label)
             .append(data_TOS_label)
-            .append(data_citationss_label)
-            .append(data_copyright_label);
+            .append(data_TOS)
+            .append(data_citations_label)
+            .append(data_citations)
+            .append(data_copyright_label)
+            .append(data_copyright);
 
         var dialog_body = $("<div/>")
             .append(display_files)

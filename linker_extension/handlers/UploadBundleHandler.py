@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 import tempfile
 import shutil
+import base64
 
 from tornado import web, gen, escape
 
@@ -145,10 +146,34 @@ class UploadBundleHandler(IPythonHandler):
         file_names = arguments['file_names']
         file_paths = arguments['file_paths']
         file_types = arguments['file_types']
+
+        TOS_files = arguments["TOS"]
+
+        try:
+            tempdir = tempfile.mkdtemp()
+            os.chdir(tempdir)
+        except IOError:
+            shutil.rmtree(tempdir)
+            raise web.HTTPError(500, "IOError when opening temp dir")
+
+        try:
+            for index, file in enumerate(TOS_files):
+                base64_data = file.split(",")[1]
+
+                encoding_info = file.split(",")[0]
+                encoding_info = encoding_info.split(";")[0]
+                encoding_info = encoding_info.split(":")[1]
+
+                with open("TOS " + str(index), "wb") as f:
+                    f.write(base64.decodestring(base64_data.encode("utf-8")))
+        except IOError:
+            shutil.rmtree(tempdir)
+            raise web.HTTPError(500, "IOError when writing the TOS files")
+
         try:
             files = tree.getroot()[2][0]
             id_count = 0
-            if file_paths is not []:
+            if file_paths is not []:  # TODO: enforce that this doesn't happen
                 if len(file_names) > 0:
                     for index, file_path in enumerate(file_paths):
                         if(file_types[index] == 'file'):
@@ -164,7 +189,21 @@ class UploadBundleHandler(IPythonHandler):
                             files_xml.append(FLocat_xml)
                             files.append(files_xml)
                             id_count += 1
+            for i in list(range(0,len(TOS_files))):
+                file_attr = {"GROUPID": "TOS-File-" + str(i),
+                             "ID": "TOS " + str(i),
+                             "MIMETYPE": encoding_info}
+                files_xml = ET.Element('file', file_attr)
+
+                FLocat_attr = {"LOCTYPE": "URL",
+                               "xlink:href": "TOS " + str(i)}
+                FLocat_xml = ET.Element('FLocat', FLocat_attr)
+
+                files_xml.append(FLocat_xml)
+                files.append(files_xml)
+
         except IndexError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IndexError when getting"
                                      "'files' root node")
 
@@ -183,17 +222,28 @@ class UploadBundleHandler(IPythonHandler):
                         helper.dir_search(file_path,
                                           file_type,
                                           struct_xml)
+
             struct.append(struct_xml)
 
+            for i in list(range(0,len(TOS_files))):
+                TOS_struct_attr = {"ID": "sword-mets-div-2",
+                                   "DMDID": "sword-mets-dmd-2",
+                                   "TYPE": "TOS"}
+                TOS_struct_xml = ET.Element('div', TOS_struct_attr)
+
+                TOS_struct_child_attr = {"ID": "sword-mets-div-2", "TYPE": "File"}
+                TOS_struct_xml_child = ET.Element('div', TOS_struct_child_attr)
+
+                TOS_fptr_xml = ET.Element("ftpr", {"FILEID": "TOS " + str(i)})
+
+                TOS_struct_xml_child.append(TOS_fptr_xml)
+                TOS_struct_xml.append(TOS_struct_xml_child)
+                struct.append(TOS_struct_xml)
+
         except IndexError:
+            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IndexError when getting "
                                      "'struct' root node")
-        try:
-            tempdir = tempfile.mkdtemp()
-            os.chdir(tempdir)
-        except IOError:
-            shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when opening temp dir")
 
         try:
             # this is writing to the cwd - might need to change?
@@ -209,8 +259,10 @@ class UploadBundleHandler(IPythonHandler):
             if file_paths is not []:
                 if len(file_paths) > 0:
                     for file_path in file_paths:
-                        print(file_path)
                         created_zip_file.write(notebook_dir + "/" + file_path, file_path)
+
+            for i in list(range(0,len(TOS_files))):
+                created_zip_file.write("TOS " + str(i))
 
         except:  # dunno what exceptions we might encounter here
             shutil.rmtree(tempdir)
