@@ -598,15 +598,13 @@ define(["base/js/namespace",
 
         var licence = $("<div/>")
             .attr("name","licence")
-            .attr("id","licence")
-            .attr("type","file");
+            .attr("id","licence");
 
         //TODO: check that this list is sensible and has all the common
         //ones that users may select
         var licenceDropdown = $("<select/>")
             .attr("name","licence dropdown")
             .attr("id","licence-dropdown")
-            .attr("type","file")
             .append($("<option/>").attr("value","").text("n/A"))
             .append($("<option/>").attr("value","CC0").text("CC0"))
             .append($("<option/>").attr("value","CC BY").text("CC BY"))
