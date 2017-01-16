@@ -21,6 +21,8 @@ define(["base/js/namespace",
     //Publish. Gives users a last chance to add metadata or associate files
     //before uploading notebook and data to dspace.
 
+    var Promise = require("es6-promise").Promise;
+
     var publish_notebook_and_bundle = function() {
         var add_metadata_form_fields = add_metadata.create_fields();
         add_metadata_form_fields.form1.addClass("hide-me");
@@ -168,39 +170,56 @@ define(["base/js/namespace",
                             var licence_file = $("#licence-file").prop("files")[0];
 
                             var licence_file_contents = "";
+                            var promise = null;
                             if ($("#licence-file").val()) {
-                                var reader = new FileReader();
+                                promise = new Promise(function(resolve,reject) {
+                                    var reader = new FileReader();
 
-                                reader.onload = function() {
-                                    licence_file_contents = reader.result;
-                                };
-                                reader.onerror = function() {
-                                    //TODO: handle error
-                                };
+                                    reader.onload = function(e) {
+                                        licence_file_contents = e.target.result;
+                                        resolve(e.target.result);
+                                    };
 
-                                reader.readAsDataURL(licence_file);
+                                    reader.onerror = function() {
+                                        //TODO: handle error
+                                        reject();
+                                    };
+
+                                    reader.readAsDataURL(licence_file);
+                                });
                             }
 
                             request.then(
-                                function() { //success function
-                                    upload_notebook.upload_notebook(
-                                        $("#username").val(),
-                                        $("#password").val(),
-                                        $("#licence-file").val(),
-                                        licence_file_contents
-                                    );
+                                function() {
+                                    promise.then(
+                                        function() { //success function
+                                            upload_notebook.upload_notebook(
+                                                $("#username").val(),
+                                                $("#password").val(),
+                                                $("#licence-file").val(),
+                                                licence_file_contents
+                                            );
 
-                                    upload_data.upload_data(
-                                        $("#username").val(),
-                                        $("#password").val(),
-                                        upload_data_info.file_names,
-                                        upload_data_info.file_paths,
-                                        upload_data_info.file_types
-                                    );
+                                            upload_data.upload_data(
+                                                $("#username").val(),
+                                                $("#password").val(),
+                                                upload_data_info.file_names,
+                                                upload_data_info.file_paths,
+                                                upload_data_info.file_types
+                                            );
 
-                                    $(".modal").modal("hide");
+                                            $(".modal").modal("hide");
+                                        },
+                                        function() { //upload failed
+                                            var error = $("<div/>")
+                                                .addClass("upload-error")
+                                                .css("color","red")
+                                                .text("File upload failed - please try again.");
+                                            instructions.after(error);
+                                        }
+                                    );
                                 },
-                                function(reason) { //fail function
+                                function(reason) { //login failed
                                     var error = $("<div/>")
                                         .addClass("login-error")
                                         .css("color","red");
@@ -209,7 +228,7 @@ define(["base/js/namespace",
                                         //you dun goofed on ur login
                                         error.text("Login details not receognised.");
                                         instructions.after(error);
-                                    } else if (reason.xhr.status === 400) { //unauthorised
+                                    } else if (reason.xhr.status === 400) { //invalid
                                         //you dun goofed on ur login
                                         error.text("Login details not valid.");
                                         instructions.after(error);
@@ -347,31 +366,48 @@ define(["base/js/namespace",
                             var licence_file = $("#licence-file").prop("files")[0];
 
                             var licence_file_contents = "";
+                            var promise = null;
                             if ($("#licence-file").val()) {
-                                var reader = new FileReader();
+                                promise = new Promise(function(resolve,reject) {
+                                    var reader = new FileReader();
 
-                                reader.onload = function() {
-                                    licence_file_contents = reader.result;
-                                };
-                                reader.onerror = function() {
-                                    //TODO: handle error
-                                };
+                                    reader.onload = function(e) {
+                                        licence_file_contents = e.target.result;
+                                        resolve(e.target.result);
+                                    };
 
-                                reader.readAsDataURL(licence_file);
+                                    reader.onerror = function() {
+                                        //TODO: handle error
+                                        reject();
+                                    };
+
+                                    reader.readAsDataURL(licence_file);
+                                });
                             }
 
                             request.then(
-                                function() { //success function
-                                    upload_notebook.upload_notebook(
-                                        $("#username").val(),
-                                        $("#password").val(),
-                                        $("#licence-file").val(),
-                                        licence_file_contents
-                                    );
+                                function() {
+                                    promise.then(
+                                        function() { //success function
+                                            upload_notebook.upload_notebook(
+                                                $("#username").val(),
+                                                $("#password").val(),
+                                                $("#licence-file").val(),
+                                                licence_file_contents
+                                            );
 
-                                    $(".modal").modal("hide");
+                                            $(".modal").modal("hide");
+                                        },
+                                        function() { //upload failed
+                                            var error = $("<div/>")
+                                                .addClass("upload-error")
+                                                .css("color","red")
+                                                .text("File upload failed - please try again.");
+                                            instructions.after(error);
+                                        }
+                                    );
                                 },
-                                function(reason) { //fail function
+                                function(reason) { //login failed
                                     var error = $("<div/>")
                                         .addClass("login-error")
                                         .css("color","red");
@@ -380,7 +416,7 @@ define(["base/js/namespace",
                                         //you dun goofed on ur login
                                         error.text("Login details not receognised.");
                                         instructions.after(error);
-                                    } else if (reason.xhr.status === 400) { //unauthorised
+                                    } else if (reason.xhr.status === 400) { //invalid
                                         //you dun goofed on ur login
                                         error.text("Login details not valid.");
                                         instructions.after(error);
