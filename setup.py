@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import shutil
 import nbconvert
 from setuptools import setup, find_packages
@@ -8,14 +9,30 @@ from setuptools.command.sdist import sdist
 from setuptools.command.install import install
 from distutils.cmd import Command
 
-
 # On build, build the javascript files
 class CustomsdistCommand(sdist):
 
     def run(self):
         # insert custom code here
-        import subprocess
-        subprocess.call(['webpack'])
+        try:
+            import subprocess
+            webpack = subprocess.call('npm list webpack', shell=True)
+            es6_promise = subprocess.call('npm list es6-promise', shell=True)
+            install_cmd = "npm install"
+
+            if webpack != 0:  # 0 means it is installed
+                install_cmd = install_cmd + " webpack"
+
+            if es6_promise != 0:
+                install_cmd = install_cmd + " es6-promise"
+
+            install_cmd = install_cmd + " --progress=false"
+
+            subprocess.call(install_cmd, shell=True)
+            subprocess.call(['webpack'])
+        except OSError as e:
+            print("Failed to run `npm install`: %s" % e, file=sys.stderr)
+            print("npm is required to build the notebook.", file=sys.stderr)
         sdist.run(self)
 
 
@@ -117,7 +134,7 @@ setup_args = dict(
     packages=find_packages(),
     package_data={
         '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
-             notebook_tests + tree_tests + resource_files + ['tests/login_credentials.txt'])
+             notebook_tests + tree_tests + resource_files + ['tests/*.txt'])
     },
     install_requires=[
         'notebook>=4',
