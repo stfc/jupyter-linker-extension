@@ -457,7 +457,7 @@ define(["base/js/namespace",
 
         var citationsLabel = $("<label/>")
             .attr("for","citations")
-            .text("Citations: ");
+            .text("Add citations for any third party resources that have been used in this notebook: ");
 
         var citations = $("<div/>");
 
@@ -484,7 +484,7 @@ define(["base/js/namespace",
 
         var referencedByLabel = $("<label/>")
             .attr("for","referencedBy")
-            .text("This document is referenced by: ");
+            .text("Add URIs for items that reference this notebook or its data: ");
 
         var referencedBy = $("<input/>")
             .addClass("referencedBy")
@@ -723,7 +723,7 @@ define(["base/js/namespace",
 
         var repositoryLabel = $("<label/>") //TODO: it this the most sensible place to  put this? perhaps before upload?
             .attr("for","repository")
-            .text("Repository: ");
+            .text("Department: ");
 
         var repository = $("<select/>")
             .attr("name","repository")
