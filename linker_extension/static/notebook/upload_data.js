@@ -52,18 +52,64 @@ define([
                 Upload: { 
                     class : "btn-primary",
                     click: function() { //todo: remove this button or sort out username
-                        upload_data(
-                            $("#username-upload-data").val(),
-                            $("#password-upload-data").val(),
-                            upload_data_info.file_names,
-                            upload_data_info.file_paths,
-                            upload_data_info.file_types
-                        );
+                        $(".login-error").remove();
+                        validate_upload_data();
+                        if($(".data-form-error").length === 0) {
+                            var username_field_val = $("#username-upload-data").val();
+                            var password_field_val = $("#password-upload-data").val();
+
+                            var login_details = JSON.stringify({
+                                username: username_field_val,
+                                password: password_field_val
+                            });
+
+                            var request = custom_contents.ldap_auth(login_details);
+
+                            request.then(
+                                function() { //success function
+                                    upload_data(
+                                        username_field_val,
+                                        password_field_val,
+                                        upload_data_info.file_names,
+                                        upload_data_info.file_paths,
+                                        upload_data_info.file_types
+                                    );
+
+                                    $(".modal").modal("hide");
+                                },
+                                function(reason) { //fail function
+                                    var error = $("<div/>")
+                                        .addClass("login-error")
+                                        .css("color","red");
+
+                                    if (reason.xhr.status === 401) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not recognised.");
+                                        login_fields.after(error);
+                                    } else if (reason.xhr.status === 400) { //unauthorised
+                                        //you dun goofed on ur login
+                                        error.text("Login details not valid.");
+                                        login_fields.after(error);
+                                    } else {
+                                        console.log(reason);
+                                        console.log(reason.text);
+                                        //shouldn't really get here?
+                                        error.text("Login failed - please try again.");
+                                        login_fields.after(error);
+                                    }
+                                }
+                            );
+                        }
                     }
                 },
             },
             notebook: Jupyter.notebook,
             keyboard_manager: Jupyter.keyboard_manager,
+        });
+
+        modal_obj.on("shown.bs.modal", function () {
+            //don't auto-dismiss when you click upload
+            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss");
         });
     };
 
@@ -191,10 +237,10 @@ define([
                 },
                 function() {
                     custom_utils.create_alert("alert-danger",
-                                                      "Error! File upload failed" + 
-                                                      ", please try again. If it " + 
-                                                      "continues to fail please " + 
-                                                      "contact the developers.");
+                                              "Error! File upload failed" + 
+                                              ", please try again. If it " + 
+                                              "continues to fail please " + 
+                                              "contact the developers.");
 
                 }
             );
@@ -211,6 +257,32 @@ define([
                                           "upload before you an upload it."); 
             }
         }
+    };
+
+    var validate_upload_data = function() {
+        $(".data-form-error").remove();
+
+        if($("#data-copyright").val() === "") {
+            var copyright_error = $("<div/>")
+                .attr("id","copyright-missing-error")
+                .addClass("data-form-error")
+                .text("Please enter copyright information");
+
+            $("label[for=\"data-copyright\"]").after(copyright_error);
+        }
+
+        if($("#data-TOS").prop("files").length === 0) {
+            var TOS_error = $("<div/>")
+                .attr("id","TOS-missing-error")
+                .addClass("data-form-error")
+                .text("Please select the TOS files for the selected files");
+
+            $("label[for=\"data-TOS\"]").after(TOS_error);
+        }
+
+        //TODO: what else do we force users to fill?
+
+        $(".data-form-error").css("color", "red");
     };
     
 

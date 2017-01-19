@@ -191,26 +191,78 @@ casper.notebook_test(function() {
                                "Default string in abstract form field correct");
     });
 
+    this.wait(1000);
+
+    this.thenClick(".btn-primary");
+    this.then(function() {
+        this.test.assertVisible("#TOS-missing-error",
+                                "TOS missing error showing correctly");
+        this.test.assertVisible("#copyright-missing-error",
+                                "Copyright missing error showing correctly");
+    });
+
     this.thenClick("#add-url-button");
     this.then(function() {
-        this.evaluate(function(un,pw) {
+        this.evaluate(function() {
             $("#data_referencedBy-0").val("URL1");
             $("#data_referencedBy-1").val("URL2");
             $("#data-citation-0").val("Citation");
-            $("data-copyright").val("Copyright");
-            $("#username-upload-data").val(un);
-            $("#password-upload-data").val(pw);
-        },username,password);
+            $("#data-copyright").val("Copyright");
+        });
     });
-
 
     this.then(function() {
         this.page.uploadFile("#data-TOS",test_path + "Test.txt");
     });
 
-    var button = ".btn-primary";
-    this.waitForSelector(button);
-    this.thenClick(button);
+    this.wait(1000);
+
+    this.thenClick(".btn-primary");
+    this.waitUntilVisible(".login-error");
+    //phantomjs does something weird with my 400 error - it changes it to a 404
+    //error which causes a test to fail. However, if it is ran in SlimerJS it
+    //works. Plus, it still shows an error - just not the most descriptive one.
+    this.then(function() {
+        this.test.assertVisible(".login-error",
+                                "Login missing error showing correctly");
+        var text = this.evaluate(function() {
+            return $(".login-error").text();
+        });
+        this.test.assertEquals(text,
+                               "Login details not valid.",
+                               "Correct login error showing");
+    });
+
+    this.then(function() {
+        this.evaluate(function() {
+            $("#username-upload-data").val("fakeusername");
+            $("#password-upload-data").val("not a real password");
+        });
+    });
+
+    this.thenClick(".btn-primary");
+    this.waitUntilVisible(".login-error");
+    this.then(function() {
+        this.test.assertVisible(".login-error",
+                                "Login wrong error showing correctly");
+        var text = this.evaluate(function() {
+            return $(".login-error").text();
+        });
+        this.test.assertEquals(text,
+                               "Login details not recognised.",
+                               "Correct login error showing");
+    });
+
+    this.wait(1000);
+
+    this.then(function() {
+        this.evaluate(function(un,pw) {
+            $("#username-upload-data").val(un);
+            $("#password-upload-data").val(pw);
+        },username,password);
+    });
+
+    this.thenClick(".btn-primary");
 
     var alert = ".alert";
     this.waitForSelector(alert);
@@ -358,7 +410,7 @@ casper.notebook_test(function() {
         this.test.assertNotEquals(
             bitstream_data.indexOf("This is a test TOS file\n"),
             -1,
-            "TOS 1.txt has correct content"
+            "TOS 0.txt has correct content"
         );
     });
 
