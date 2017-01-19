@@ -102,6 +102,5 @@ class LDAPHandler(IPythonHandler):
             self.set_status(200)
             self.finish()
         else:
-            print("didn't log in")
             self.set_status(401)
             self.finish()
