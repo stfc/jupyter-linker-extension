@@ -160,9 +160,11 @@ define(["base/js/namespace",
                         else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
                             $(".login-error").remove();
+                            var username_field_val = $("#username").val();
+                            var password_field_val = $("#password").val();
                             var login_details = JSON.stringify({
-                                username: $("#username").val(),
-                                password: $("#password").val()
+                                username: username_field_val,
+                                password: password_field_val
                             });
 
                             var request = custom_contents.ldap_auth(login_details);
@@ -194,15 +196,15 @@ define(["base/js/namespace",
                                     promise.then(
                                         function() { //success function
                                             upload_notebook.upload_notebook(
-                                                $("#username").val(),
-                                                $("#password").val(),
+                                                username_field_val,
+                                                password_field_val,
                                                 $("#licence-file").val(),
                                                 licence_file_contents
                                             );
 
                                             upload_data.upload_data(
-                                                $("#username").val(),
-                                                $("#password").val(),
+                                                username_field_val,
+                                                password_field_val,
                                                 upload_data_info.file_names,
                                                 upload_data_info.file_paths,
                                                 upload_data_info.file_types
@@ -356,9 +358,11 @@ define(["base/js/namespace",
                         else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
                             $(".login-error").remove();
+                            var username_field_val = $("#username").val();
+                            var password_field_val = $("#password").val();
                             var login_details = JSON.stringify({
-                                username: $("#username").val(),
-                                password: $("#password").val()
+                                username: username_field_val,
+                                password: password_field_val
                             });
 
                             var request = custom_contents.ldap_auth(login_details);
@@ -390,8 +394,8 @@ define(["base/js/namespace",
                                     promise.then(
                                         function() { //success function
                                             upload_notebook.upload_notebook(
-                                                $("#username").val(),
-                                                $("#password").val(),
+                                                username_field_val,
+                                                password_field_val,
                                                 $("#licence-file").val(),
                                                 licence_file_contents
                                             );
@@ -546,10 +550,11 @@ define(["base/js/namespace",
                         else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
                             $(".login-error").remove();
-                            console.log(login_details);
+                            var username_field_val = $("#username").val();
+                            var password_field_val = $("#password").val();
                             var login_details = JSON.stringify({
-                                username: $("#username").val(),
-                                password: $("#password").val()
+                                username: username_field_val,
+                                password: password_field_val
                             });
 
                             var request = custom_contents.ldap_auth(login_details);
@@ -557,8 +562,8 @@ define(["base/js/namespace",
                             request.then(
                                 function() { //success function
                                     upload_data.upload_data(
-                                        $("#username").val(),
-                                        $("#password").val(),
+                                        username_field_val,
+                                        password_field_val,
                                         upload_data_info.file_names,
                                         upload_data_info.file_paths,
                                         upload_data_info.file_types
