@@ -31,7 +31,12 @@ define([
 
         $(".bundle-cancel-button").click(function() {
             sessionStorage.removeItem("bundle");
-            window.location.reload(); //TODO: should we redirect to tree page or back to notebook?
+            var nb_url = utils.url_path_join(
+                utils.get_body_data("baseUrl"),
+                "notebooks",
+                referring_notebook
+            );
+            window.location.assign(nb_url);
         });
     };
 
