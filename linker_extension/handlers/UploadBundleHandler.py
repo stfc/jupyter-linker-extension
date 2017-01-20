@@ -122,6 +122,10 @@ class UploadBundleHandler(IPythonHandler):
                     reference_xml.text = referencedBy
                     metadata.append(reference_xml)
 
+        reference_xml = ET.Element("dc:type")
+        reference_xml.text = "Dataset"
+        metadata.append(reference_xml)
+
         # TODO: figure out a way to do funders and sponsors?
         # or get rid of them
         #funders = arguments['funders']
@@ -331,11 +335,13 @@ class UploadBundleHandler(IPythonHandler):
             shutil.rmtree(tempdir)
             self.clear()
             self.set_status(201)
+            print(r.text)
             self.finish(r.text)
         elif (r.status_code == 202):  # accepted (waiting for approval)
             shutil.rmtree(tempdir)
             self.clear()
             self.set_status(202)
+            print(r.text)
             self.finish(r.text)
         else:  # Still failed even after the retries
             shutil.rmtree(tempdir)
