@@ -5,7 +5,6 @@ define([
     "../custom_utils",
     "../custom_contents",
     "./view_data_dialog",
-    "./select_data_notebook",
     "./modify_notebook_html",
 ],function(
     Jupyter,
@@ -13,8 +12,7 @@ define([
     dialog,
     custom_utils,
     custom_contents,
-    view_data,
-    select_data) {
+    view_data) {
 
     var Promise = require("es6-promise").Promise;
 
@@ -23,25 +21,31 @@ define([
 
         var dialog_body = upload_data_info.dialog_body;
 
-        var login_fields = $("<div/>").attr("id","login-fields-upload-data");
+        var login = $("<table/>").attr("id","login-fields-upload-data");
+        var login_labels = $("<tr/>");
+        var login_fields = $("<tr/>");
+
         var username_label = $("<label/>")
             .attr("for","username")
             .text("Username: ");
-        var username_field = $("<input/>").attr("id","username-upload-data");
+        var username_field = $("<input/>").attr("id","username");
 
         var password_label = $("<label/>")
             .attr("for","password")
             .text("Password: ");
         var password_field = $("<input/>")
-            .attr("id","password-upload-data")
+            .attr("id","password")
             .attr("type","password");
 
-        login_fields.append(username_label)
-                    .append(username_field)
-                    .append(password_label)
-                    .append(password_field);
+        login_labels.append($("<td/>").append(username_label))
+                    .append($("<td/>").append(password_label));
 
-        dialog_body.append(login_fields);
+        login_fields.append($("<td/>").append(username_field))
+                    .append($("<td/>").append(password_field));
+
+        login.append(login_labels).append(login_fields);
+
+        dialog_body.append(login);
 
         var modal_obj = dialog.modal({
             title: "Upload Associated Data",
@@ -55,8 +59,8 @@ define([
                         $(".login-error").remove();
                         validate_upload_data();
                         if($(".data-form-error").length === 0) {
-                            var username_field_val = $("#username-upload-data").val();
-                            var password_field_val = $("#password-upload-data").val();
+                            var username_field_val = $("#username").val();
+                            var password_field_val = $("#password").val();
 
                             var login_details = JSON.stringify({
                                 username: username_field_val,
@@ -137,24 +141,24 @@ define([
             });
 
             var referencedBy_URLs = [];
-            $(".data_referencedBy").each(function(i,e) {
+            $(".referencedBy").each(function(i,e) {
                 if($(e).val() !== "") {
                     referencedBy_URLs.push($(e).val());
                 }
             });
 
             var citations = [];
-            $(".data-citation").each(function(i,e) {
+            $(".citation").each(function(i,e) {
                 if($(e).val() !== "") {
                     citations.push($(e).val());
                 }
             });
 
-            var abstract = $("#data_abstract").val();
+            var abstract = $("#abstract").val();
             abstract = abstract + "\nCopyright: \n";
-            abstract = abstract + $("#data-copyright").val();
+            abstract = abstract + $("#copyright").val();
 
-            var TOS_files = $("#data-TOS").prop("files");
+            var TOS_files = $("#TOS").prop("files");
             var TOS_files_contents = [];
             var promises = [];
 
@@ -262,22 +266,22 @@ define([
     var validate_upload_data = function() {
         $(".data-form-error").remove();
 
-        if($("#data-copyright").val() === "") {
+        if($("#copyright").val() === "") {
             var copyright_error = $("<div/>")
                 .attr("id","copyright-missing-error")
                 .addClass("data-form-error")
                 .text("Please enter copyright information");
 
-            $("label[for=\"data-copyright\"]").after(copyright_error);
+            $("label[for=\"copyright\"]").after(copyright_error);
         }
 
-        if($("#data-TOS").prop("files").length === 0) {
+        if($("#TOS").prop("files").length === 0) {
             var TOS_error = $("<div/>")
                 .attr("id","TOS-missing-error")
                 .addClass("data-form-error")
                 .text("Please select the TOS files for the selected files");
 
-            $("label[for=\"data-TOS\"]").after(TOS_error);
+            $("label[for=\"TOS\"]").after(TOS_error);
         }
 
         //TODO: what else do we force users to fill?
@@ -287,40 +291,29 @@ define([
     
 
     var upload_data_form = function() {
-        var display_files = $("<div/>").append(
-            $("<p/>").addClass("bundle-message")
-                .text("These are the files currently associated with " + 
-                      Jupyter.notebook.notebook_name + " :")
-        ).append(
-            $("<br/>")
-        );
+        var display_files = $("<div/>").attr("id","view-and-select-data")
+            .append(
+                $("<p/>").addClass("bundle-message")
+                    .text("These are the files currently associated with " + 
+                          Jupyter.notebook.notebook_name + " :"))
+            .append($("<br/>"));
 
         var view_data_info = view_data.view_data();
 
         display_files.append(view_data_info.view_data_div);
 
-        var select_data_button = $("<button/>")
-            .addClass("btn btn-xs btn-default select-data-button")
-            .attr("type","button")
-            .text("Select data")
-            .attr("title","Select data to associate with this notebook")
-            .attr("aria-label","Select data to associate with this notebook")
-            .click(function() {
-                select_data.select_data();
-            });
-
         var file_names = view_data_info.file_names;
         var file_paths = view_data_info.file_paths;
         var file_types = view_data_info.file_types;
 
-        var data_abstract_label = $("<label/>")
-            .attr("for","data_abstract")
+        var abstract_label = $("<label/>")
+            .attr("for","abstract")
             .text("Please write an abstract here (You may want to write " +
                   " something to describe each file in the bundle): ");
 
-        var data_abstract = $("<textarea/>")
-            .attr("name","data_abstract")
-            .attr("id","data_abstract");
+        var abstract = $("<textarea/>")
+            .attr("name","abstract")
+            .attr("id","abstract");
 
         var default_abstract = "";
         file_names.forEach(function(item,index) {
@@ -332,19 +325,19 @@ define([
             }
         });
 
-        data_abstract.val(default_abstract);
+        abstract.val(default_abstract);
 
-        var data_referencedBy_label = $("<label/>")
-            .attr("for","data_referencedBy")
+        var referencedBy_label = $("<label/>")
+            .attr("for","referencedBy")
             .text("Related publication persistent URLs: ");
 
-        var data_referencedBy = $("<input/>")
-            .addClass("data_referencedBy")
-            .attr("name","data_referencedBy")
-            .attr("id","data_referencedBy-0");
+        var referencedBy = $("<input/>")
+            .addClass("referencedBy")
+            .attr("name","referencedBy")
+            .attr("id","referencedBy-0");
 
-        var data_referencedBy_div = $("<div/>")
-            .addClass("data_referencedBy_div");
+        var referencedBy_div = $("<div/>")
+            .addClass("referencedBy_div");
 
         var addURLButton = $("<button/>").text("Add")
             .addClass("btn btn-xs btn-default")
@@ -352,19 +345,19 @@ define([
             .attr("type","button")
             .bind("click",addURL);
 
-        data_referencedBy_div.append(data_referencedBy);
-        data_referencedBy_div.append(addURLButton);
+        referencedBy_div.append(referencedBy);
+        referencedBy_div.append(addURLButton);
 
         var urlcount = 1;
 
         function addURL() {
-            var newURL = ($("<div/>")).addClass("data_referencedBy_div");
+            var newURL = ($("<div/>")).addClass("referencedBy_div");
             var URL = $("<input/>")
-                .attr("class","data_referencedBy")
+                .attr("class","referencedBy")
                 .attr("type","text")
-                .attr("id","data_referencedBy-" + urlcount);
+                .attr("id","referencedBy-" + urlcount);
 
-            var previousURL = $(".data_referencedBy_div").last();
+            var previousURL = $(".referencedBy_div").last();
             //detach from the previously last url input
             // so we can put it back on the new one
             addURLButton.detach();
@@ -383,65 +376,87 @@ define([
             return [URL,newURL];
         }
 
-        var data_licences_label = $("<label/>")
-            .attr("for","data-licences")
+        var licences_label = $("<label/>")
+            .attr("for","licences")
             .text("Licences: ");
 
         //TODO: add licences fields
 
-        var data_TOS_label = $("<label/>")
-            .attr("for","data-TOS")
+        var TOS_label = $("<label/>")
+            .attr("for","TOS")
             .text("Terms of Service: ");
 
-        var data_TOS = $("<input>")
+        var TOS_container = $("<div/>");
+        var TOS_button = $("<span/>").addClass("btn btn-sm btn-default btn-file").text("Browse");
+        var TOS_feedback = $("<input/>")
+            .attr("readonly","readonly")
+            .attr("type","text")
+            .prop("disabled",true);
+        var TOS = $("<input>")
             .attr("type","file")
-            .attr("id","data-TOS")
+            .attr("id","TOS")
             .attr("name","TOS[]")
             .attr("multiple","multiple");
+        TOS_button.append(TOS);
+        TOS_container.append(TOS_button).append(TOS_feedback);
 
-        var data_citations_label = $("<label/>")
-            .attr("for","data-citation")
+        TOS.change(function() {
+            var input = $(this);
+            var numFiles = input.get(0).files ? input.get(0).files.length : 1;
+            var label = input.val().replace(/\\/g, "/").replace(/.*\//, "");
+            input.trigger("fileselect", [numFiles, label]);
+        });
+
+        TOS.on("fileselect", function(event, numFiles, label) {
+            var log = numFiles > 1 ? numFiles + " files selected" : label;
+
+            TOS_feedback.val(log);
+        });
+
+
+        var citations_label = $("<label/>")
+            .attr("for","citation")
             .text("Citations: ");
 
-        var data_citations = $("<div/>");
+        var citations = $("<div/>");
 
-        var data_citation_div = $("<div/>").addClass("data-citation_div");
+        var citation_div = $("<div/>").addClass("citation_div");
 
-        var data_citation = $("<input/>")
-            .addClass("data-citation")
+        var citation = $("<input/>")
+            .addClass("citation")
             .attr("name","data citation")
-            .attr("id","data-citation-0");
+            .attr("id","citation-0");
 
-        var data_addCitationButton = $("<button/>")
+        var addCitationButton = $("<button/>")
             .addClass("btn btn-xs btn-default")
-            .attr("id","add-data-citation-button")
+            .attr("id","add-citation-button")
             .attr("type","button")
             .bind("click",addCitation)
             .attr("aria-label","Add citation");
 
-        data_addCitationButton.append($("<i>").addClass("fa fa-plus"));
+        addCitationButton.append($("<i>").addClass("fa fa-plus"));
 
-        data_citation_div.append(data_citation);
-        data_citation_div.append(data_addCitationButton);
+        citation_div.append(citation);
+        citation_div.append(addCitationButton);
 
-        data_citations.append(data_citation_div);
+        citations.append(citation_div);
 
         var citationCount = 1;
 
         function addCitation() {
-            var newCitation_div = ($("<div/>")).addClass("data-citation_div");
+            var newCitation_div = ($("<div/>")).addClass("citation_div");
             var newCitation = $("<input/>")
-                .attr("class","data-citation")
+                .attr("class","citation")
                 .attr("type","text")
-                .attr("id","data-citation-" + citationCount);
+                .attr("id","citation-" + citationCount);
 
-            var previousCitation = $(".data-citation_div").last();
+            var previousCitation = $(".citation_div").last();
 
             //detach from the previously last url input
             //so we can put it back on the new one
-            data_addCitationButton.detach(); 
+            addCitationButton.detach(); 
             var deleteCitation = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-data-citation-button")
+                .addClass("btn btn-xs btn-default remove-citation-button")
                 .attr("type","button")
                 .attr("aria-label","Remove citation")
                     .click(function() {
@@ -453,37 +468,36 @@ define([
                              .addClass("fa fa-trash")
                              .attr("aria-hidden","true"));
             previousCitation.append(deleteCitation);
-            data_citations.append(newCitation_div.append(newCitation).append(data_addCitationButton));
+            citations.append(newCitation_div.append(newCitation).append(addCitationButton));
             citationCount++;
 
             return [newCitation,newCitation_div];
         }
 
-        var data_copyright_label = $("<label/>")
-            .attr("for","data-copyright")
+        var copyright_label = $("<label/>")
+            .attr("for","copyright")
             .text("Copyright: ");
 
-        var data_copyright = $("<textarea/>")
-            .attr("id","data-copyright")
+        var copyright = $("<textarea/>")
+            .attr("id","copyright")
             .attr("name","copyright");
 
         var data_fields = $("<fieldset/>")
             .attr("title","data_fields").attr("id","data_fields")
-            .append(data_abstract_label)
-            .append(data_abstract)
-            .append(data_referencedBy_label)
-            .append(data_referencedBy_div)
-            .append(data_licences_label)
-            .append(data_TOS_label)
-            .append(data_TOS)
-            .append(data_citations_label)
-            .append(data_citations)
-            .append(data_copyright_label)
-            .append(data_copyright);
+            .append(abstract_label)
+            .append(abstract)
+            .append(referencedBy_label)
+            .append(referencedBy_div)
+            .append(licences_label)
+            .append(TOS_label)
+            .append(TOS_container)
+            .append(citations_label)
+            .append(citations)
+            .append(copyright_label)
+            .append(copyright);
 
         var dialog_body = $("<div/>")
             .append(display_files)
-            .append(select_data_button)
             .append(data_fields);
 
         return {dialog_body: dialog_body,
