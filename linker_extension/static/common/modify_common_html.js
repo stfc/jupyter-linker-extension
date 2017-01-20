@@ -22,6 +22,11 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
         
         var logo_link = $("#ipython_notebook").children("a");
         logo_link.attr("href","https://www.stfc.ac.uk/");
+        var logo = $("#ipython_notebook").children("a").children("img");
+        logo.attr("src","/nbextensions/linker_extension/common/logo.png");
+
+        var favicon = $("head > link[rel=\"shortcut icon\"]");
+        favicon.attr("href","/nbextensions/linker_extension/common/favicon.ico");
 
         $("head").append(
             $("<link>")
@@ -30,6 +35,7 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
             .attr("href", utils.get_body_data("baseUrl")
                           + "nbextensions/linker_extension/common/common_style.css")
         );
+
 
         //applies to both notebook and edit - put it here so we don't have
         //to add additional code just for the edit page
