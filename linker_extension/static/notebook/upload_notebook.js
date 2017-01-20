@@ -79,34 +79,40 @@ define([
     };
 
     var upload_notebook_dialog = function() {
-        var login_fields = $("<div/>").attr("id","login-fields-new-item");
+        var login = $("<table/>").attr("id","login-fields-new-item");
+        var login_labels = $("<tr/>");
+        var login_fields = $("<tr/>");
+
         var username_label = $("<label/>")
             .attr("for","username")
             .text("Username: ");
-        var username_field = $("<input/>").attr("id","username-new-item");
+        var username_field = $("<input/>").attr("id","username");
 
         var password_label = $("<label/>")
             .attr("for","password")
             .text("Password: ");
         var password_field = $("<input/>")
-            .attr("id","password-new-item")
+            .attr("id","password")
             .attr("type","password");
 
-        login_fields.append(username_label)
-                    .append(username_field)
-                    .append(password_label)
-                    .append(password_field);
+        login_labels.append($("<td/>").append(username_label))
+                    .append($("<td/>").append(password_label));
+
+        login_fields.append($("<td/>").append(username_field))
+                    .append($("<td/>").append(password_field));
+
+        login.append(login_labels).append(login_fields);
 
         var d = dialog.modal({
             title: "Upload Notebook",
-            body: login_fields,
+            body: login,
             default_button: "Cancel",
             buttons: {
                 Upload:  {
                     class : "btn-primary",
                     click: function() {
-                        upload_notebook($("#username-new-item").val(),
-                                        $("#password-new-item").val(),
+                        upload_notebook($("#username").val(),
+                                        $("#password").val(),
                                         "",
                                         "");
                     }
