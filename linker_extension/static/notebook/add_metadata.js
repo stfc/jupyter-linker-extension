@@ -64,6 +64,7 @@ define(["base/js/namespace",
             //only allow the option when publishing
             $("#licence-file-radio").prop("disabled",true);
             $("#licence-file").prop("disabled",true);
+            $("#licence-file-button").attr("disabled","");
         });
     };
 
@@ -638,11 +639,35 @@ define(["base/js/namespace",
             .css("display","none")
             .val("file");
 
+        var licenceFile_container = $("<div/>").css("display","none");
+        var licenceFile_button = $("<span/>")
+            .attr("id","licence-file-button")
+            .addClass("btn btn-sm btn-default btn-file")
+            .text("Browse");
+        var licenceFile_feedback = $("<input/>")
+            .attr("readonly","readonly")
+            .attr("type","text")
+            .prop("disabled",true);
         var licenceFile = $("<input/>")
             .attr("name","licence file")
             .attr("id","licence-file")
             .css("display","none")
             .attr("type","file");
+        licenceFile_button.append(licenceFile);
+        licenceFile_container.append(licenceFile_button).append(licenceFile_feedback);
+
+        licenceFile.change(function() {
+            var input = $(this);
+            var numFiles = input.get(0).files ? input.get(0).files.length : 1;
+            var label = input.val().replace(/\\/g, "/").replace(/.*\//, "");
+            input.trigger("fileselect", [numFiles, label]);
+        });
+
+        licenceFile.on("fileselect", function(event, numFiles, label) {
+            var log = numFiles > 1 ? numFiles + " files selected" : label;
+
+            licenceFile_feedback.val(log);
+        });
 
         //TODO: do we keep the "Add Metadata" button? is it okay they can't
         //specfity a file in advance? Should I either try to allow file upload
@@ -680,34 +705,40 @@ define(["base/js/namespace",
                 licenceRadioURL.css("display","inline");
                 licenceFileLabel.css("display","inline");
                 licenceURLLabel.css("display","inline");
-                licenceFile.css("display","block");
+                licenceFile_container.css("display","block");
                 licenceURL.css("display","block");
             } else {
                 licenceRadioFile.css("display","none");
                 licenceRadioURL.css("display","none");
                 licenceFileLabel.css("display","none");
                 licenceURLLabel.css("display","none");
-                licenceFile.css("display","none");
+                licenceFile_container.css("display","none");
                 licenceURL.css("display","none");          
             }
         });
 
-        licenceRadioFile.click(function() {
+        licenceRadioFile.change(function() {
             licenceURL.prop("disabled",true);
             licenceFile.prop("disabled",false);
+            licenceFile_button.removeAttr("disabled");
         });
 
-        licenceRadioURL.click(function() {
+        licenceRadioURL.change(function() {
             licenceURL.prop("disabled",false);
             licenceFile.prop("disabled",true);
+            licenceFile_button.attr("disabled","");
         });
 
-        licenceFile.click(function() {
-            licenceRadioFile.click();
+        licenceFile_button.click(function() {
+            if(!licenceRadioFile.prop("disabled")) {
+                licenceRadioFile.click();
+            }
         });
 
         licenceURL.click(function() {
-            licenceRadioURL.click();
+            if(!licenceRadioURL.prop("disabled")) {
+                licenceRadioURL.click();
+            }
         });
 
         licence.append(licenceLabel)
@@ -716,7 +747,7 @@ define(["base/js/namespace",
                .append($("<br/>"))
                .append(licenceRadioFile)
                .append(licenceFileLabel)
-               .append(licenceFile)
+               .append(licenceFile_container)
                .append(licenceRadioURL)
                .append(licenceURLLabel)
                .append(licenceURL);

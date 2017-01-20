@@ -57,7 +57,10 @@ define(["base/js/namespace",
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");
         
-        var login_fields = $("<div/>").attr("id","login-fields");
+        var login = $("<table/>").attr("id","login-fields-upload-data");
+        var login_labels = $("<tr/>");
+        var login_fields = $("<tr/>");
+
         var username_label = $("<label/>")
             .attr("for","username")
             .text("Username: ");
@@ -70,12 +73,15 @@ define(["base/js/namespace",
             .attr("id","password")
             .attr("type","password");
 
-        login_fields.append(username_label)
-                    .append(username_field)
-                    .append(password_label)
-                    .append(password_field);
+        login_labels.append($("<td/>").append(username_label))
+                    .append($("<td/>").append(password_label));
 
-        final_page.append(login_fields);
+        login_fields.append($("<td/>").append(username_field))
+                    .append($("<td/>").append(password_field));
+
+        login.append(login_labels).append(login_fields);
+
+        final_page.append(login);
 
         form_body.append(final_page);
 
@@ -285,7 +291,10 @@ define(["base/js/namespace",
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");
 
-        var login_fields = $("<div/>").attr("id","login-fields");
+        var login = $("<table/>").attr("id","login-fields-upload-data");
+        var login_labels = $("<tr/>");
+        var login_fields = $("<tr/>");
+
         var username_label = $("<label/>")
             .attr("for","username")
             .text("Username: ");
@@ -298,12 +307,15 @@ define(["base/js/namespace",
             .attr("id","password")
             .attr("type","password");
 
-        login_fields.append(username_label)
-                    .append(username_field)
-                    .append(password_label)
-                    .append(password_field);
+        login_labels.append($("<td/>").append(username_label))
+                    .append($("<td/>").append(password_label));
 
-        final_page.append(login_fields);
+        login_fields.append($("<td/>").append(username_field))
+                    .append($("<td/>").append(password_field));
+
+        login.append(login_labels).append(login_fields);
+
+        final_page.append(login);
 
         form_body.append(final_page);
 
@@ -476,7 +488,10 @@ define(["base/js/namespace",
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");
         
-        var login_fields = $("<div/>").attr("id","login-fields");
+        var login = $("<table/>").attr("id","login-fields-upload-data");
+        var login_labels = $("<tr/>");
+        var login_fields = $("<tr/>");
+
         var username_label = $("<label/>")
             .attr("for","username")
             .text("Username: ");
@@ -489,12 +504,15 @@ define(["base/js/namespace",
             .attr("id","password")
             .attr("type","password");
 
-        login_fields.append(username_label)
-                    .append(username_field)
-                    .append(password_label)
-                    .append(password_field);
+        login_labels.append($("<td/>").append(username_label))
+                    .append($("<td/>").append(password_label));
 
-        final_page.append(login_fields);
+        login_fields.append($("<td/>").append(username_field))
+                    .append($("<td/>").append(password_field));
+
+        login.append(login_labels).append(login_fields);
+
+        final_page.append(login);
         
         form_body.append(final_page);
 
