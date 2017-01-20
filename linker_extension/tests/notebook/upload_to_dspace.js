@@ -107,11 +107,11 @@ casper.notebook_test(function() {
     this.waitForSelector(selector);
     this.thenClick(selector);
 
-    this.waitForSelector("#username-new-item");
+    this.waitForSelector("#username");
     this.then(function() {
         this.evaluate(function(un,pw) {
-            $("#username-new-item").val(un);
-            $("#password-new-item").val(pw);
+            $("#username").val(un);
+            $("#password").val(pw);
         }, username, password);
     });
 
