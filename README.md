@@ -8,20 +8,15 @@ TODO: upload to PyPi to make simple install easier?
 
 Install Node.js and npm
 
-Install webpack via
-
-`npm install -g webpack`
-
 Download and extract or clone this git repo.
 
-Navigate into the extracted/cloned folder and run the command:
+Navigate into the extracted/cloned folder and run the command. It will install some node packages (`webpack` and `es6-promise`) if they are not already installed:
 
 `python setup.py sdist --formats=gztar,zip`
 
 Install using the command:
 
 `pip install dist/LinkerExtension-1.0.tar.gz`
-
 
 Install and enable the extensions by running the command:
 
