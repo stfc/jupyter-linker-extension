@@ -2,8 +2,9 @@ define([
     "base/js/namespace",
     "base/js/dialog",
     "base/js/utils",
-    "./modify_notebook_html"
-],function(Jupyter,dialog,utils){
+    "./modify_notebook_html",
+    "./select_data_notebook",
+],function(Jupyter,dialog,utils,select_data){
     
     var view_data_dialog = function () {
         var dialog_body = $("<div/>").append(
@@ -32,10 +33,21 @@ define([
         var file_paths = [];
         var file_types = [];
 
+        var select_data_button = $("<button/>")
+            .addClass("btn btn-xs btn-default select-data-button")
+            .attr("type","button")
+            .text("Select data")
+            .attr("title","Select data to associate with this notebook")
+            .attr("aria-label","Select data to associate with this notebook")
+            .click(function() {
+                select_data.select_data();
+            });
+
+        var associated_files = $("<div/>").attr("id","associated-files");
+
         if(!($.isEmptyObject(Jupyter.notebook.metadata))) {
             if("databundle" in Jupyter.notebook.metadata) {
                 var databundle = Jupyter.notebook.metadata.databundle;
-                var bundlehtml = $("<div/>");
                 var type_order = {"directory":0,"notebook":1,"file":2};
                 var db_copy = databundle.slice();
                 db_copy.sort(function(a,b) {
@@ -74,36 +86,40 @@ define([
 
                         divs[parent].append(div);
                     } else {
-                        bundlehtml.append(div);
+                        associated_files.append(div);
                     }
                     file_names.push(item.name);
                     file_paths.push(item.path);
                     file_types.push(item.type);
                 });
-                view_data_div.append(bundlehtml);
+                view_data_div.append(associated_files);
             } else {
-                view_data_div.append($("<div/>")
+                view_data_div.append(associated_files
                                      .text("You have associated no files " + 
                                            "with this notebook!"));
             }
             if("databundle_url" in Jupyter.notebook.metadata) {
-                view_data_div.append($("<br/>"));
-                view_data_div.append($("<strong/>")
+                var exists_warning = $("<div/>").attr("id","exists-warning");
+                exists_warning.append($("<strong/>")
                                      .text("ATTENTION: ")
                                      .css("color","red"));
-                view_data_div.append($("<p/>")
+                exists_warning.append($("<p/>")
                                      .text("You have already uploaded the " + 
                                            "associated data for this notebook. " +
                                            "It is located here: "));
-                view_data_div.append($("<a/>")
+                exists_warning.append($("<a/>")
                                      .attr("href",Jupyter.notebook.metadata.databundle_url)
                                      .text(Jupyter.notebook.metadata.databundle_url));
+                view_data_div.append(exists_warning);
             }
         } else {
-            view_data_div.append($("<div/>")
+            view_data_div.append(associated_files
                                  .text("You have associated no files" + 
                                        "with this notebook!"));
         }
+        view_data_div.append($("<br/>"));
+        associated_files.after(select_data_button);
+
         return {view_data_div: view_data_div,
                 file_names: file_names,
                 file_paths: file_paths,
