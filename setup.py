@@ -134,7 +134,8 @@ setup_args = dict(
     packages=find_packages(),
     package_data={
         '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
-             notebook_tests + tree_tests + resource_files + ['tests/*.txt'])
+             notebook_tests + tree_tests + resource_files + ['tests/*.txt']
+             + ["static/common/logo.png","static/common/favicon.ico"])
     },
     install_requires=[
         'notebook>=4',
