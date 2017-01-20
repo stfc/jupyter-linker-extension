@@ -3,13 +3,16 @@ define([
 ],function(){
 
     var load = function() {
+        $(".dynamic-buttons").after($("<hr/>").attr("id","bundle-divider"));
         var bundle_instructions = $("<div/>")
                                   .addClass("bundle-instructions")
                                   .text("Select files and directories to " + 
                                         "associate with your chosen notebook." +
                                         " Note: you cannot associate notebooks" +
                                         " with other notebooks.\n");
-        $(".dynamic-instructions").after(bundle_instructions);
+        $("#bundle-divider").after(bundle_instructions);
+
+        var bundle_buttons = $("<div/>").attr("id","bundle-buttons");
 
         var bundle_button = $("<button/>")
                             .addClass("bundle-button btn btn-default btn-xs")
@@ -22,7 +25,13 @@ define([
                             .attr("title","Stop associating files and return to the regular tree")
                             .text("Cancel");
 
-        $(".dynamic-buttons").prepend(cancel_button).prepend(bundle_button);
+        bundle_buttons.append(bundle_button).append(cancel_button);
+        $(".bundle-instructions").after(bundle_buttons);
+
+        var upload_html = $(".btn-upload").html();
+        upload_html = upload_html.replace("Upload","Add files to current directory");
+        $(".btn-upload").html(upload_html);        
+
     };
 
     module.exports = {load: load}; 

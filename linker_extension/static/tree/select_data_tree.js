@@ -322,8 +322,10 @@ define([
         }
         if (referring_notebook) {
             $(".bundle-instructions").css("display","inline-block");
+            $("#bundle-divider").css("display","block");
         } else {
-            $(".bundle-instructions").css("display","none");            
+            $(".bundle-instructions").css("display","none");
+            $("#bundle-divider").css("display","none");          
         }
     };
 
