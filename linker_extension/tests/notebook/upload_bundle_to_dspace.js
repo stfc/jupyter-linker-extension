@@ -177,11 +177,11 @@ casper.notebook_test(function() {
     this.thenClick(selector);
 
     //add check here for dialog correctness
-    this.waitForSelector("#data_abstract");
+    this.waitForSelector("#abstract");
     
     this.then(function() {
         var test_textarea_val = this.evaluate(function() {
-            return $("#data_abstract").val();
+            return $("#abstract").val();
         });
         var correct_textarea_str = "file_in_nbdir.txt\n\n" + 
                                    "file_in_sub_∂ir1.txt\n\n" +
@@ -204,15 +204,15 @@ casper.notebook_test(function() {
     this.thenClick("#add-url-button");
     this.then(function() {
         this.evaluate(function() {
-            $("#data_referencedBy-0").val("URL1");
-            $("#data_referencedBy-1").val("URL2");
-            $("#data-citation-0").val("Citation");
-            $("#data-copyright").val("Copyright");
+            $("#referencedBy-0").val("URL1");
+            $("#referencedBy-1").val("URL2");
+            $("#citation-0").val("Citation");
+            $("#copyright").val("Copyright");
         });
     });
 
     this.then(function() {
-        this.page.uploadFile("#data-TOS",test_path + "Test.txt");
+        this.page.uploadFile("#TOS",test_path + "Test.txt");
     });
 
     this.wait(1000);
@@ -235,8 +235,8 @@ casper.notebook_test(function() {
 
     this.then(function() {
         this.evaluate(function() {
-            $("#username-upload-data").val("fakeusername");
-            $("#password-upload-data").val("not a real password");
+            $("#username").val("fakeusername");
+            $("#password").val("not a real password");
         });
     });
 
@@ -257,8 +257,8 @@ casper.notebook_test(function() {
 
     this.then(function() {
         this.evaluate(function(un,pw) {
-            $("#username-upload-data").val(un);
-            $("#password-upload-data").val(pw);
+            $("#username").val(un);
+            $("#password").val(pw);
         },username,password);
     });
 
