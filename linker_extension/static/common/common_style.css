@@ -286,3 +286,7 @@ input.fileinput {
   width: inherit;
   height: inherit;
 }
+
+#licence-URL:disabled {
+  cursor: not-allowed;
+}
