@@ -178,7 +178,7 @@ define(["base/js/namespace",
                             var licence_file = $("#licence-file").prop("files")[0];
 
                             var licence_file_contents = "";
-                            var promise = null;
+                            var promise;
                             if ($("#licence-file").val()) {
                                 promise = new Promise(function(resolve,reject) {
                                     var reader = new FileReader();
@@ -195,6 +195,8 @@ define(["base/js/namespace",
 
                                     reader.readAsDataURL(licence_file);
                                 });
+                            } else {
+                                promise = Promise.resolve();
                             }
 
                             request.then(
@@ -382,7 +384,7 @@ define(["base/js/namespace",
                             var licence_file = $("#licence-file").prop("files")[0];
 
                             var licence_file_contents = "";
-                            var promise = null;
+                            var promise;
                             if ($("#licence-file").val()) {
                                 promise = new Promise(function(resolve,reject) {
                                     var reader = new FileReader();
@@ -399,6 +401,8 @@ define(["base/js/namespace",
 
                                     reader.readAsDataURL(licence_file);
                                 });
+                            } else {
+                                promise = Promise.resolve();
                             }
 
                             request.then(
