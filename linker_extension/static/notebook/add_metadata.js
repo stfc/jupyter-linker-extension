@@ -64,7 +64,7 @@ define(["base/js/namespace",
             //only allow the option when publishing
             $("#licence-file-radio").prop("disabled",true);
             $("#licence-file").prop("disabled",true);
-            $("#licence-file-button").attr("disabled","");
+            $("#licence-file-button").prop("disabled",true);
         });
     };
 
@@ -639,6 +639,11 @@ define(["base/js/namespace",
             .css("display","none")
             .val("file");
 
+        var licenceRadioFileLabel = $("<label/>")
+            .attr("for","licence-file-radio")
+            .text("File Upload")
+            .css("display","none");
+
         var licenceFile_container = $("<div/>").css("display","none");
         var licenceFile_button = $("<span/>")
             .attr("id","licence-file-button")
@@ -651,7 +656,6 @@ define(["base/js/namespace",
         var licenceFile = $("<input/>")
             .attr("name","licence file")
             .attr("id","licence-file")
-            .css("display","none")
             .attr("type","file");
         licenceFile_button.append(licenceFile);
         licenceFile_container.append(licenceFile_button).append(licenceFile_feedback);
@@ -673,6 +677,7 @@ define(["base/js/namespace",
         //specfity a file in advance? Should I either try to allow file upload
         //in the "Add Metadata" stage or remove the button and only have the
         //users specify metadata before publishing?
+
         var licenceFileLabel = $("<label/>")
             .attr("for","licence-file")
             .text("Upload a licence file. Note: you can only upload a file " +
@@ -681,6 +686,10 @@ define(["base/js/namespace",
                   "back to \"Other\" and upload your file when publishing.")
             .css("display","none");
 
+        licenceFileLabel.click(function(e) {
+            e.preventDefault();
+        });
+
         var licenceRadioURL = $("<input/>")
             .attr("name","licence radio")
             .attr("type","radio")
@@ -688,14 +697,19 @@ define(["base/js/namespace",
             .css("display","none")
             .val("URL");
 
+        var licenceRadioURLLabel = $("<label/>")
+            .attr("for","licence-url-radio")
+            .text("URL")
+            .css("display","none");
+
         var licenceURL = $("<input/>")
             .attr("name","licence url")
-            .attr("id","licence-URL")
+            .attr("id","licence-url")
             .css("display","none")
             .attr("type","text");
 
         var licenceURLLabel = $("<label/>")
-            .attr("for","licence-URL")
+            .attr("for","licence-url")
             .text("Provide a URL that links to your licence")
             .css("display","none");
 
@@ -703,8 +717,10 @@ define(["base/js/namespace",
             if($(this).val() === "Other") {
                 licenceRadioFile.css("display","inline");
                 licenceRadioURL.css("display","inline");
-                licenceFileLabel.css("display","inline");
-                licenceURLLabel.css("display","inline");
+                licenceFileLabel.css("display","block");
+                licenceURLLabel.css("display","block");
+                licenceRadioFileLabel.css("display","inline");
+                licenceRadioURLLabel.css("display","inline");
                 licenceFile_container.css("display","block");
                 licenceURL.css("display","block");
             } else {
@@ -712,6 +728,8 @@ define(["base/js/namespace",
                 licenceRadioURL.css("display","none");
                 licenceFileLabel.css("display","none");
                 licenceURLLabel.css("display","none");
+                licenceRadioFileLabel.css("display","none");
+                licenceRadioURLLabel.css("display","none");
                 licenceFile_container.css("display","none");
                 licenceURL.css("display","none");          
             }
@@ -720,25 +738,13 @@ define(["base/js/namespace",
         licenceRadioFile.change(function() {
             licenceURL.prop("disabled",true);
             licenceFile.prop("disabled",false);
-            licenceFile_button.removeAttr("disabled");
+            licenceFile_button.prop("disabled",false);
         });
 
         licenceRadioURL.change(function() {
             licenceURL.prop("disabled",false);
             licenceFile.prop("disabled",true);
-            licenceFile_button.attr("disabled","");
-        });
-
-        licenceFile_button.click(function() {
-            if(!licenceRadioFile.prop("disabled")) {
-                licenceRadioFile.click();
-            }
-        });
-
-        licenceURL.click(function() {
-            if(!licenceRadioURL.prop("disabled")) {
-                licenceRadioURL.click();
-            }
+            licenceFile_button.prop("disabled",true);
         });
 
         licence.append(licenceLabel)
@@ -746,9 +752,11 @@ define(["base/js/namespace",
                .append(licenceDropdown)
                .append($("<br/>"))
                .append(licenceRadioFile)
+               .append(licenceRadioFileLabel)
                .append(licenceFileLabel)
                .append(licenceFile_container)
                .append(licenceRadioURL)
+               .append(licenceRadioURLLabel)
                .append(licenceURLLabel)
                .append(licenceURL);
 
@@ -1083,7 +1091,7 @@ define(["base/js/namespace",
 
             $("label[for=\"licence\"]").after(no_licence_error);
         } else if($("#licence-dropdown").val() === "Other" && 
-                  $("#licence-URL").val() === "" &&
+                  $("#licence-url").val() === "" &&
                   $("#licence-url-radio").prop("checked"))
         {
             var no_licence_url_error = $("<div/>")
@@ -1091,13 +1099,13 @@ define(["base/js/namespace",
                 .addClass("metadata-form-error")
                 .text("Please provide a link to a licence file.");
 
-            $("label[for=\"licence-URL\"]").after(no_licence_url_error);
+            $("label[for=\"licence-url\"]").after(no_licence_url_error);
         } else if($("#licence-dropdown").val() === "Other" && 
                   $("#licence-file").val() === "" &&
                   $("#licence-file-radio").prop("checked"))
         {
             var no_licence_file_error = $("<div/>")
-                .attr("id","no-licence-url-error")
+                .attr("id","no-licence-file-error")
                 .addClass("metadata-form-error")
                 .text("Please upload a licence file.");
 
@@ -1171,7 +1179,7 @@ define(["base/js/namespace",
 
             md.reportmetadata.licence = {
                 "preset": $("#licence-dropdown").val(),
-                "url": $("#licence-URL").val()
+                "url": $("#licence-url").val()
             };
 
             md.reportmetadata.repository = $("#repository").val();
