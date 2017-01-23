@@ -113,7 +113,7 @@ define([
 
         modal_obj.on("shown.bs.modal", function () {
             //don't auto-dismiss when you click upload
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss");
+            $(".modal-footer > .btn-primary").removeAttr("data-dismiss");
         });
     };
 

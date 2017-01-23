@@ -103,7 +103,7 @@ define([
 
         login.append(login_labels).append(login_fields);
 
-        var d = dialog.modal({
+        var modal_obj = dialog.modal({
             title: "Upload Notebook",
             body: login,
             default_button: "Cancel",
@@ -111,16 +111,61 @@ define([
                 Upload:  {
                     class : "btn-primary",
                     click: function() {
-                        upload_notebook($("#username").val(),
-                                        $("#password").val(),
-                                        "",
-                                        "");
+                        $(".login-error").remove();
+                        var username_field_val = $("#username").val();
+                        var password_field_val = $("#password").val();
+
+                        var login_details = JSON.stringify({
+                            username: username_field_val,
+                            password: password_field_val
+                        });
+
+                        var request = custom_contents.ldap_auth(login_details);
+
+                        request.then(
+                            function() { //success function
+                                upload_notebook(
+                                    username_field_val,
+                                    password_field_val,
+                                    "",
+                                    ""
+                                );
+
+                                $(".modal").modal("hide");
+                            },
+                            function(reason) { //fail function
+                                var error = $("<div/>")
+                                    .addClass("login-error")
+                                    .css("color","red");
+
+                                if (reason.xhr.status === 401) { //unauthorised
+                                    //you dun goofed on ur login
+                                    error.text("Login details not recognised.");
+                                    login_fields.after(error);
+                                } else if (reason.xhr.status === 400) { //unauthorised
+                                    //you dun goofed on ur login
+                                    error.text("Login details not valid.");
+                                    login_fields.after(error);
+                                } else {
+                                    console.log(reason);
+                                    console.log(reason.text);
+                                    //shouldn't really get here?
+                                    error.text("Login failed - please try again.");
+                                    login_fields.after(error);
+                                }
+                            }
+                        );
                     }
                 },
                 Cancel: {},
             },
             notebook: Jupyter.notebook,
             keyboard_manager: Jupyter.keyboard_manager,
+        });
+
+        modal_obj.on("shown.bs.modal", function () {
+            //don't auto-dismiss when you click upload
+            $(".modal-footer > .btn-primary").removeAttr("data-dismiss");
         });
     };
     
