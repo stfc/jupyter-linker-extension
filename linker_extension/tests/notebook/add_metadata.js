@@ -645,7 +645,7 @@ casper.notebook_test(function() {
 
     this.then(function() {
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
-            "#licence-URL": "Test"
+            "#licence-url": "Test"
         });
     });
 
