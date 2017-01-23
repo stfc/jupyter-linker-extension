@@ -178,6 +178,7 @@ casper.notebook_test(function() {
 
     //add check here for dialog correctness
     this.waitForSelector("#abstract");
+    this.wait(1000); //need to wait for modal to be fully visible
     
     this.then(function() {
         var test_textarea_val = this.evaluate(function() {
@@ -190,9 +191,7 @@ casper.notebook_test(function() {
                                correct_textarea_str,
                                "Default string in abstract form field correct");
     });
-
-    this.wait(1000);
-
+    
     this.thenClick(".btn-primary");
     this.then(function() {
         this.test.assertVisible("#TOS-missing-error",
@@ -200,6 +199,8 @@ casper.notebook_test(function() {
         this.test.assertVisible("#copyright-missing-error",
                                 "Copyright missing error showing correctly");
     });
+
+    //this.wait(250);
 
     this.thenClick("#add-url-button");
     this.then(function() {
@@ -215,23 +216,9 @@ casper.notebook_test(function() {
         this.page.uploadFile("#TOS",test_path + "Test.txt");
     });
 
-    this.wait(1000);
-
     this.thenClick(".btn-primary");
+    //if it doesn't show, this will fail, so no need to make an assertion
     this.waitUntilVisible(".login-error");
-    //phantomjs does something weird with my 400 error - it changes it to a 404
-    //error which causes a test to fail. However, if it is ran in SlimerJS it
-    //works. Plus, it still shows an error - just not the most descriptive one.
-    this.then(function() {
-        this.test.assertVisible(".login-error",
-                                "Login missing error showing correctly");
-        var text = this.evaluate(function() {
-            return $(".login-error").text();
-        });
-        this.test.assertEquals(text,
-                               "Login details not valid.",
-                               "Correct login error showing");
-    });
 
     this.then(function() {
         this.evaluate(function() {
@@ -242,27 +229,19 @@ casper.notebook_test(function() {
 
     this.thenClick(".btn-primary");
     this.waitUntilVisible(".login-error");
-    this.then(function() {
-        this.test.assertVisible(".login-error",
-                                "Login wrong error showing correctly");
-        var text = this.evaluate(function() {
-            return $(".login-error").text();
-        });
-        this.test.assertEquals(text,
-                               "Login details not recognised.",
-                               "Correct login error showing");
-    });
-
-    this.wait(1000);
 
     this.then(function() {
         this.evaluate(function(un,pw) {
             $("#username").val(un);
             $("#password").val(pw);
-        },username,password);
+        }, username, password);
     });
 
     this.thenClick(".btn-primary");
+
+    this.then(function() {
+        this.test.assertNotVisible(".login-error","Login validation correct");
+    });
 
     var alert = ".alert";
     this.waitForSelector(alert);
@@ -408,7 +387,7 @@ casper.notebook_test(function() {
             "file_in_sub_dir1a.txt has correct content"
         );
         this.test.assertNotEquals(
-            bitstream_data.indexOf("This is a test TOS file\n"),
+            bitstream_data.indexOf("This is a test file\n"),
             -1,
             "TOS 0.txt has correct content"
         );

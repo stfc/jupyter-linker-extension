@@ -6,7 +6,7 @@ casper.notebook_test(function() {
 
     casper.test.info("Testing uploading notebook to DSpace");
 
-    this.viewport(1024, 768);
+    this.viewport(1280, 720);
 
     var username = "";
     var password = "";
@@ -107,7 +107,23 @@ casper.notebook_test(function() {
     this.waitForSelector(selector);
     this.thenClick(selector);
 
-    this.waitForSelector("#username");
+    this.waitForSelector(".modal");
+    this.wait(1000); //need to wait for modal to be fully visible
+
+    this.thenClick(".btn-primary");
+    //if it doesn't show, this will fail, so no need to make an assertion
+    this.waitUntilVisible(".login-error");
+
+    this.then(function() {
+        this.evaluate(function() {
+            $("#username").val("fakeusername");
+            $("#password").val("not a real password");
+        });
+    });
+
+    this.thenClick(".btn-primary");
+    this.waitUntilVisible(".login-error");
+
     this.then(function() {
         this.evaluate(function(un,pw) {
             $("#username").val(un);
@@ -115,9 +131,11 @@ casper.notebook_test(function() {
         }, username, password);
     });
 
-    var button = ".btn-primary";
-    this.waitForSelector(button);
-    this.thenClick(button);
+    this.thenClick(".btn-primary");
+
+    this.then(function() {
+        this.test.assertNotVisible(".login-error","Login validation correct");
+    });
 
     var alert = ".alert";
     this.waitForSelector(alert);
