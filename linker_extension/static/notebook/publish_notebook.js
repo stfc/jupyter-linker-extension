@@ -93,15 +93,12 @@ define(["base/js/namespace",
                 Previous: { 
                     click: function() {
                         //make a multi page form by changing visibility of the forms
-                        if(!$("#upload-data-container").hasClass("hide-me")) {
-                            //can"t go back when we"re on the first page
-                            $("#previous").addClass("disabled"); 
-                        } 
-                        else if($("upload-data-container").hasClass("hide-me") &&
-                                !$("#fields1").hasClass("hide-me"))
+                        if($("upload-data-container").hasClass("hide-me") &&
+                           !$("#fields1").hasClass("hide-me"))
                         {
                             $("#fields1").addClass("hide-me");
                             $("#upload-data-container").removeClass("hide-me");
+                            $("#previous").addClass("disabled");
                             instructions.text("Check the files currently " +
                                               "associated with this notebook. " +
                                               "Click the \"Select Data\" button " +
@@ -124,6 +121,8 @@ define(["base/js/namespace",
                             //we want button text to be next
                             //on any page but the last one
                             $("#next").text("Next");
+                            instructions.text("Check and edit the metadata for " +
+                                              "the notebook before uploading to eData.");
                         }
                     }
                 },
@@ -131,22 +130,24 @@ define(["base/js/namespace",
                     class : "btn-primary",
                     click: function() {
                         if(!$("#upload-data-container").hasClass("hide-me")) {
-                            var bundle_metadata = {};
-                            bundle_metadata.abstract = $("#data_abstract").val();
-                            var referencedBy_URLs = [];
-                            $(".data_referencedBy").each(function(i,e) {
-                                referencedBy_URLs.push($(e).val());
-                            });
-                            bundle_metadata.referencedBy = referencedBy_URLs;
-                            //TODO: do we need to save this metadata or not? ask
+                            upload_data.validate_upload_data();
+                            if($(".data-form-error").length === 0) {
+                                /*var bundle_metadata = {};
+                                bundle_metadata.abstract = $("#data_abstract").val();
+                                var referencedBy_URLs = [];
+                                $(".data_referencedBy").each(function(i,e) {
+                                    referencedBy_URLs.push($(e).val());
+                                });
+                                bundle_metadata.referencedBy = referencedBy_URLs;
+                                //TODO: do we need to save this metadata or not? ask
+                                Jupyter.notebook.metadata.bundle_metadata = bundle_metadata;*/
 
-                            $("#upload-data-container").addClass("hide-me");
-                            $("#fields1").removeClass("hide-me");
-                            $("#previous").removeClass("disabled");
-                            instructions.text("Check and edit the metadata for " +
-                                              "the notebook before uploading to eData.");
-
-                            Jupyter.notebook.metadata.bundle_metadata = bundle_metadata;
+                                $("#upload-data-container").addClass("hide-me");
+                                $("#fields1").removeClass("hide-me");
+                                $("#previous").removeClass("disabled");
+                                instructions.text("Check and edit the metadata for " +
+                                                  "the notebook before uploading to eData.");
+                            }
                         } else if (!$("#fields1").hasClass("hide-me")) {
                             add_metadata.validate_fields1();
                             if($(".metadata-form-error").length === 0) {
@@ -161,6 +162,9 @@ define(["base/js/namespace",
 
                                 //we want next to be publish on the last page
                                 $("#next").text("Publish");
+                                instructions.text("Confirm that you would like " + 
+                                                  "to upload the notebook and " + 
+                                                  "data bundle.");
                             }
                         }
                         else if (!$("#final-page").hasClass("hide-me")) {
@@ -203,19 +207,19 @@ define(["base/js/namespace",
                                 function() {
                                     promise.then(
                                         function() { //success function
-                                            upload_notebook.upload_notebook(
-                                                username_field_val,
-                                                password_field_val,
-                                                $("#licence-file").val(),
-                                                licence_file_contents
-                                            );
-
                                             upload_data.upload_data(
                                                 username_field_val,
                                                 password_field_val,
                                                 upload_data_info.file_names,
                                                 upload_data_info.file_paths,
                                                 upload_data_info.file_types
+                                            );
+
+                                            upload_notebook.upload_notebook(
+                                                username_field_val,
+                                                password_field_val,
+                                                $("#licence-file").val(),
+                                                licence_file_contents
                                             );
 
                                             $(".modal").modal("hide");
@@ -259,7 +263,8 @@ define(["base/js/namespace",
 
         modal.on("shown.bs.modal", function () {
             $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous");
+                                                    .attr("id","previous")
+                                                    .prop("disabled",true);
             $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
                                                     .attr("id","next");
         });
@@ -329,15 +334,12 @@ define(["base/js/namespace",
                 Previous: { 
                     click: function() {
                         //make a multi page form by changing visibility of the forms
-                        if(!$("#fields1").hasClass("hide-me")) {
-                            //can't go back when we'"'re on the first page
-                            $("#previous").addClass("disabled");
-                        } 
-                        else if($("#fields1").hasClass("hide-me") &&
-                                !$("#fields2").hasClass("hide-me"))
+                        if($("#fields1").hasClass("hide-me") &&
+                           !$("#fields2").hasClass("hide-me"))
                         {
                             $("#fields2").addClass("hide-me");
                             $("#fields1").removeClass("hide-me");
+                            $("#previous").addClass("disabled");
                         }
                         else if($("#fields2").hasClass("hide-me") &&
                                 !$("#final-page").hasClass("hide-me"))
@@ -348,6 +350,8 @@ define(["base/js/namespace",
                             //we want button text to be next
                             //on any page but the last one
                             $("#next").text("Next");
+                            instructions.text("Check and edit the metadata for " +
+                                              "the notebook before uploading to eData.");
                         }
                     }
                 },
@@ -367,6 +371,8 @@ define(["base/js/namespace",
                                 $("#fields2").addClass("hide-me");
                                 $("#final-page").removeClass("hide-me");
                                 $("#next").text("Publish"); //we want next to be save on the last page
+                                instructions.text("Confirm that you would like " + 
+                                                  "to upload the notebook.");
                             }
                         }
                         else if (!$("#final-page").hasClass("hide-me")) {
@@ -457,7 +463,8 @@ define(["base/js/namespace",
 
         modal.on("shown.bs.modal", function () {
             $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous");
+                                                    .attr("id","previous")
+                                                    .prop("disabled",true);
             $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
                                                     .attr("id","next");
         });
@@ -528,15 +535,12 @@ define(["base/js/namespace",
                 Previous: { 
                     click: function() {
                         //make a multi page form by changing visibility of the forms
-                        if(!$("#upload-data-container").hasClass("hide-me")) {
-                            //can"t go back when we're on the first page
-                            $("#previous").addClass("disabled");
-                        } 
-                        else if($("upload-data-container").hasClass("hide-me") &&
-                                !$("#final-page").hasClass("hide-me"))
+                        if($("upload-data-container").hasClass("hide-me") &&
+                                !($("#final-page").hasClass("hide-me")))
                         {
                             $("#final-page").addClass("hide-me");
                             $("#upload-data-container").removeClass("hide-me");
+                            $("#previous").addClass("disabled");
 
                             //we want button text to be next
                             //on any page but the last one
@@ -548,25 +552,28 @@ define(["base/js/namespace",
                     class : "btn-primary",
                     click: function() {
                         if(!$("#upload-data-container").hasClass("hide-me")) {
-                            var bundle_metadata = {};
-                            bundle_metadata.abstract = $("#data_abstract").val();
-                            var referencedBy_URLs = [];
-                            $(".data_referencedBy").each(function(i,e) {
-                                referencedBy_URLs.push($(e).val());
-                            });
-                            bundle_metadata.referencedBy = referencedBy_URLs;
-                            //TODO: do we need to save this metadata or not? ask
+                            upload_data.validate_upload_data();
+                            if($(".data-form-error").length === 0) {
+                                /*var bundle_metadata = {};
+                                bundle_metadata.abstract = $("#data_abstract").val();
+                                var referencedBy_URLs = [];
+                                $(".data_referencedBy").each(function(i,e) {
+                                    referencedBy_URLs.push($(e).val());
+                                });
+                                bundle_metadata.referencedBy = referencedBy_URLs;
+                                //TODO: do we need to save this metadata or not? ask
 
-                            Jupyter.notebook.metadata.bundle_metadata = bundle_metadata;
+                                Jupyter.notebook.metadata.bundle_metadata = bundle_metadata;*/
 
-                            $("#upload-data-container").addClass("hide-me");
-                            $("#final-page").removeClass("hide-me");
-                            $("#previous").removeClass("disabled");
-                            instructions.text("Confirm that you would like " + 
-                                              "to upload the data bundle.");
+                                $("#upload-data-container").addClass("hide-me");
+                                $("#final-page").removeClass("hide-me");
+                                $("#previous").removeClass("disabled");
+                                instructions.text("Confirm that you would like " + 
+                                                  "to upload the data bundle.");
 
-                            //we want next to be publish on the last page
-                            $("#next").text("Publish");
+                                //we want next to be publish on the last page
+                                $("#next").text("Publish");
+                            }
                         }
 
                         else if (!$("#final-page").hasClass("hide-me")) {
@@ -623,7 +630,8 @@ define(["base/js/namespace",
 
         modal.on("shown.bs.modal", function () {
             $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous");
+                                                    .attr("id","previous")
+                                                    .prop("disabled",true);
             $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
                                                     .attr("id","next");
         });
