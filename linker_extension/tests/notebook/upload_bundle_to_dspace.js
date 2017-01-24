@@ -177,12 +177,12 @@ casper.notebook_test(function() {
     this.thenClick(selector);
 
     //add check here for dialog correctness
-    this.waitForSelector("#abstract");
+    this.waitForSelector("#data-abstract");
     this.wait(1000); //need to wait for modal to be fully visible
     
     this.then(function() {
         var test_textarea_val = this.evaluate(function() {
-            return $("#abstract").val();
+            return $("#data-abstract").val();
         });
         var correct_textarea_str = "file_in_nbdir.txt\n\n" + 
                                    "file_in_sub_∂ir1.txt\n\n" +
@@ -202,12 +202,12 @@ casper.notebook_test(function() {
 
     //this.wait(250);
 
-    this.thenClick("#add-url-button");
+    this.thenClick("#add-data-url-button");
     this.then(function() {
         this.evaluate(function() {
-            $("#referencedBy-0").val("URL1");
-            $("#referencedBy-1").val("URL2");
-            $("#citation-0").val("Citation");
+            $("#data-referencedBy-0").val("URL1");
+            $("#data-referencedBy-1").val("URL2");
+            $("#data-citation-0").val("Citation");
             $("#copyright").val("Copyright");
         });
     });
@@ -246,10 +246,8 @@ casper.notebook_test(function() {
     var alert = ".alert";
     this.waitForSelector(alert);
     this.then(function() {
-        var alert_element = this.getElementAttribute(alert,"class");
-        this.test.assertEquals(alert_element,
-                               "alert alert-dismissible fade in alert-success",
-                               "Success alert seen");
+        this.test.assertExists(".data-upload-success-alert",
+                               "Data upload success alert seen");
     });
 
     //check that we got the url reference back

@@ -141,20 +141,20 @@ define([
             });
 
             var referencedBy_URLs = [];
-            $(".referencedBy").each(function(i,e) {
+            $(".data-referencedBy").each(function(i,e) {
                 if($(e).val() !== "") {
                     referencedBy_URLs.push($(e).val());
                 }
             });
 
             var citations = [];
-            $(".citation").each(function(i,e) {
+            $(".data-citation").each(function(i,e) {
                 if($(e).val() !== "") {
                     citations.push($(e).val());
                 }
             });
 
-            var abstract = $("#abstract").val();
+            var abstract = $("#data-abstract").val();
             abstract = abstract + "\nCopyright: \n";
             abstract = abstract + $("#copyright").val();
 
@@ -224,7 +224,7 @@ define([
                             });
                             md.databundle_url = id;
                             Jupyter.notebook.save_notebook();
-                            custom_utils.create_alert("alert-success",
+                            custom_utils.create_alert("alert-success data-upload-success-alert",
                                                       "Success! Item created in eData! " +
                                                       "It is located here: <a href =\"" +
                                                       id + "\">" + id + "</a>")
@@ -307,13 +307,13 @@ define([
         var file_types = view_data_info.file_types;
 
         var abstract_label = $("<label/>")
-            .attr("for","abstract")
+            .attr("for","data-abstract")
             .text("Please write an abstract here (You may want to write " +
                   " something to describe each file in the bundle): ");
 
         var abstract = $("<textarea/>")
             .attr("name","abstract")
-            .attr("id","abstract");
+            .attr("id","data-abstract");
 
         var default_abstract = "";
         file_names.forEach(function(item,index) {
@@ -328,20 +328,20 @@ define([
         abstract.val(default_abstract);
 
         var referencedBy_label = $("<label/>")
-            .attr("for","referencedBy")
+            .attr("for","data-referencedBy")
             .text("Related publication persistent URLs: ");
 
         var referencedBy = $("<input/>")
-            .addClass("referencedBy")
-            .attr("name","referencedBy")
-            .attr("id","referencedBy-0");
+            .addClass("data-referencedBy")
+            .attr("name","data-referencedBy")
+            .attr("id","data-referencedBy-0");
 
         var referencedBy_div = $("<div/>")
-            .addClass("referencedBy_div");
+            .addClass("data-referencedBy_div");
 
         var addURLButton = $("<button/>").text("Add")
             .addClass("btn btn-xs btn-default")
-            .attr("id","add-url-button")
+            .attr("id","add-data-url-button")
             .attr("type","button")
             .bind("click",addURL);
 
@@ -351,19 +351,18 @@ define([
         var urlcount = 1;
 
         function addURL() {
-            var newURL = ($("<div/>")).addClass("referencedBy_div");
+            var newURL = ($("<div/>")).addClass("data-referencedBy_div");
             var URL = $("<input/>")
-                .attr("class","referencedBy")
+                .attr("class","data-referencedBy")
                 .attr("type","text")
-                .attr("id","referencedBy-" + urlcount);
+                .attr("id","data-referencedBy-" + urlcount);
 
             var previousURL = $(".referencedBy_div").last();
             //detach from the previously last url input
             // so we can put it back on the new one
             addURLButton.detach();
             var deleteURL = $("<button/>").text("Remove")
-                .addClass("btn btn-xs btn-default")
-                .attr("id","remove-url-button")
+                .addClass("btn btn-xs btn-default remove-url-button remove-data-url-button")
                 .attr("type","button")
                     .click(function() {
                         previousURL.remove();
@@ -415,21 +414,21 @@ define([
 
 
         var citations_label = $("<label/>")
-            .attr("for","citation")
+            .attr("for","data-citations")
             .text("Citations: ");
 
-        var citations = $("<div/>");
+        var citations = $("<div/>").attr("id", "data-citations");
 
-        var citation_div = $("<div/>").addClass("citation_div");
+        var citation_div = $("<div/>").addClass("data-citation_div");
 
         var citation = $("<input/>")
-            .addClass("citation")
-            .attr("name","data citation")
-            .attr("id","citation-0");
+            .addClass("data-citation citation")
+            .attr("name","citation")
+            .attr("id","data-citation-0");
 
         var addCitationButton = $("<button/>")
             .addClass("btn btn-xs btn-default")
-            .attr("id","add-citation-button")
+            .attr("id","add-data-citation-button")
             .attr("type","button")
             .bind("click",addCitation)
             .attr("aria-label","Add citation");
@@ -444,19 +443,19 @@ define([
         var citationCount = 1;
 
         function addCitation() {
-            var newCitation_div = ($("<div/>")).addClass("citation_div");
+            var newCitation_div = ($("<div/>")).addClass("data-citation_div");
             var newCitation = $("<input/>")
-                .attr("class","citation")
+                .attr("class","data-citation citation")
                 .attr("type","text")
-                .attr("id","citation-" + citationCount);
+                .attr("id","data-citation-" + citationCount);
 
-            var previousCitation = $(".citation_div").last();
+            var previousCitation = $(".data-citation_div").last();
 
             //detach from the previously last url input
             //so we can put it back on the new one
             addCitationButton.detach(); 
             var deleteCitation = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-citation-button")
+                .addClass("btn btn-xs btn-default remove-citation-button remove-data-citation-button")
                 .attr("type","button")
                 .attr("aria-label","Remove citation")
                     .click(function() {
@@ -527,5 +526,6 @@ define([
         load: load, 
         upload_data_form: upload_data_form,
         upload_data: upload_data,
+        validate_upload_data: validate_upload_data,
     };
 });

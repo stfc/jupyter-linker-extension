@@ -55,7 +55,7 @@ define([
                             id = without_starttag;
                         }
                     });
-                    custom_utils.create_alert("alert-success",
+                    custom_utils.create_alert("alert-success nb-upload-success-alert",
                                               "Success! Item created in eData! " +
                                               "It is located here: <a href =\"" +
                                               id + "\">" + id + "</a>")

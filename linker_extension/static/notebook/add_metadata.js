@@ -351,10 +351,10 @@ define(["base/js/namespace",
         }
 
         var abstractLabel = $("<label/>")
-            .attr("for","abstract")
+            .attr("for","nb-abstract")
             .text("Abstract: ");
 
-        var abstract = $("<textarea/>").attr("name","abstract").attr("id","abstract");
+        var abstract = $("<textarea/>").attr("name","abstract").attr("id","nb-abstract");
 
         var tagsLabel = $("<label/>")
             .attr("for","tags")
@@ -457,21 +457,21 @@ define(["base/js/namespace",
             .attr("id","publisher");
 
         var citationsLabel = $("<label/>")
-            .attr("for","citations")
+            .attr("for","nb-citations")
             .text("Add citations for any third party resources that have been used in this notebook: ");
 
         var citations = $("<div/>");
 
-        var citation_div = $("<div/>").addClass("citation_div");
+        var citation_div = $("<div/>").addClass("nb-citation_div");
 
         var citation = $("<input/>")
-            .addClass("citation")
+            .addClass("nb-citation")
             .attr("name","citation")
-            .attr("id","citation-0");
+            .attr("id","nb-citation-0");
 
         var addCitationButton = $("<button/>")
             .addClass("btn btn-xs btn-default")
-            .attr("id","add-citation-button")
+            .attr("id","add-nb-citation-button")
             .attr("type","button")
             .bind("click",addCitation)
             .attr("aria-label","Add citation");
@@ -484,21 +484,21 @@ define(["base/js/namespace",
         citations.append(citation_div);
 
         var referencedByLabel = $("<label/>")
-            .attr("for","referencedBy")
+            .attr("for","nb-referencedBy")
             .text("Add URIs for items that reference this notebook or its data: ");
 
         var referencedBy = $("<input/>")
-            .addClass("referencedBy")
+            .addClass("nb-referencedBy")
             .attr("name","referencedBy")
-            .attr("id","referencedBy-0");
+            .attr("id","nb-referencedBy-0");
 
-        var referencedBy_div = $("<div/>").addClass("referencedBy_div");
+        var referencedBy_div = $("<div/>").addClass("nb-referencedBy_div");
 
         var referencedBy_divs = $("<div/>");
 
         var addReferencedByButton = $("<button/>")
             .addClass("btn btn-xs btn-default")
-            .attr("id","add-referencedBy-button")
+            .attr("id","add-nb-referencedBy-button")
             .attr("type","button")
             .bind("click",addReferencedBy)
             .attr("aria-label","Add referenced by URL");
@@ -514,19 +514,19 @@ define(["base/js/namespace",
         var citationCount = 1;
 
         function addReferencedBy() {
-            var newReferencedBy_div = ($("<div/>")).addClass("referencedBy_div");
+            var newReferencedBy_div = ($("<div/>")).addClass("nb-referencedBy_div");
             var newReferencedBy = $("<input/>")
-                .attr("class","referencedBy")
+                .attr("class","nb-referencedBy")
                 .attr("type","text")
-                .attr("id","referencedBy-" + referencedByCount);
+                .attr("id","nb-referencedBy-" + referencedByCount);
 
-            var previousReferencedBy = $(".referencedBy_div").last();
+            var previousReferencedBy = $(".nb-referencedBy_div").last();
 
             //detach from the previously last url input
             //so we can put it back on the new one
             addReferencedByButton.detach(); 
             var deleteReferencedBy = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-referencedBy-button")
+                .addClass("btn btn-xs btn-default remove-nb-referencedBy-button remove-referencedBy-button")
                 .attr("type","button")
                 .attr("aria-label","Remove referenced By URL")
                     .click(function() {
@@ -545,19 +545,19 @@ define(["base/js/namespace",
         }
 
         function addCitation() {
-            var newCitation_div = ($("<div/>")).addClass("citation_div");
+            var newCitation_div = ($("<div/>")).addClass("nb-citation_div");
             var newCitation = $("<input/>")
-                .attr("class","citation")
+                .attr("class","nb-citation")
                 .attr("type","text")
-                .attr("id","citation-" + citationCount);
+                .attr("id","nb-citation-" + citationCount);
 
-            var previousCitation = $(".citation_div").last();
+            var previousCitation = $(".nb-citation_div").last();
 
             //detach from the previously last url input
             //so we can put it back on the new one
             addCitationButton.detach(); 
             var deleteCitation = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-citation-button")
+                .addClass("btn btn-xs btn-default remove-nb-citation-button remove-citation-button")
                 .attr("type","button")
                 .attr("aria-label","Remove citation")
                     .click(function() {
@@ -889,7 +889,7 @@ define(["base/js/namespace",
                         //which don"t work here since the modal
                         //is still being created I think...
                         deleteCitation = $("<button/>") 
-                            .addClass("btn btn-xs btn-default remove-citation-button") 
+                            .addClass("btn btn-xs btn-default remove-citation-button remove-nb-citation-button") 
                             .attr("type","button")
                             .attr("aria-label","Remove citation")
                                 .click(function() {
@@ -907,7 +907,7 @@ define(["base/js/namespace",
                     newCitation[0].val(item);
                     if(index !== citationarr.length - 1) { //if not last element
                         deleteCitation = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-citation-button")
+                            .addClass("btn btn-xs btn-default remove-citation-button remove-nb-citation-button")
                             .attr("type","button")
                             .attr("aria-label","Remove citaiton")
                                 .click(function() {
@@ -933,7 +933,7 @@ define(["base/js/namespace",
                         //which don"t work here since the modal
                         //is still being created I think...
                         deleteReferencedBy = $("<button/>") 
-                            .addClass("btn btn-xs btn-default remove-referencedBy-button") 
+                            .addClass("btn btn-xs btn-default remove-referencedBy-button remove-nb-referencedBy-button") 
                             .attr("type","button")
                             .attr("aria-label","Remove referenced By URL")
                                 .click(function() {
@@ -951,7 +951,7 @@ define(["base/js/namespace",
                     newReferencedBy[0].val(item);
                     if(index !== referencedByarr.length - 1) { //if not last element
                         deleteReferencedBy = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-referencedBy-button")
+                            .addClass("btn btn-xs btn-default remove-referencedBy-button remove-nb-referencedBy-button")
                             .attr("type","button")
                             .attr("aria-label","Remove referenced By URL")
                                 .click(function() {
@@ -970,12 +970,14 @@ define(["base/js/namespace",
             sponsors.val(md.reportmetadata.sponsors);
             licenceDropdown.val(md.reportmetadata.licence.preset);
             if(md.reportmetadata.licence.preset === "Other") {
-                licenceURLLabel.css("display","inline");
-                licenceFileLabel.css("display","inline");
-                licenceRadioURL.css("display","inline");
                 licenceRadioFile.css("display","inline");
+                licenceRadioURL.css("display","inline");
+                licenceFileLabel.css("display","block");
+                licenceURLLabel.css("display","block");
+                licenceRadioFileLabel.css("display","inline");
+                licenceRadioURLLabel.css("display","inline");
+                licenceFile_container.css("display","block");
                 licenceURL.css("display","block");
-                licenceFile.css("display","block");
             }
             licenceURL.val(md.reportmetadata.licence.url);
             if (licenceURL.val()) {
@@ -997,13 +999,13 @@ define(["base/js/namespace",
 
             $("label[for=\"title\"]").after(title_error);
         }
-        if($("#abstract").val() === "") {
+        if($("#nb-abstract").val() === "") {
             var abstract_error = $("<div/>")
-                .attr("id","abstract-missing-error")
+                .attr("id","nb-abstract-missing-error")
                 .addClass("metadata-form-error")
                 .text("Please enter an abstract");
 
-            $("label[for=\"abstract\"]").after(abstract_error);
+            $("label[for=\"nb-abstract\"]").after(abstract_error);
         }
         var isInteger = function(str,greaterthan,lessthan) {
             var n = ~~Number(str); //convert into a number with no decimal part
@@ -1129,7 +1131,7 @@ define(["base/js/namespace",
                     md.reportmetadata.authors.push(authorarr);
                 }
             });
-            md.reportmetadata.abstract = $("#abstract").val();
+            md.reportmetadata.abstract = $("#nb-abstract").val();
 
             //Split our textarea by lines
             var split = $("#tags").val().split("\n");
@@ -1161,14 +1163,14 @@ define(["base/js/namespace",
             md.reportmetadata.publisher = $("#publisher").val();
 
             md.reportmetadata.citations = [];
-            $(".citation").each(function(i,e) {
+            $(".nb-citation").each(function(i,e) {
                 if($(e).val() !== "") {
                     md.reportmetadata.citations.push($(e).val());
                 }
             });
             
             md.reportmetadata.referencedBy = [];
-            $(".referencedBy").each(function(i,e) {
+            $(".nb-referencedBy").each(function(i,e) {
                 if($(e).val() !== "") {
                     md.reportmetadata.referencedBy.push($(e).val());
                 }

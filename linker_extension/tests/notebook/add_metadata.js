@@ -26,7 +26,7 @@ casper.notebook_test(function() {
     this.then(function() {
         this.test.assertExists("#title-missing-error",
                                "Title missing error exists");
-        this.test.assertExists("#abstract-missing-error",
+        this.test.assertExists("#nb-abstract-missing-error",
                                "Abstract missing error exists");
         this.test.assertExists("#year-missing-error",
                                "Year missing error exists");
@@ -142,7 +142,7 @@ casper.notebook_test(function() {
         //need to use fillSelectors over fill to fill in the authors
         this.fillSelectors("form#add_metadata_form > fieldset#fields1", { 
             "#title": "My Title",
-            "#abstract": "My abstract",
+            "#nb-abstract": "My abstract",
             "#year": "1995",
             "#month": "8",
             "#day": "20",
@@ -202,24 +202,24 @@ casper.notebook_test(function() {
         });
     });
 
-    this.waitForSelector("#add-referencedBy-button");
+    this.waitForSelector("#add-nb-referencedBy-button");
     //again, create two extra boxes but we'll only use one
-    this.thenClick("#add-referencedBy-button");
-    this.thenClick("#add-referencedBy-button");
+    this.thenClick("#add-nb-referencedBy-button");
+    this.thenClick("#add-nb-referencedBy-button");
 
-    this.waitForSelector("#add-citation-button");
+    this.waitForSelector("#add-nb-citation-button");
     //again, create two extra boxes but we'll only use one
-    this.thenClick("#add-citation-button");
-    this.thenClick("#add-citation-button");
+    this.thenClick("#add-nb-citation-button");
+    this.thenClick("#add-nb-citation-button");
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
             "#publisher": "test publisher",
-            "#citation-0": "Citation 1",
-            "#citation-2": "Citation 2",
-            "#referencedBy-0": "URL1",
-            "#referencedBy-2": "URL2"
+            "#nb-citation-0": "Citation 1",
+            "#nb-citation-2": "Citation 2",
+            "#nb-referencedBy-0": "URL1",
+            "#nb-referencedBy-2": "URL2"
         });
     }); //TODO: add funders and sponsors if we can use them
     this.thenClick("#next");
@@ -487,7 +487,7 @@ casper.notebook_test(function() {
         var vals = this.evaluate(function(){
             return {
                 titleval: document.getElementById("title").value,
-                abstractval: document.getElementById("abstract").value,
+                abstractval: document.getElementById("nb-abstract").value,
                 yearval: document.getElementById("year").value,
                 monthval: document.getElementById("month").value,
                 dayval: document.getElementById("day").value,
@@ -498,10 +498,10 @@ casper.notebook_test(function() {
                 authorln1val: document.getElementById("author-last-name-1").value,
                 languageval: document.getElementById("language").value,
                 publisherval: document.getElementById("publisher").value,
-                citation0val: document.getElementById("citation-0").value,
-                citation1val: document.getElementById("citation-1").value,
-                reference0val: document.getElementById("referencedBy-0").value,
-                reference1val: document.getElementById("referencedBy-1").value,
+                citation0val: document.getElementById("nb-citation-0").value,
+                citation1val: document.getElementById("nb-citation-1").value,
+                reference0val: document.getElementById("nb-referencedBy-0").value,
+                reference1val: document.getElementById("nb-referencedBy-1").value,
                 repositoryval: document.getElementById("repository").value,
                 licenceval: document.getElementById("licence-dropdown").value,
             };
@@ -622,23 +622,23 @@ casper.notebook_test(function() {
 
     this.waitForSelector("#collections_loaded"); //feels dirty...
 
-    this.waitForSelector("#add-referencedBy-button");
-    this.thenClick("#add-referencedBy-button");
-    this.thenClick("#add-referencedBy-button");
+    this.waitForSelector("#add-nb-referencedBy-button");
+    this.thenClick("#add-nb-referencedBy-button");
+    this.thenClick("#add-nb-referencedBy-button");
 
-    this.waitForSelector("#add-citation-button");
-    this.thenClick("#add-citation-button");
-    this.thenClick("#add-citation-button");
+    this.waitForSelector("#add-nb-citation-button");
+    this.thenClick("#add-nb-citation-button");
+    this.thenClick("#add-nb-citation-button");
 
     this.thenClick("#licence-url-radio");
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
-            "#citation-2": "Citation 3",
-            "#citation-3": "Citation 4",
-            "#referencedBy-2": "URL3",
-            "#referencedBy-3": "URL4",
+            "#nb-citation-2": "Citation 3",
+            "#nb-citation-3": "Citation 4",
+            "#nb-referencedBy-2": "URL3",
+            "#nb-referencedBy-3": "URL4",
             "#licence-dropdown": "Other"
         });
     });
@@ -650,10 +650,10 @@ casper.notebook_test(function() {
     });
 
     this.thenEvaluate(function() {
-        $("#citation-1").parent().find("button").click();
-        $("#citation-2").parent().find("button").click();
-        $("#referencedBy-1").parent().find("button").click();
-        $("#referencedBy-2").parent().find("button").click();
+        $("#nb-citation-1").parent().find("button").click();
+        $("#nb-citation-2").parent().find("button").click();
+        $("#nb-referencedBy-1").parent().find("button").click();
+        $("#nb-referencedBy-2").parent().find("button").click();
     });
 
     this.thenClick("#next");
