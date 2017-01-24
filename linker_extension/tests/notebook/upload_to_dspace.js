@@ -73,7 +73,7 @@ casper.notebook_test(function() {
                   "citation2",
                 ],
                 "licence": {
-                    "preset": "CC0",
+                    "preset": "MIT",
                     "url": "",
                 }
             };
@@ -140,17 +140,15 @@ casper.notebook_test(function() {
     var alert = ".alert";
     this.waitForSelector(alert);
     this.then(function() {
-        var alert_element = this.getElementAttribute(alert,"class");
-        this.test.assertEquals(alert_element,
-                               "alert alert-dismissible fade in alert-success",
-                               "Success alert seen");
+        this.test.assertExists(".nb-upload-success-alert",
+                               "Notebook upload success alert seen");
     });
     
     var id = "";
 
     this.then(function() {
         this.evaluate(function(un,pw) {
-            var id_url = $(".alert-success").attr("item-id");
+            var id_url = $(".nb-upload-success-alert").attr("item-id");
             var nb_utils = require("base/js/utils");
             var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
                                                      "/dspace/findid");
@@ -188,9 +186,10 @@ casper.notebook_test(function() {
         this.evaluate(function(id,un,pw) {
             var nb_utils = require("base/js/utils");
             var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
-                                                     "/dspace/delete");
+                                                     "/dspace/getbistreams");
             var settings = {
                 processData : false,
+                cache : false,
                 type : "POST",
                 contentType: "application/json",
                 data: JSON.stringify({"ID":id, "username": un, "password": pw}),
@@ -198,23 +197,120 @@ casper.notebook_test(function() {
             var request = nb_utils.promising_ajax(request_url, settings);
 
             request.then(function(result) {
-                $(document.body).append($("<div/>")
-                                            .attr("id","test-delete-status")
-                                            .attr("status-code",result));
+                for (var key in result) {
+                    var item = result[key];
+                    //don't check the license or sword package file because cba
+                    //(if they're wrong it's something wrong with SWORD and not me)
+                    if(item.bundleName === "ORIGINAL") { 
+                        $(document.body).append($("<div/>")
+                                                    .addClass("test-bitstream-id")
+                                                    .attr("item-id",item.id));
+                    }
+                }
             });
-        }, id, username, password);
+        }, id,username,password);
     });
 
-    this.waitForSelector("#test-delete-status");
+    this.waitForSelector(".test-bitstream-id");
 
     this.then(function() {
-        var delete_status_code = this.getElementAttribute("#test-delete-status",
-                                                          "status-code");
-        this.test.assertEquals(
-            delete_status_code,
-            "404",
-            "Item not found in DSpace so successfully deleted"
+        this.evaluate(function(un,pw) {
+            var bitstreams = $(".test-bitstream-id");
+            var IDs = [];
+            bitstreams.each(function(index,item) {
+                IDs.push($(item).attr("item-id"));
+            });
+            var nb_utils = require("base/js/utils");
+            var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
+                                                     "/dspace/getbistreamdata");
+            var settings = {
+                processData : false,
+                cache : false,
+                type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"IDs":IDs,
+                                      "username": un,
+                                      "password": pw}),
+            };
+            var request = nb_utils.promising_ajax(request_url, settings);
+
+            request.then(function(result) {
+                for (var key in result) {
+                    $(document.body).append($("<div/>")
+                                                .addClass("test-bitstream-content")
+                                                .attr("bitstream-content",result[key]));
+                }
+            });
+        }, username, password);
+    });
+
+    this.waitForSelector(".test-bitstream-content");
+
+    this.then(function() {
+        var bitstream_data = this.getElementsAttribute(".test-bitstream-content",
+                                                       "bitstream-content");
+        var MIT = 
+            "Copyright (c) <year> <copyright holders>\n\n"+
+            "Permission is hereby granted, free of charge, to any person obtaining a copy\n"+
+            "of this software and associated documentation files (the \"Software\"), to deal\n"+
+            "in the Software without restriction, including without limitation the rights\n"+
+            "to use, copy, modify, merge, publish, distribute, sublicense, and\/or sell\n"+
+            "copies of the Software, and to permit persons to whom the Software is\n"+
+            "furnished to do so, subject to the following conditions:\n\n"+
+            "The above copyright notice and this permission notice shall be included in all\n"+
+            "copies or substantial portions of the Software.\n\n"+
+            "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"+
+            "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"+
+            "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"+
+            "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"+
+            "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"+
+            "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"+
+            "SOFTWARE.\n";
+
+        this.test.assertNotEquals(
+            bitstream_data.indexOf(MIT),
+            -1,
+            "LICENSE.txt has correct content"
         );
     });
+
+    var delete_once_finished = true; //used for testing the test
+
+    if (delete_once_finished) {
+        this.then(function() {
+            this.evaluate(function(id,un,pw) {
+                var nb_utils = require("base/js/utils");
+                var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
+                                                         "/dspace/delete");
+                var settings = {
+                    processData : false,
+                    type : "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({"ID":id,
+                                          "username": un,
+                                          "password": pw}),
+                };
+                var request = nb_utils.promising_ajax(request_url, settings);
+
+                request.then(function(result) {
+                    $(document.body).append($("<div/>")
+                                                .attr("id","test-delete-status")
+                                                .attr("status-code",result));
+                });
+            }, id,username,password);
+        });
+
+        this.waitForSelector("#test-delete-status");
+
+        this.then(function() {
+            var delete_status_code = this.getElementAttribute("#test-delete-status",
+                                                              "status-code");
+            this.test.assertEquals(
+                delete_status_code,
+                "404",
+                "Item not found in DSpace so successfully deleted"
+            );
+        });
+    }
 
 });
