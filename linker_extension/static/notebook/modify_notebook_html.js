@@ -4,6 +4,7 @@ define([
 ],function(Jupyter,utils){
 
     var load = function() {
+        var Promise = require("es6-promise").Promise;
         //make publish menu
         var dropdown = $("<li/>").addClass("dropdown")
             .append($("<a/>")
@@ -25,14 +26,25 @@ define([
         dropdown.append(dropdown_ul);
         $("ul.navbar-nav").append(dropdown);
 
-        var toggle_cell_references_bar_text = "";
+        var promise = new Promise(function(resolve) {
+            function poll() {
+                if(Jupyter.notebook.metadata.celltoolbar) {
+                    resolve();
+                } else {
+                    setTimeout(poll,1000);
+                } 
+            }
+            poll();
+        });
 
-        if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
-            toggle_cell_references_bar_text = "Show cell references toolbar";
-        } else {
-            toggle_cell_references_bar_text = "Hide cell references toolbar";
-        }
-
+        promise.then(function() {
+            if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
+                $("#toggle_cell_references_bar > a").text("Show cell references toolbar");
+            } else {
+                $("#toggle_cell_references_bar > a").text("Hide cell references toolbar");
+            }
+        });
+        
         dropdown_ul.append($("<li/>").attr("id","add_metadata")
                                      .append($("<a/>")
                                              .attr("href","#")
@@ -65,7 +77,7 @@ define([
                    .append($("<li/>").attr("id","toggle_cell_references_bar")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text(toggle_cell_references_bar_text)))
+                                             .text("Show/Hide cell references toolbar")))
 
                    .append($("<li/>").attr("id","generate_references")
                                      .append($("<a/>")
