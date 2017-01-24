@@ -163,6 +163,7 @@ class SWORDHandler(IPythonHandler):
                     with open("LICENSE.txt", "w") as f:
                         f.write("Licence located at: ")
                         f.write(licence_url)
+                        f.write("\n")
                 else:
                     base64_data = licence_file_contents.split(",")[1]
 
