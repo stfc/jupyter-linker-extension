@@ -4,7 +4,7 @@ var fs = require("fs");
 casper.notebook_test(function() {
     "use strict";
 
-    casper.test.info("Testing adding report metadata");
+    casper.test.info("Testing the publish notebook button and dialog");
 
     this.viewport(1024, 768);
 
@@ -54,7 +54,7 @@ casper.notebook_test(function() {
     this.then(function() {
         this.test.assertExists("#title-missing-error",
                                "Title missing error exists");
-        this.test.assertExists("#abstract-missing-error",
+        this.test.assertExists("#nb-abstract-missing-error",
                                "Abstract missing error exists");
         this.test.assertExists("#year-missing-error",
                                "Year missing error exists");
@@ -170,7 +170,7 @@ casper.notebook_test(function() {
         //need to use fillSelectors over fill to fill in the authors
         this.fillSelectors("form#publish_form > fieldset#fields1", { 
             "#title": "My Title",
-            "#abstract": "My abstract",
+            "#nb-abstract": "My abstract",
             "#year": "1995",
             "#month": "8",
             "#day": "20",
@@ -243,24 +243,24 @@ casper.notebook_test(function() {
         this.page.uploadFile("#licence-file",test_path + "Test.txt");
     });
 
-    this.waitForSelector("#add-referencedBy-button");
+    this.waitForSelector("#add-nb-referencedBy-button");
     //again, create two extra boxes but we'll only use one
-    this.thenClick("#add-referencedBy-button");
-    this.thenClick("#add-referencedBy-button");
+    this.thenClick("#add-nb-referencedBy-button");
+    this.thenClick("#add-nb-referencedBy-button");
 
-    this.waitForSelector("#add-citation-button");
+    this.waitForSelector("#add-nb-citation-button");
     //again, create two extra boxes but we'll only use one
-    this.thenClick("#add-citation-button");
-    this.thenClick("#add-citation-button");
+    this.thenClick("#add-nb-citation-button");
+    this.thenClick("#add-nb-citation-button");
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
         this.fillSelectors("form#publish_form > fieldset#fields2", {
             "#publisher": "test publisher",
-            "#citation-0": "Citation 1",
-            "#citation-2": "Citation 2",
-            "#referencedBy-0": "URL1",
-            "#referencedBy-2": "URL2"
+            "#nb-citation-0": "Citation 1",
+            "#nb-citation-2": "Citation 2",
+            "#nb-referencedBy-0": "URL1",
+            "#nb-referencedBy-2": "URL2"
         });
     }); //TODO: add funders and sponsors if we can use them
     this.thenClick("#next");
@@ -377,17 +377,15 @@ casper.notebook_test(function() {
     var alert = ".alert";
     this.waitForSelector(alert);
     this.then(function() {
-        var alert_element = this.getElementAttribute(alert,"class");
-        this.test.assertEquals(alert_element,
-                               "alert alert-dismissible fade in alert-success",
-                               "Success alert seen");
+        this.test.assertExists(".nb-upload-success-alert",
+                               "Notebook upload success alert seen");
     });
     
     var id = "";
 
     this.then(function() {
         this.evaluate(function(un,pw) {
-            var id_url = $(".alert-success").attr("item-id");
+            var id_url = $(".nb-upload-success-alert").attr("item-id");
             var nb_utils = require("base/js/utils");
             var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
                                                      "/dspace/findid");
@@ -425,9 +423,10 @@ casper.notebook_test(function() {
         this.evaluate(function(id,un,pw) {
             var nb_utils = require("base/js/utils");
             var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
-                                                     "/dspace/delete");
+                                                     "/dspace/getbistreams");
             var settings = {
                 processData : false,
+                cache : false,
                 type : "POST",
                 contentType: "application/json",
                 data: JSON.stringify({"ID":id, "username": un, "password": pw}),
@@ -435,22 +434,102 @@ casper.notebook_test(function() {
             var request = nb_utils.promising_ajax(request_url, settings);
 
             request.then(function(result) {
-                $(document.body).append($("<div/>")
-                                            .attr("id","test-delete-status")
-                                            .attr("status-code",result));
+                for (var key in result) {
+                    var item = result[key];
+                    //don't check the license or sword package file because cba
+                    //(if they're wrong it's something wrong with SWORD and not me)
+                    if(item.bundleName === "ORIGINAL") { 
+                        $(document.body).append($("<div/>")
+                                                    .addClass("test-bitstream-id")
+                                                    .attr("item-id",item.id));
+                    }
+                }
             });
-        }, id, username, password);
+        }, id,username,password);
     });
 
-    this.waitForSelector("#test-delete-status");
+    this.waitForSelector(".test-bitstream-id");
 
     this.then(function() {
-        var delete_status_code = this.getElementAttribute("#test-delete-status",
-                                                          "status-code");
-        this.test.assertEquals(
-            delete_status_code,
-            "404",
-            "Item not found in DSpace so successfully deleted"
+        this.evaluate(function(un,pw) {
+            var bitstreams = $(".test-bitstream-id");
+            var IDs = [];
+            bitstreams.each(function(index,item) {
+                IDs.push($(item).attr("item-id"));
+            });
+            var nb_utils = require("base/js/utils");
+            var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
+                                                     "/dspace/getbistreamdata");
+            var settings = {
+                processData : false,
+                cache : false,
+                type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"IDs":IDs,
+                                      "username": un,
+                                      "password": pw}),
+            };
+            var request = nb_utils.promising_ajax(request_url, settings);
+
+            request.then(function(result) {
+                for (var key in result) {
+                    $(document.body).append($("<div/>")
+                                                .addClass("test-bitstream-content")
+                                                .attr("bitstream-content",result[key]));
+                }
+            });
+        }, username, password);
+    });
+
+    this.waitForSelector(".test-bitstream-content");
+
+    this.then(function() {
+        var bitstream_data = this.getElementsAttribute(".test-bitstream-content",
+                                                       "bitstream-content");
+
+        this.test.assertNotEquals(
+            bitstream_data.indexOf("This is a test file\n"),
+            -1,
+            "LICENSE.txt has correct content"
         );
     });
+
+    var delete_once_finished = true; //used for testing the test
+
+    if (delete_once_finished) {
+        this.then(function() {
+            this.evaluate(function(id,un,pw) {
+                var nb_utils = require("base/js/utils");
+                var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
+                                                         "/dspace/delete");
+                var settings = {
+                    processData : false,
+                    type : "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({"ID":id,
+                                          "username": un,
+                                          "password": pw}),
+                };
+                var request = nb_utils.promising_ajax(request_url, settings);
+
+                request.then(function(result) {
+                    $(document.body).append($("<div/>")
+                                                .attr("id","test-delete-status")
+                                                .attr("status-code",result));
+                });
+            }, id,username,password);
+        });
+
+        this.waitForSelector("#test-delete-status");
+
+        this.then(function() {
+            var delete_status_code = this.getElementAttribute("#test-delete-status",
+                                                              "status-code");
+            this.test.assertEquals(
+                delete_status_code,
+                "404",
+                "Item not found in DSpace so successfully deleted"
+            );
+        });
+    }
 });
