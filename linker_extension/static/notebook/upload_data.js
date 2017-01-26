@@ -327,50 +327,62 @@ define([
 
         abstract.val(default_abstract);
 
+        var referencedBy_divs = $("<div/>")
+            .addClass("data-referencedBy_divs");
+
         var referencedBy_label = $("<label/>")
-            .attr("for","data-referencedBy")
+            .attr("for","data-referencedBy_divs")
             .text("Related publication persistent URLs: ");
 
         var referencedBy = $("<input/>")
-            .addClass("data-referencedBy")
+            .addClass("data-referencedBy referencedBy")
             .attr("name","data-referencedBy")
             .attr("id","data-referencedBy-0");
 
         var referencedBy_div = $("<div/>")
             .addClass("data-referencedBy_div");
 
-        var addURLButton = $("<button/>").text("Add")
-            .addClass("btn btn-xs btn-default")
-            .attr("id","add-data-url-button")
+        var addURLButton = $("<button/>")
+            .addClass("btn btn-xs btn-default add-referencedBy-button btn-add")
+            .attr("id","add-data-referencedBy-button")
             .attr("type","button")
-            .bind("click",addURL);
+            .bind("click",addURL)
+            .attr("aria-label","Add referencedBy URL");
+
+        addURLButton.append($("<i>").addClass("fa fa-plus"));
 
         referencedBy_div.append(referencedBy);
         referencedBy_div.append(addURLButton);
+
+        referencedBy_divs.append(referencedBy_div);
 
         var urlcount = 1;
 
         function addURL() {
             var newURL = ($("<div/>")).addClass("data-referencedBy_div");
             var URL = $("<input/>")
-                .attr("class","data-referencedBy")
+                .attr("class","data-referencedBy referencedBy")
                 .attr("type","text")
                 .attr("id","data-referencedBy-" + urlcount);
 
-            var previousURL = $(".referencedBy_div").last();
+            var previousURL = $(".data-referencedBy_div").last();
             //detach from the previously last url input
             // so we can put it back on the new one
             addURLButton.detach();
-            var deleteURL = $("<button/>").text("Remove")
-                .addClass("btn btn-xs btn-default remove-url-button remove-data-url-button")
+            var deleteURL = $("<button/>")
+                .addClass("btn btn-xs btn-default btn-remove remove-referencedBy-button remove-data-referencedBy-button")
                 .attr("type","button")
                     .click(function() {
                         previousURL.remove();
                         $(this).remove();
                     }); //add a remove button to the previously last url
 
+            deleteURL.append($("<i>")
+                     .addClass("fa fa-trash")
+                     .attr("aria-hidden","true"));
+
             previousURL.append(deleteURL);
-            data_fields.append(newURL.append(URL).append(addURLButton));
+            referencedBy_divs.append(newURL.append(URL).append(addURLButton));
             urlcount++;
             return [URL,newURL];
         }
@@ -427,7 +439,7 @@ define([
             .attr("id","data-citation-0");
 
         var addCitationButton = $("<button/>")
-            .addClass("btn btn-xs btn-default")
+            .addClass("btn btn-xs btn-default btn-add add-citation-button")
             .attr("id","add-data-citation-button")
             .attr("type","button")
             .bind("click",addCitation)
@@ -455,7 +467,7 @@ define([
             //so we can put it back on the new one
             addCitationButton.detach(); 
             var deleteCitation = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-citation-button remove-data-citation-button")
+                .addClass("btn btn-xs btn-default btn-remove remove-citation-button remove-data-citation-button")
                 .attr("type","button")
                 .attr("aria-label","Remove citation")
                     .click(function() {
@@ -486,7 +498,7 @@ define([
             .append(abstract_label)
             .append(abstract)
             .append(referencedBy_label)
-            .append(referencedBy_div)
+            .append(referencedBy_divs)
             .append(licences_label)
             .append(TOS_label)
             .append(TOS_container)

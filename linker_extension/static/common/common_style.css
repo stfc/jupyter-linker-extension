@@ -99,11 +99,6 @@ li.dropdown:nth-child(8) > a {
   background-color: #DDDDDD; 
 }
 
-#maintoolbar-container > .btn-group > .btn {
-  
-}
-
-
 .dropdown-menu > .disabled a, .dropdown-menu > .disabled a:hover {
   color: darkgrey;
 }
@@ -117,7 +112,7 @@ body {
   overflow: hidden
 }
 span.save_widget {
-  margin-top: 38px;
+  margin-top: 35px;
 }
 span.save_widget span.filename, span.last_modified, .dirty-indicator-clean, span.checkpoint_status, span.autosave_status, #current-mode {
   color: #ffffff;
@@ -171,10 +166,11 @@ span#login_widget {
   margin-right: 10px;
 }
 
-#add-author-button, .remove-author-button, .remove-url-button, #add-url-button, #add-citation-button, .remove-citation-button {
+.btn-add, .btn-remove {
   margin-bottom: 2px;
   margin-left: 7px;
 }
+
 textarea {
   width: 600px;
   max-width: 600px;

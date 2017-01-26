@@ -214,7 +214,7 @@ define(["base/js/namespace",
             .append(defaultAuthor);
 
         var addAuthorButton = $("<button/>")
-            .addClass("btn btn-xs btn-default")
+            .addClass("btn btn-xs btn-default btn-add")
             .attr("id","add-author-button")
             .attr("type","button")
             .attr("aria-label","Add author")
@@ -333,7 +333,7 @@ define(["base/js/namespace",
             //so we can put it back on the new one
             addAuthorButton.detach(); 
             var deleteAuthor = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-author-button")
+                .addClass("btn btn-xs btn-default btn-remove remove-author-button")
                 .attr("type","button")
                 .attr("aria-label","Remove author")
                     .click(function() {
@@ -470,7 +470,7 @@ define(["base/js/namespace",
             .attr("id","nb-citation-0");
 
         var addCitationButton = $("<button/>")
-            .addClass("btn btn-xs btn-default")
+            .addClass("btn btn-xs btn-default btn-add add-citation-button")
             .attr("id","add-nb-citation-button")
             .attr("type","button")
             .bind("click",addCitation)
@@ -484,11 +484,11 @@ define(["base/js/namespace",
         citations.append(citation_div);
 
         var referencedByLabel = $("<label/>")
-            .attr("for","nb-referencedBy")
+            .attr("for","nb-referencedBy_div")
             .text("Add URIs for items that reference this notebook or its data: ");
 
         var referencedBy = $("<input/>")
-            .addClass("nb-referencedBy")
+            .addClass("nb-referencedBy referencedBy")
             .attr("name","referencedBy")
             .attr("id","nb-referencedBy-0");
 
@@ -497,7 +497,7 @@ define(["base/js/namespace",
         var referencedBy_divs = $("<div/>");
 
         var addReferencedByButton = $("<button/>")
-            .addClass("btn btn-xs btn-default")
+            .addClass("btn btn-xs btn-default btn-add add-ReferencedBy-button")
             .attr("id","add-nb-referencedBy-button")
             .attr("type","button")
             .bind("click",addReferencedBy)
@@ -516,7 +516,7 @@ define(["base/js/namespace",
         function addReferencedBy() {
             var newReferencedBy_div = ($("<div/>")).addClass("nb-referencedBy_div");
             var newReferencedBy = $("<input/>")
-                .attr("class","nb-referencedBy")
+                .attr("class","nb-referencedBy referencedBy")
                 .attr("type","text")
                 .attr("id","nb-referencedBy-" + referencedByCount);
 
@@ -526,7 +526,7 @@ define(["base/js/namespace",
             //so we can put it back on the new one
             addReferencedByButton.detach(); 
             var deleteReferencedBy = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-nb-referencedBy-button remove-referencedBy-button")
+                .addClass("btn btn-xs btn-default btn-remove remove-nb-referencedBy-button remove-referencedBy-button")
                 .attr("type","button")
                 .attr("aria-label","Remove referenced By URL")
                     .click(function() {
@@ -557,7 +557,7 @@ define(["base/js/namespace",
             //so we can put it back on the new one
             addCitationButton.detach(); 
             var deleteCitation = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-nb-citation-button remove-citation-button")
+                .addClass("btn btn-xs btn-default btn-remove remove-nb-citation-button remove-citation-button")
                 .attr("type","button")
                 .attr("aria-label","Remove citation")
                     .click(function() {
@@ -800,8 +800,8 @@ define(["base/js/namespace",
             .append(citations)
             .append(referencedByLabel)
             .append(referencedBy_divs)
-            //.append(fundersLabel)
-            //.append(funders)
+            .append(fundersLabel)
+            .append(funders)
             //.append(sponsorsLabel)
             //.append(sponsors)
             .append(licenceLabel)
@@ -820,7 +820,7 @@ define(["base/js/namespace",
                     defaultAuthorFirstName.val(item[1]);
                     if(authorsarr.length > 1) {
                         deleteAuthor = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-author-button")
+                            .addClass("btn btn-xs btn-default btn-remove remove-author-button")
                             .attr("type","button")
                             .attr("aria-label","Remove author")
                                 .click(function() {
@@ -840,7 +840,7 @@ define(["base/js/namespace",
                     auth[1].val(item[1]);
                     if(index !== authorsarr.length - 1) { //if not last element
                         deleteAuthor = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-author-button")
+                            .addClass("btn btn-xs btn-default btn-remove remove-author-button")
                             .attr("type","button")
                             .attr("aria-label","Remove author")
                                 .click(function() {
@@ -889,7 +889,7 @@ define(["base/js/namespace",
                         //which don"t work here since the modal
                         //is still being created I think...
                         deleteCitation = $("<button/>") 
-                            .addClass("btn btn-xs btn-default remove-citation-button remove-nb-citation-button") 
+                            .addClass("btn btn-xs btn-default btn-remove remove-citation-button remove-nb-citation-button") 
                             .attr("type","button")
                             .attr("aria-label","Remove citation")
                                 .click(function() {
@@ -907,7 +907,7 @@ define(["base/js/namespace",
                     newCitation[0].val(item);
                     if(index !== citationarr.length - 1) { //if not last element
                         deleteCitation = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-citation-button remove-nb-citation-button")
+                            .addClass("btn btn-xs btn-default btn-remove remove-citation-button remove-nb-citation-button")
                             .attr("type","button")
                             .attr("aria-label","Remove citaiton")
                                 .click(function() {
@@ -933,7 +933,7 @@ define(["base/js/namespace",
                         //which don"t work here since the modal
                         //is still being created I think...
                         deleteReferencedBy = $("<button/>") 
-                            .addClass("btn btn-xs btn-default remove-referencedBy-button remove-nb-referencedBy-button") 
+                            .addClass("btn btn-xs btn-default btn-remove remove-referencedBy-button remove-nb-referencedBy-button") 
                             .attr("type","button")
                             .attr("aria-label","Remove referenced By URL")
                                 .click(function() {
@@ -951,7 +951,7 @@ define(["base/js/namespace",
                     newReferencedBy[0].val(item);
                     if(index !== referencedByarr.length - 1) { //if not last element
                         deleteReferencedBy = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-referencedBy-button remove-nb-referencedBy-button")
+                            .addClass("btn btn-xs btn-default btn-remove remove-referencedBy-button remove-nb-referencedBy-button")
                             .attr("type","button")
                             .attr("aria-label","Remove referenced By URL")
                                 .click(function() {

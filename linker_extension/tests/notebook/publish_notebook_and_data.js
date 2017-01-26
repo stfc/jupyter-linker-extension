@@ -160,7 +160,7 @@ casper.notebook_test(function() {
                                 "Copyright missing error showing correctly");
     });
 
-    this.thenClick("#add-data-url-button");
+    this.thenClick("#add-data-referencedBy-button");
     this.then(function() {
         this.evaluate(function() {
             $("#data-referencedBy-0").val("URL1");

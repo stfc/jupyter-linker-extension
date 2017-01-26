@@ -206,7 +206,7 @@ casper.notebook_test(function() {
 
     //this.wait(250);
 
-    this.thenClick("#add-data-url-button");
+    this.thenClick("#add-data-referencedBy-button");
     this.then(function() {
         this.evaluate(function() {
             $("#data-referencedBy-0").val("URL1");
