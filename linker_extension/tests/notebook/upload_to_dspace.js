@@ -72,6 +72,7 @@ casper.notebook_test(function() {
                   "citation1",
                   "citation2",
                 ],
+                "funders":"",
                 "licence": {
                     "preset": "MIT",
                     "url": "",
