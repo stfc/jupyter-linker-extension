@@ -158,6 +158,8 @@ define([
             abstract = abstract + "\nCopyright: \n";
             abstract = abstract + $("#copyright").val();
 
+            var licence = $("#data-licence-dropdown").val();
+
             var TOS_files = $("#TOS").prop("files");
             var TOS_files_contents = [];
             var promises = [];
@@ -203,6 +205,7 @@ define([
                         "language":md.reportmetadata.language,
                         "publisher":md.reportmetadata.publisher,
                         "citations":citations,
+                        "licence":licence,
                         "funders":md.reportmetadata.funders,
                         "sponsors":md.reportmetadata.sponsors,
                         "repository":md.reportmetadata.repository,
@@ -282,6 +285,15 @@ define([
                 .text("Please select the TOS files for the selected files");
 
             $("label[for=\"TOS\"]").after(TOS_error);
+        }
+
+        if($("#data-licence-dropdown").val() === "") {
+            var licence_error = $("<div/>")
+                .attr("id","licence-missing-error")
+                .addClass("data-form-error")
+                .text("Please select the licence for the selected files");
+
+            $("label[for=\"data-licence-dropdown\"]").after(licence_error);
         }
 
         //TODO: what else do we force users to fill?
@@ -387,11 +399,36 @@ define([
             return [URL,newURL];
         }
 
-        var licences_label = $("<label/>")
-            .attr("for","licences")
-            .text("Licences: ");
+        var licence_label = $("<label/>")
+            .attr("for","data-licence-dropdown")
+            .text("Licence: ");
 
         //TODO: add licences fields
+
+        //TODO: check that this list is sensible and has all the common
+        //ones that users may select
+        var licenceDropdown = $("<select/>")
+            .attr("name","licence dropdown")
+            .attr("id","data-licence-dropdown")
+            .append($("<option/>").attr("value","").text("None Selected"))
+            .append($("<option/>").attr("value","CC0").text("CC0"))
+            .append($("<option/>").attr("value","CC BY").text("CC BY"))
+            .append($("<option/>").attr("value","CC BY-SA").text("CC BY-SA"))
+            .append($("<option/>").attr("value","CC BY-NC").text("CC BY-NC"))
+            .append($("<option/>").attr("value","CC BY-ND").text("CC BY-ND"))
+            .append($("<option/>").attr("value","CC BY-NC-SA").text("CC BY-NC-SA"))
+            .append($("<option/>").attr("value","CC BY-NC-ND").text("CC BY-NC-ND"))
+            .append($("<option/>").attr("value","Apache 2.0").text("Apache-2.0"))
+            .append($("<option/>").attr("value","BSD-3-Clause").text("BSD-3-Clause"))
+            .append($("<option/>").attr("value","BSD-2-Clause").text("BSD-2-Clause"))
+            .append($("<option/>").attr("value","GPL-2.0").text("GPL-2.0"))
+            .append($("<option/>").attr("value","GPL-3.0").text("GPL-3.0"))
+            .append($("<option/>").attr("value","LGPL-2.1").text("LGPL-2.1"))
+            .append($("<option/>").attr("value","LGPL-3.0").text("LGPL-3.0"))
+            .append($("<option/>").attr("value","MIT").text("MIT"))
+            .append($("<option/>").attr("value","MPL-2.0").text("MPL-2.0"))
+            .append($("<option/>").attr("value","CDDL-1.0").text("CDDL-1.0"))
+            .append($("<option/>").attr("value","EPL-1.0").text("EPL-1.0"));
 
         var TOS_label = $("<label/>")
             .attr("for","TOS")
@@ -499,7 +536,8 @@ define([
             .append(abstract)
             .append(referencedBy_label)
             .append(referencedBy_divs)
-            .append(licences_label)
+            .append(licence_label)
+            .append(licenceDropdown)
             .append(TOS_label)
             .append(TOS_container)
             .append(citations_label)

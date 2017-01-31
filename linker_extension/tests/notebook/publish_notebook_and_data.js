@@ -158,6 +158,8 @@ casper.notebook_test(function() {
                                 "TOS missing error showing correctly");
         this.test.assertVisible("#copyright-missing-error",
                                 "Copyright missing error showing correctly");
+        this.test.assertVisible("#licence-missing-error",
+                                "Licence missing error showing correctly");
     });
 
     this.thenClick("#add-data-referencedBy-button");
@@ -167,6 +169,7 @@ casper.notebook_test(function() {
             $("#data-referencedBy-1").val("URL2");
             $("#data-citation-0").val("Citation");
             $("#copyright").val("Copyright");
+            $("#data-licence-dropdown").val("MIT");
         });
     });
 
@@ -187,9 +190,48 @@ casper.notebook_test(function() {
                                "Author missing error exists");
         this.test.assertExists("#nb-abstract-missing-error",
                                "Abstract missing error exists");
+        var date = [];
+        var curr_date = new Date();
+        date.push(curr_date.getDate().toString());
+        date.push((curr_date.getMonth() + 1).toString());
+        date.push(curr_date.getFullYear().toString());
+
+        var test_date = this.evaluate(function() {
+            var date_arr = [];
+            date_arr.push($("#day").val());
+            date_arr.push($("#month").val());
+            date_arr.push($("#year").val());
+            return date_arr;
+        });
+        this.test.assertEquals(date,test_date,"Current date has been inserted right");
+
+    });
+
+    this.thenClick("#clear-date");
+    this.thenClick("#next");
+    this.then(function() {
         this.test.assertExists("#year-missing-error",
                                "Year missing error exists");
     });
+    this.thenClick("#current-date");
+    this.then(function () {
+        var date = [];
+        var curr_date = new Date();
+        date.push(curr_date.getDate().toString());
+        date.push((curr_date.getMonth() + 1).toString());
+        date.push(curr_date.getFullYear().toString());
+        
+        var test_date = this.evaluate(function() {
+            var date_arr = [];
+            date_arr.push($("#day").val());
+            date_arr.push($("#month").val());
+            date_arr.push($("#year").val());
+            return date_arr;
+        });
+        this.test.assertEquals(date,test_date,"Current date has been reinserted right");
+    });
+
+    this.thenClick("#clear-date");
 
     //testing the date validation
     this.then(function() {
@@ -333,7 +375,7 @@ casper.notebook_test(function() {
     this.then(function(){
         this.fillSelectors("form#publish_form > fieldset#fields2", {
             "#repository": "edata/8", //the handle for SCD
-            "#licence-dropdown": "Other"
+            "#nb-licence-dropdown": "Other"
         });
     });
 
@@ -813,6 +855,30 @@ casper.notebook_test(function() {
             bitstream_data.indexOf("This is a test file\n"),
             -1,
             "TOS 0.txt has correct content"
+        );
+
+        var MIT = 
+            "Copyright (c) <year> <copyright holders>\n\n"+
+            "Permission is hereby granted, free of charge, to any person obtaining a copy\n"+
+            "of this software and associated documentation files (the \"Software\"), to deal\n"+
+            "in the Software without restriction, including without limitation the rights\n"+
+            "to use, copy, modify, merge, publish, distribute, sublicense, and\/or sell\n"+
+            "copies of the Software, and to permit persons to whom the Software is\n"+
+            "furnished to do so, subject to the following conditions:\n\n"+
+            "The above copyright notice and this permission notice shall be included in all\n"+
+            "copies or substantial portions of the Software.\n\n"+
+            "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"+
+            "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"+
+            "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"+
+            "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"+
+            "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"+
+            "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"+
+            "SOFTWARE.\n";
+
+        this.test.assertNotEquals(
+            bitstream_data.indexOf(MIT),
+            -1,
+            "LICENSE.txt has correct content"
         );
     });
 

@@ -152,6 +152,7 @@ class UploadBundleHandler(IPythonHandler):
         file_types = arguments['file_types']
 
         TOS_files = arguments["TOS"]
+        licence = arguments["licence"]
 
         try:
             tempdir = tempfile.mkdtemp()
@@ -173,6 +174,18 @@ class UploadBundleHandler(IPythonHandler):
         except IOError:
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when writing the TOS files")
+
+        try:
+            licence_file_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "resources",
+                "licences",
+                licence,
+                "LICENSE.txt"
+            )
+        except IOError:
+            shutil.rmtree(tempdir)
+            raise web.HTTPError(500, "IOError when fetching the licence file")
 
         try:
             files = tree.getroot()[2][0]
@@ -205,6 +218,17 @@ class UploadBundleHandler(IPythonHandler):
 
                 files_xml.append(FLocat_xml)
                 files.append(files_xml)
+
+            licence_attr = {"GROUPID": "licence",
+                            "ID": "licence",
+                            "MIMETYPE": "text/plain"}
+            licence_xml = ET.Element('file', licence_attr)
+
+            licence_FLocat_attr = {"LOCTYPE": "URL", "xlink:href": "LICENSE.txt"}
+            licence_FLocat_xml = ET.Element('FLocat', licence_FLocat_attr)
+
+            licence_xml.append(licence_FLocat_xml)
+            files.append(licence_xml)
 
         except IndexError:
             shutil.rmtree(tempdir)
@@ -244,6 +268,20 @@ class UploadBundleHandler(IPythonHandler):
                 TOS_struct_xml.append(TOS_struct_xml_child)
                 struct.append(TOS_struct_xml)
 
+            licence_struct_attr = {"ID": "sword-mets-div-3",
+                                   "DMDID": "sword-mets-dmd-3",
+                                   "TYPE": "License"}
+            licence_struct_xml = ET.Element('div', licence_struct_attr)
+
+            licence_struct_child_attr = {"ID": "sword-mets-div-3", "TYPE": "File"}
+            licence_struct_xml_child = ET.Element('div', licence_struct_child_attr)
+
+            licence_fptr_xml = ET.Element("ftpr", {"FILEID": "sword-mets-file-3"})
+
+            licence_struct_xml_child.append(licence_fptr_xml)
+            licence_struct_xml.append(licence_struct_xml_child)
+            struct.append(licence_struct_xml)
+
         except IndexError:
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IndexError when getting "
@@ -267,6 +305,8 @@ class UploadBundleHandler(IPythonHandler):
 
             for i in list(range(0,len(TOS_files))):
                 created_zip_file.write("TOS " + str(i))
+
+            created_zip_file.write(licence_file_path, "LICENSE.txt")
 
         except:  # dunno what exceptions we might encounter here
             shutil.rmtree(tempdir)
