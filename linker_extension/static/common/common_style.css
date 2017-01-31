@@ -60,11 +60,11 @@ body > #header #header-container {
   height: 32px;
 }
 
-li.dropdown:nth-child(1) > a {
+.navbar-nav > li.dropdown:nth-child(1) > a {
   box-shadow: -1px 0px 0px 0px #DDDDDD;
 }
 
-li.dropdown:nth-child(8) > a {
+.navbar-nav > .publish-dropdown > a {
   border-right: 2px solid #DDDDDD;
   box-shadow: 1px 0px 0px 0px #FFFFFF;
 }
@@ -140,18 +140,18 @@ span#login_widget {
   display: block;
 }
 
-[for=licence-file], [for=licence-URL]{
+[for=licence-file-radio], [for=licence-url-radio]{
   margin-left: 3px;
   position: relative;
   bottom: 4px;
 }
 
-[for=defaultAuthorFirstName] {
+[for=author-first-name-0],  [for=author-first-name-1] {
   margin-left: 178px;
   display: inline-block;
 }
 
-[for=defaultAuthorLastName] {
+[for=author-last-name-0], [for=author-last-name-1]{
   display: inline-block;
 }
 .author-first-name {
@@ -169,6 +169,10 @@ span#login_widget {
 .btn-add, .btn-remove {
   margin-bottom: 2px;
   margin-left: 7px;
+}
+
+.btn-date {
+  margin-top: 4px;
 }
 
 textarea {

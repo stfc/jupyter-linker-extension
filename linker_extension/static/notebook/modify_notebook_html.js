@@ -6,7 +6,7 @@ define([
     var load = function() {
         var Promise = require("es6-promise").Promise;
         //make publish menu
-        var dropdown = $("<li/>").addClass("dropdown")
+        var dropdown = $("<li/>").addClass("dropdown publish-dropdown")
             .append($("<a/>")
                     .attr("href","#")
                     .addClass("dropdown-toggle")

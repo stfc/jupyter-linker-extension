@@ -23,10 +23,12 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
         var logo_link = $("#ipython_notebook").children("a");
         logo_link.attr("href","https://www.stfc.ac.uk/");
         var logo = $("#ipython_notebook").children("a").children("img");
-        logo.attr("src","/nbextensions/linker_extension/common/logo.png");
+        logo.attr("src", utils.get_body_data("baseUrl") + 
+                         "nbextensions/linker_extension/common/logo.png");
 
         var favicon = $("head > link[rel=\"shortcut icon\"]");
-        favicon.attr("href","/nbextensions/linker_extension/common/favicon.ico");
+        favicon.attr("href", utils.get_body_data("baseUrl") + 
+                             "nbextensions/linker_extension/common/favicon.ico");
 
         $("head").append(
             $("<link>")
