@@ -24,6 +24,55 @@ class LDAPHandler(IPythonHandler):
     def get(self):
         firstname = self.get_query_argument('firstname', default="")
         lastname = self.get_query_argument('lastname', default="")
+        fedID = self.get_query_argument('fedID', default="")
+
+        server = ldap3.Server('logon10.fed.cclrc.ac.uk', get_info=ldap3.ALL)
+
+        conn = ldap3.Connection(server, auto_bind=True)
+
+        result = []
+
+        if firstname and not lastname and not fedID:
+            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
+                        '(givenName=*' + firstname + '*)',
+                        attributes=['sn', 'givenName','cn','department','displayName'])
+            result = conn.entries
+
+        elif lastname and not firstname and not fedID:
+            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
+                        '(sn=*' + lastname + '*)',
+                        attributes=['sn', 'givenName','cn','department','displayName'])
+            result = conn.entries
+
+        elif lastname and firstname and not fedID:
+            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
+                        '(&(sn=*' + lastname + '*)(givenName=*' + firstname + '*))',
+                        attributes=['sn', 'givenName','cn','department','displayName'])
+            result = conn.entries
+
+        elif fedID and not firstname and not lastname:
+            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
+                        '(cn=*' + fedID + '*)',
+                        attributes=['sn', 'givenName','cn','department','displayName'])
+            result = conn.entries
+        else: #malformed request
+            self.set_status(400)
+            self.finish()
+            return
+
+        json_entries = []
+        for entry in conn.entries:
+            json_entries.append(entry.entry_to_json())
+
+        self.set_header('Content-Type', 'application/json')
+        self.finish(json.dumps(json_entries))
+
+    @web.authenticated
+    @json_errors
+    @gen.coroutine
+    def patch(self):
+        firstname = self.get_query_argument('firstname', default="")
+        lastname = self.get_query_argument('lastname', default="")
 
         server = ldap3.Server('logon10.fed.cclrc.ac.uk', get_info=ldap3.ALL)
 
