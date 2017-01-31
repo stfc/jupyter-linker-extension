@@ -5,7 +5,6 @@ USER root
 RUN apt-get update && apt-get install -y --quiet inetutils-traceroute curl
 
 COPY /linker_extension/resources/blank.xml /srv/jupyterhub/blank.xml
-COPY /linker_extension/resources/admin.txt /srv/jupyterhub/admin.txt
 COPY /linker_extension/resources/templates/custom_base.tplx /opt/conda/lib/python3.5/site-packages/nbconvert/templates/latex/custom_base.tplx
 COPY /linker_extension/resources/templates/custom_style_ipython.tplx /opt/conda/lib/python3.5/site-packages/nbconvert/templates/latex/custom_style_ipython.tplx
 COPY /linker_extension/resources/templates/custom_article.tplx /opt/conda/lib/python3.5/site-packages/nbconvert/templates/latex/custom_article.tplx
