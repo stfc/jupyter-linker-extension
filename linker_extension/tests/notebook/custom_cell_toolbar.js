@@ -6,7 +6,7 @@ casper.notebook_test(function() {
     this.viewport(1024, 768);
 
     //add an extra cell
-    var selector = "#insert_above_below > button";
+    var selector = "#insert_above_below > button"; //add extra cell
     this.waitForSelector(selector);
     this.thenClick(selector);
 
@@ -21,6 +21,16 @@ casper.notebook_test(function() {
     //click the toggle button
     selector = "#toggle_cell_references_bar";
     this.waitForSelector(selector);
+    this.then(function() {
+        var text = this.evaluate(function() {
+            return $("#toggle_cell_references_bar").text();
+        });
+        this.test.assertEquals(
+            text,
+            "Show cell references toolbar",
+            "Toggle button says show when it is not visible"
+        );
+    });
     this.thenClick(selector);
 
     //test that toggle on works
@@ -37,6 +47,15 @@ casper.notebook_test(function() {
             selector,
             "At least one cell toolbars is visible"
         ); //this should mean that all are visible
+
+        var text = this.evaluate(function() {
+            return $("#toggle_cell_references_bar").text();
+        });
+        this.test.assertEquals(
+            text,
+            "Hide cell references toolbar",
+            "Toggle button says hide when it is visible"
+        );
     });
 
     //test that toggle off works 
@@ -46,6 +65,14 @@ casper.notebook_test(function() {
         this.test.assertNotVisible(
             selector,
             "Cell toolbar has been toggled off successfully"
+        );
+        var text = this.evaluate(function() {
+            return $("#toggle_cell_references_bar").text();
+        });
+        this.test.assertEquals(
+            text,
+            "Show cell references toolbar",
+            "Toggle button says show when it isn't visible"
         );
     });
 
@@ -315,6 +342,61 @@ casper.notebook_test(function() {
             cell2_inputs.url1,
             "URL5",
             "Cell 2 input 1 refilled successfully"
+        );
+    });
+
+    var nbname = "Untitled.ipynb";
+    this.thenEvaluate(function (nbname) {
+        require(["base/js/events"], function (events) {
+            Jupyter.notebook.set_notebook_name(nbname);
+            Jupyter._save_success = Jupyter._save_failed = false;
+            events.on("notebook_saved.Notebook", function () {
+                Jupyter._save_success = true;
+            });
+            events.on("notebook_save_failed.Notebook", function (event, error) {
+                Jupyter._save_failed = "save failed with " + error;
+            });
+            Jupyter.notebook.save_notebook();
+        });
+    }, {nbname:nbname});
+    
+    this.waitFor(function () {
+        return this.evaluate(function(){
+            return Jupyter._save_failed || Jupyter._save_success;
+        });
+    });
+
+    this.then(function(){
+        var success_failure = this.evaluate(function(){
+            return [Jupyter._save_success, Jupyter._save_failed];
+        });
+        this.test.assertEquals(success_failure[1], false, "Save did not fail");
+        this.test.assertEquals(success_failure[0], true, "Save OK");
+    });
+
+    this.reload();
+
+    this.waitFor(this.page_loaded);
+    this.waitFor(this.kernel_running);
+
+
+    this.waitFor(function() {
+        var text = this.evaluate(function() {
+            return $("#toggle_cell_references_bar").text();
+        });
+        if(text !== "Show/Hide cell references toolbar" && text !== "") {
+            //this is the default text and empty string, so either unloaded yet
+            //or our promise hasn't resolved yet
+            return true;
+        }
+    }, function then() {
+        var text = this.evaluate(function() {
+            return $("#toggle_cell_references_bar").text();
+        });
+        this.test.assertEquals(
+            text,
+            "Hide cell references toolbar",
+            "Toggle button says hide when it is visible after reload"
         );
     });
 });

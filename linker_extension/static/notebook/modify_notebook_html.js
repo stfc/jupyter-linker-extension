@@ -25,25 +25,6 @@ define([
 
         dropdown.append(dropdown_ul);
         $("ul.navbar-nav").append(dropdown);
-
-        var promise = new Promise(function(resolve) {
-            function poll() {
-                if(Jupyter.notebook.metadata.celltoolbar) {
-                    resolve();
-                } else {
-                    setTimeout(poll,1000);
-                } 
-            }
-            poll();
-        });
-
-        promise.then(function() {
-            if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
-                $("#toggle_cell_references_bar > a").text("Show cell references toolbar");
-            } else {
-                $("#toggle_cell_references_bar > a").text("Hide cell references toolbar");
-            }
-        });
         
         dropdown_ul.append($("<li/>").attr("id","add_metadata")
                                      .append($("<a/>")
@@ -100,6 +81,25 @@ define([
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Publish Notebook and associated data")));
+
+        var promise = new Promise(function(resolve) {
+            function poll() {
+                if(Jupyter.notebook.metadata) {
+                    resolve();
+                } else {
+                    setTimeout(poll,1000);
+                } 
+            }
+            poll();
+        });
+
+        promise.then(function() {
+            if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
+                $("#toggle_cell_references_bar > a").text("Show cell references toolbar");
+            } else {
+                $("#toggle_cell_references_bar > a").text("Hide cell references toolbar");
+            }
+        });
 
         $("#download_pdf").remove();
         var new_pdf_menu_item = $("<li>")

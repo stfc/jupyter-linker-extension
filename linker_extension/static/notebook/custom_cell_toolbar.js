@@ -60,12 +60,12 @@ define([
             Jupyter.notebook.metadata.celltoolbar = "Linker Extension";
 
             $("#toggle_cell_references_bar > a")
-                .text("Hide cell references bar");
+                .text("Hide cell references toolbar");
         } else {
             CellToolbar.global_hide();
             delete Jupyter.notebook.metadata.celltoolbar;
             $("#toggle_cell_references_bar > a")
-                .text("Show cell references bar");
+                .text("Show cell references toolbar");
         }
     };
 
