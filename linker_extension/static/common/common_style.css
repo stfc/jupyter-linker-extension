@@ -130,9 +130,13 @@ span#login_widget {
   margin-left: 4px; 
 }
 
-#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-URL, .citation {
+#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation {
   margin-bottom: 8px;
   width: 600px;
+}
+
+#fields2 input[readonly], #data_fields input[readonly] {
+  width: 533px;
 }
 
 #fields1 > label, #fields2 > label, #data_fields > label {
@@ -174,6 +178,11 @@ span#login_widget {
 .btn-date {
   margin-top: 4px;
 }
+
+#current-date {
+  margin-left: 8px;
+}
+
 
 textarea {
   width: 600px;
