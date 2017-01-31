@@ -349,10 +349,29 @@ define(["base/js/namespace",
 
         date.append(dateLabelContainer).append(dateInputContainer);
 
+        //default to have the current date selected
+        var currtime = new Date();
+        day.val(currtime.getDate());
+        month.val(currtime.getMonth() + 1);
+        year.val(currtime.getFullYear());
+
+        //clear date
+        var clear_button = $("<button/>")
+            .text("Clear date")
+            .attr("type","button")
+            .attr("id","clear-date")
+            .addClass("btn btn-xs btn-default btn-date")
+            .click(function() {
+                day.val("");
+                month.val("0");
+                year.val("");
+            });
+
         //fill the date fields with the default - now
         var now_button = $("<button/>")
             .text("Set to current date")
             .attr("type","button")
+            .attr("id","current-date")
             .addClass("btn btn-xs btn-default btn-date")
             .click(function() {
                 var currtime = new Date();
@@ -361,6 +380,7 @@ define(["base/js/namespace",
                 year.val(currtime.getFullYear());
             });
 
+        dateInputContainer.append(clear_button);
         dateInputContainer.append(now_button);
 
         var languageLabel = $("<label/>")
@@ -558,8 +578,8 @@ define(["base/js/namespace",
         //ones that users may select
         var licenceDropdown = $("<select/>")
             .attr("name","licence dropdown")
-            .attr("id","licence-dropdown")
-            .append($("<option/>").attr("value","").text("n/A"))
+            .attr("id","nb-licence-dropdown")
+            .append($("<option/>").attr("value","").text("None Selected"))
             .append($("<option/>").attr("value","CC0").text("CC0"))
             .append($("<option/>").attr("value","CC BY").text("CC BY"))
             .append($("<option/>").attr("value","CC BY-SA").text("CC BY-SA"))
@@ -581,7 +601,7 @@ define(["base/js/namespace",
             .append($("<option/>").attr("value","Other").text("Other"));
 
         var licenceDropdownLabel = $("<label/>")
-            .attr("for","licence-dropdown")
+            .attr("for","nb-licence-dropdown")
             .text("Please select a licence from one of the ones listed below, " + 
                   "or select \"Other\" and specify your own licence");
 
@@ -1081,14 +1101,14 @@ define(["base/js/namespace",
             $("label[for=\"repository\"]").after(repository_error);
         }
 
-        if($("#licence-dropdown").val() === "") {
+        if($("#nb-licence-dropdown").val() === "") {
             var licence_dropdown_error = $("<div/>")
                 .attr("id","licence-dropdown-error")
                 .addClass("metadata-form-error")
                 .text("Please select a licence or select \"Other\" and specify your own.");
 
             $("label[for=\"licence\"]").after(licence_dropdown_error);
-        } else if($("#licence-dropdown").val() === "Other" && 
+        } else if($("#nb-licence-dropdown").val() === "Other" && 
                   !$("#licence-url-radio").prop("checked") &&
                   !$("#licence-file-radio").prop("checked"))
         {
@@ -1098,7 +1118,7 @@ define(["base/js/namespace",
                 .text("Please either provide a link to a licence or upload a licence file.");
 
             $("label[for=\"licence\"]").after(no_licence_error);
-        } else if($("#licence-dropdown").val() === "Other" && 
+        } else if($("#nb-licence-dropdown").val() === "Other" && 
                   $("#licence-url").val() === "" &&
                   $("#licence-url-radio").prop("checked"))
         {
@@ -1108,7 +1128,7 @@ define(["base/js/namespace",
                 .text("Please provide a link to a licence file.");
 
             $("label[for=\"licence-url\"]").after(no_licence_url_error);
-        } else if($("#licence-dropdown").val() === "Other" && 
+        } else if($("#nb-licence-dropdown").val() === "Other" && 
                   $("#licence-file").val() === "" &&
                   $("#licence-file-radio").prop("checked"))
         {
@@ -1186,7 +1206,7 @@ define(["base/js/namespace",
             md.reportmetadata.sponsors = $("#sponsors").val();
 
             md.reportmetadata.licence = {
-                "preset": $("#licence-dropdown").val(),
+                "preset": $("#nb-licence-dropdown").val(),
                 "url": $("#licence-url").val()
             };
 
