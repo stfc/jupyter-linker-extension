@@ -30,7 +30,7 @@ define(["base/js/namespace",
                         if(!$("#fields1").hasClass("hide-me") &&
                             $("#fields2").hasClass("hide-me"))
                         { 
-                            //can"t go back when we"re on the first page
+                            //can't go back when we're on the first page
                             $("#previous").addClass("disabled"); 
                         }
                         else if($("#fields1").hasClass("hide-me") &&
@@ -57,23 +57,21 @@ define(["base/js/namespace",
 
         modal.on("shown.bs.modal", function () {
             $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous");
+                                                    .attr("id","previous")
+                                                    .prop("disabled",true);
             $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
                                                     .attr("id","next");
             //we can't store licence file info in metadata so disable it
             //only allow the option when publishing
             $("#licence-file-radio").prop("disabled",true);
             $("#licence-file").prop("disabled",true);
-            $("#licence-file-button").prop("disabled",true);
+            $("#licence-file-button").attr("disabled","disabled");
         });
     };
 
     var create_fields = function () {
         var md = Jupyter.notebook.metadata;
         var md_set = false;
-        var authorcount = 1;
-
-        var return_fields = {};
 
         //check to see if metadata has previously been set and whether we need
         //to repopulate the form fields
@@ -87,120 +85,126 @@ define(["base/js/namespace",
             .attr("type","text")
             .val("");
 
-        return_fields.title = title;
-
         var titleLabel =  $("<label/>")
             .attr("for","title")
             .text("Title: ");
 
-        var defaultAuthorFirstName = $("<input/>")
-            .attr("class","author-first-name")
-            .attr("type","text")
-            .attr("id","author-first-name-0")
-            .on("keydown", function(event) {
-                if (event.keyCode === $.ui.keyCode.TAB &&
-                    $(this).autocomplete().data("ui-autocomplete").menu.active)
-                {
-                    event.preventDefault(); //don"t navigate away on tab press
-                }
-            })
-            .autocomplete({
-                source: function( request, response ) {
-                    var url = Jupyter.notebook.contents.base_url + "ldap";
-                    var settings = {
-                        processData : false,
-                        cache: false,
-                        type : "GET",
-                        dataType : "json",
-                        success: function(data) {
-                            response($.map(data, function(item) {
-                                var parsed = JSON.parse(item);
-                                var sn = parsed.attributes.sn;
-                                var fn = parsed.attributes.givenName;
-                                var namestring = sn + ", " + fn;
-                                return namestring;
-                            }));
+        var generate_author = function(id,first_or_last) {
+            var generated_author = $("<input/>")
+                .attr("class","author-" + first_or_last + "-name")
+                .attr("type","text")
+                .attr("id","author-" + first_or_last + "-name-" + id)
+                .on("keydown", function(event) {
+                    if (event.keyCode === $.ui.keyCode.TAB &&
+                        $(this).autocomplete().data("ui-autocomplete").menu.active)
+                    {
+                        event.preventDefault();
+                    }
+                })
+                .autocomplete({
+                    source: function( request, response ) {
+                        var url = Jupyter.notebook.contents.base_url + "ldap";
+                        var settings = {
+                            processData : false,
+                            cache: false,
+                            type : "GET",
+                            dataType : "json",
+                            success: function(data) {
+                                response($.map(data, function(item) {
+                                    var parsed = JSON.parse(item);
+                                    return parsed.attributes.displayName;
+                                }));
+                            }
+                        };
+                        if(first_or_last === "last") {
+                            $.ajax(url + "?" +
+                                   $.param({"lastname": request.term,
+                                            "firstname": $("#author-first-name-" + id).val()}
+                                  ),settings);
+                        } else if (first_or_last === "first") {
+                            $.ajax(url + "?" +
+                                   $.param({"lastname": $("#author-last-name-" + id).val(),
+                                            "firstname": request.term}
+                                  ),settings);
                         }
-                    };
-                    $.ajax(url + "?" + 
-                           $.param({"firstname": request.term,
-                                    "lastname": $("#author-last-name-0").val()}
-                          ),settings);
-                },
-                focus: function() {
-                  // prevent value inserted on focus
-                    return false;
-                },
-                select: function( event, ui ) {
-                    var name = ui.item.value;
-                    var sn = name.split(",")[0].trim();
-                    var fn = name.split(",")[1].trim();
-                    $(this).val(fn);
-                    $(this).parent().children().eq(0).val(sn);
-                    return false;
-                },
-                minLength:1,
-            });
+                    },
+                    focus: function() {
+                      // prevent value inserted on focus
+                        return false;
+                    },
+                    minLength:1,
+                });
 
-        var defaultAuthorLastName = $("<input/>")
-            .attr("class","author-last-name")
-            .attr("type","text")
-            .attr("id","author-last-name-0")
-            .on("keydown", function(event) {
-                if (event.keyCode === $.ui.keyCode.TAB &&
-                    $(this).autocomplete().data("ui-autocomplete").menu.active)
-                {
-                    event.preventDefault();
-                }
-            })
-            .autocomplete({
-                source: function( request, response ) {
-                    var url = Jupyter.notebook.contents.base_url + "ldap";
-                    var settings = {
-                        processData : false,
-                        cache: false,
-                        type : "GET",
-                        dataType : "json",
-                        success: function(data) {
-                            response($.map(data, function(item) {
-                                var parsed = JSON.parse(item);
-                                var sn = parsed.attributes.sn;
-                                var fn = parsed.attributes.givenName;
-                                var namestring = sn + ", " + fn;
-                                return namestring;
-                            }));
+            if(id === 0) {
+                generated_author.autocomplete({
+                    select: function( event, ui ) {
+                        var person = ui.item.value;
+                        var person_split = person.split(" ");
+                        var sn = person_split[0].slice(0,-1);
+                        var fn = person_split[1];
+                        var department = person_split[2].split(",")[2].slice(0,-1);
+
+                        if(first_or_last === "last") {
+                            $(this).val(sn);
+                            $(this).parent().children().eq(1).val(fn);
+                        } else {
+                            $(this).val(fn);
+                            $(this).parent().children().eq(0).val(sn);
                         }
-                    };
-                    $.ajax(url + "?" +
-                           $.param({"lastname": request.term,
-                                    "firstname": $("#author-first-name-0").val()}
-                          ),settings);
-                },
-                focus: function() {
-                  // prevent value inserted on focus
-                    return false;
-                },
-                select: function( event, ui ) {
-                    var name = ui.item.value;
-                    var sn = name.split(",")[0].trim();
-                    var fn = name.split(",")[1].trim();
-                    $(this).val(sn);
-                    $(this).parent().children().eq(1).val(fn);
-                    return false;
-                },
-                minLength:1,
-            });
+                        
+                        var deps_to_reps = {
+                            "SC": "SCD",
+                            "RALSP": "RAL Space",
+                            "DIA": "DLS",
+                            "TECH":"Technology",
+                            "CLF":"CLF",
+                            "ISIS":"ISIS",
+                            "PPD":"PPD",
+                            "AST":"ASTeC",
+                            "UKATC":"UKATC"
+                        };
+                        var repository = deps_to_reps[department];
+                        $("#repository").val($("#repository option").filter(function() {
+                            return $(this).text() === repository;
+                        }).val());
 
-        var authorsLabel = $("<label/>")
+                        return false;
+                    }
+                });
+            } else {
+                generated_author.autocomplete({
+                    select: function( event, ui ) {
+                        var person = ui.item.value;
+                        var person_split = person.split(" ");
+                        var sn = person_split[0].slice(0,-1);
+                        var fn = person_split[1];
+                        if(first_or_last === "last") {
+                            $(this).val(sn);
+                            $(this).parent().children().eq(1).val(fn);
+                        } else {
+                            $(this).val(fn);
+                            $(this).parent().children().eq(0).val(sn);
+                        }
+                        return false;
+                    }
+                });
+            }
+            return generated_author;
+        };
+
+        var defaultAuthorLastName = generate_author(0,"last");
+        var defaultAuthorFirstName = generate_author(0,"first");
+
+        var authorLabel = $("<label/>")
             .attr("for","author")
-            .text("Authors: ");
+            .text("Author: ");
 
         var authorsFirstNameLabel = $("<label/>")
-            .attr("for","defaultAuthorFirstName")
+            .attr("for","author-first-name-0")
             .text("First name(s), e.g. John: ");
 
         var authorsLastNameLabel = $("<label/>")
-            .attr("for","defaultAuthorLastName")
+            .attr("for","author-last-name-0")
             .text("Last name, e.g. Smith: ");
 
         var defaultAuthor = ($("<div/>"))
@@ -208,10 +212,30 @@ define(["base/js/namespace",
             .append(defaultAuthorLastName)
             .append(defaultAuthorFirstName);
 
-        var authors = $("<div/>").attr("id","authors")
+        var author = $("<div/>").attr("id","author")
             .append(authorsLastNameLabel)
             .append(authorsFirstNameLabel)
             .append(defaultAuthor);
+
+        var additionalAuthorsLabel = $("<label/>")
+            .attr("for","additional-authors")
+            .text("Additional Authors: ");
+
+        var additionalAuthorsFirstNameLabel = $("<label/>")
+            .attr("for","author-first-name-1")
+            .text("First name(s), e.g. John: ");
+
+        var additionalAuthorsLastNameLabel = $("<label/>")
+            .attr("for","author-last-name-1")
+            .text("Last name, e.g. Smith: ");
+
+        var additionalLastName = generate_author(1,"last");
+        var additionalFirstName = generate_author(1,"first");
+
+        var additionalAuthor = ($("<div/>"))
+            .addClass("author additional-author")
+            .append(additionalLastName)
+            .append(additionalFirstName);
 
         var addAuthorButton = $("<button/>")
             .addClass("btn btn-xs btn-default btn-add")
@@ -223,111 +247,24 @@ define(["base/js/namespace",
         addAuthorButton.append($("<i>")
                        .addClass("fa fa-plus")
                        .attr("aria-hidden","true"));
-        defaultAuthor.append(addAuthorButton);
+        additionalAuthor.append(addAuthorButton);
 
+        var additionalAuthors = $("<div/>").attr("id","additional-authors")
+            .append(additionalAuthorsLastNameLabel)
+            .append(additionalAuthorsFirstNameLabel)
+            .append(additionalAuthor);
+
+        var authorcount = 2;
         function addAuthor() {
             var newAuthor = ($("<div/>"));
-            var currcount = authorcount;
-            var lastName = $("<input/>")
-                .attr("class","author-last-name")
-                .attr("type","text")
-                .attr("id","author-last-name-" + authorcount)
-                .on("keydown", function(event) {
-                    if (event.keyCode === $.ui.keyCode.TAB &&
-                        $(this).autocomplete().data("ui-autocomplete").menu.active)
-                    {
-                        event.preventDefault();
-                    }
-                })
-                .autocomplete({
-                    source: function( request, response ) {
-                        var url = Jupyter.notebook.contents.base_url + "ldap";
-                        var settings = {
-                            processData : false,
-                            cache: false,
-                            type : "GET",
-                            dataType : "json",
-                            success: function(data) {
-                                response($.map(data, function(item) {
-                                    var parsed = JSON.parse(item);
-                                    var sn = parsed.attributes.sn;
-                                    var fn = parsed.attributes.givenName;
-                                    var namestring = sn + ", " + fn;
-                                    return namestring;
-                                }));
-                            }
-                        };
-                        $.ajax(url + "?" +
-                               $.param({"lastname": request.term,
-                                        "firstname": $("#author-first-name-" + currcount).val()}
-                              ),settings);
-                    },
-                    focus: function() {
-                      // prevent value inserted on focus
-                        return false;
-                    },
-                    select: function( event, ui ) {
-                        var name = ui.item.value;
-                        var sn = name.split(",")[0].trim();
-                        var fn = name.split(",")[1].trim();
-                        $(this).val(sn);
-                        $(this).parent().children().eq(1).val(fn);
-                        return false;
-                    },
-                    minLength:1,
-                });
-            var firstName = $("<input/>")
-                .attr("class","author-first-name")
-                .attr("type","text")
-                .attr("id","author-first-name-" + authorcount)
-                .on("keydown", function(event) {
-                    if (event.keyCode === $.ui.keyCode.TAB &&
-                        $(this).autocomplete().data("ui-autocomplete").menu.active)
-                    {
-                        event.preventDefault();
-                    }
-                })
-                .autocomplete({
-                    source: function( request, response ) {
-                        var url = Jupyter.notebook.contents.base_url + "ldap";
-                        var settings = {
-                            processData : false,
-                            cache: false,
-                            type : "GET",
-                            dataType : "json",
-                            success: function(data) {
-                                response($.map(data, function(item) {
-                                    var parsed = JSON.parse(item);
-                                    var sn = parsed.attributes.sn;
-                                    var fn = parsed.attributes.givenName;
-                                    var namestring = sn + ", " + fn;
-                                    return namestring;
-                                }));
-                            }
-                        };
-                        $.ajax(url + "?" +
-                               $.param({"firstname": request.term,
-                                        "lastname": $("#author-last-name-" + currcount).val()}
-                              ),settings);
-                    },
-                    focus: function() {
-                      // prevent value inserted on focus
-                        return false;
-                    },
-                    select: function( event, ui ) {
-                        var name = ui.item.value;
-                        var sn = name.split(",")[0].trim();
-                        var fn = name.split(",")[1].trim();
-                        $(this).val(fn);
-                        $(this).parent().children().eq(0).val(sn);
-                        return false;
-                    },
-                    minLength:1,
-                });
-            newAuthor.addClass("author")
+            
+            var firstName = generate_author(authorcount,"first");
+            var lastName = generate_author(authorcount,"last");
+
+            newAuthor.addClass("author additional-author")
                 .append(lastName)
                 .append(firstName);
-            var previousAuthor = $(".author").last();
+            var previousAuthor = $(".additional-author").last();
 
             //detach from the previously last author input
             //so we can put it back on the new one
@@ -345,7 +282,7 @@ define(["base/js/namespace",
                         .addClass("fa fa-trash")
                         .attr("aria-hidden","true"));
             previousAuthor.append(deleteAuthor);
-            authors.append(newAuthor.append(addAuthorButton));
+            additionalAuthors.append(newAuthor.append(addAuthorButton));
             authorcount++;
             return [lastName,firstName,newAuthor];
         }
@@ -412,8 +349,19 @@ define(["base/js/namespace",
 
         date.append(dateLabelContainer).append(dateInputContainer);
 
-        //TODO: Ask about type - surely it will have to be collection for now?
+        //fill the date fields with the default - now
+        var now_button = $("<button/>")
+            .text("Set to current date")
+            .attr("type","button")
+            .addClass("btn btn-xs btn-default btn-date")
+            .click(function() {
+                var currtime = new Date();
+                day.val(currtime.getDate());
+                month.val(currtime.getMonth() + 1);
+                year.val(currtime.getFullYear());
+            });
 
+        dateInputContainer.append(now_button);
 
         var languageLabel = $("<label/>")
             .attr("for","language")
@@ -434,11 +382,16 @@ define(["base/js/namespace",
             .append($("<option/>").attr("value","tr").text("Turkish"))
             .append($("<option/>").attr("value","other").text("Other"));
 
+        //default - english?
+        language.val("en");
+
         var form1 = $("<fieldset/>").attr("title","fields1").attr("id","fields1")
             .append(titleLabel)
             .append(title)
-            .append(authorsLabel)
-            .append(authors)
+            .append(authorLabel)
+            .append(author)
+            .append(additionalAuthorsLabel)
+            .append(additionalAuthors)
             .append(abstractLabel)
             .append(abstract)
             .append(tagsLabel)
@@ -465,7 +418,7 @@ define(["base/js/namespace",
         var citation_div = $("<div/>").addClass("nb-citation_div");
 
         var citation = $("<input/>")
-            .addClass("nb-citation")
+            .addClass("nb-citation citation")
             .attr("name","citation")
             .attr("id","nb-citation-0");
 
@@ -547,7 +500,7 @@ define(["base/js/namespace",
         function addCitation() {
             var newCitation_div = ($("<div/>")).addClass("nb-citation_div");
             var newCitation = $("<input/>")
-                .attr("class","nb-citation")
+                .attr("class","nb-citation citation")
                 .attr("type","text")
                 .attr("id","nb-citation-" + citationCount);
 
@@ -738,13 +691,13 @@ define(["base/js/namespace",
         licenceRadioFile.change(function() {
             licenceURL.prop("disabled",true);
             licenceFile.prop("disabled",false);
-            licenceFile_button.prop("disabled",false);
+            licenceFile_button.removeAttr("disabled");
         });
 
         licenceRadioURL.change(function() {
             licenceURL.prop("disabled",false);
             licenceFile.prop("disabled",true);
-            licenceFile_button.prop("disabled",true);
+            licenceFile_button.attr("disabled","disabled");
         });
 
         licence.append(licenceLabel)
@@ -769,7 +722,9 @@ define(["base/js/namespace",
             .attr("id","repository")
             .append($("<option/>").attr("value","").text(""));
 
-        custom_contents.get_collections().then(function(response) {
+        var collections_promise = custom_contents.get_collections();
+
+        collections_promise.then(function(response) {
             var collections = JSON.parse(response);
             collections.forEach(function(collection) {
                 var collection_option = $("<option/>");
@@ -777,10 +732,6 @@ define(["base/js/namespace",
                 collection_option.text(collection.name);
                 repository.append(collection_option);
             });
-
-            if(md_set) {
-                repository.val(md.reportmetadata.repository);
-            }
             $(document.body).append($("<div/>").attr("id","collections_loaded"));
         },function(reason) { //error
             console.log("Error fetching collections from eData: ");
@@ -809,6 +760,46 @@ define(["base/js/namespace",
             .append(repositoryLabel)
             .append(repository);
 
+        if(window.location.href.indexOf("user") !== -1) { //we're in jupyterhub
+            console.log("jupyterhub!");
+            var url_arr = window.location.href.split("/");
+            for(var i = 0; i < url_arr.length; i++) {
+                if(url_arr[i] === "user") {
+                    break;
+                }
+            }
+            var fedID = url_arr[i + 1]; //the url part right after user will be the username
+            var url = Jupyter.notebook.contents.base_url + "ldap";
+            var settings = {
+                processData : false,
+                cache: false,
+                type : "GET",
+                dataType : "json",
+                success: function(data) {
+                    console.log(data);
+                    var parsed = JSON.parse(data);
+                    $("#author-first-name-0").val(parsed.attributes.givenName);
+                    $("#author-last-name-0").val(parsed.attributes.sn);
+                    var department = parsed.attributes.department;
+                    var deps_to_reps = {
+                        "SC": "SCD",
+                        "RALSP": "RAL Space",
+                        "DIA": "DLS",
+                        "TECH":"Technology",
+                        "CLF":"CLF",
+                        "ISIS":"ISIS",
+                        "PPD":"PPD",
+                        "AST":"ASTeC",
+                        "UKATC":"UKATC"
+                    };
+                    var repository = deps_to_reps[department];
+                    collections_promise.then(function() {
+                        $("#repository").val(repository);
+                    });
+                }
+            };
+            $.ajax(url + "?" + $.param({"fedID": fedID}),settings);
+        }
 
         if(md_set) { //repopulate the form fields with previously saved data
             title.val(md.reportmetadata.title);
@@ -818,22 +809,24 @@ define(["base/js/namespace",
                 if(index === 0) {
                     defaultAuthorLastName.val(item[0]);
                     defaultAuthorFirstName.val(item[1]);
-                    if(authorsarr.length > 1) {
+                } else if(index === 1) {
+                    additionalLastName.val(item[0]);
+                    additionalFirstName.val(item[1]);
+                    if(authorsarr.length > 2) {
                         deleteAuthor = $("<button/>")
                             .addClass("btn btn-xs btn-default btn-remove remove-author-button")
                             .attr("type","button")
                             .attr("aria-label","Remove author")
                                 .click(function() {
-                                    auth[2].remove();
+                                    additionalAuthor.remove();
                                     $(this).remove();
                                 }); //add a remove button to the previously last author
 
                         deleteAuthor.append($("<i>")
                                             .addClass("fa fa-trash")
                                             .attr("aria-hidden","true"));
-                        defaultAuthor.append(deleteAuthor);
+                        additionalAuthor.append(deleteAuthor);
                     }
-                    
                 } else {
                     var auth = addAuthor();
                     auth[0].val(item[0]);
@@ -968,6 +961,11 @@ define(["base/js/namespace",
 
             funders.val(md.reportmetadata.funders);
             sponsors.val(md.reportmetadata.sponsors);
+
+            collections_promise.then(function() {
+                repository.val(md.reportmetadata.repository);
+            });
+
             licenceDropdown.val(md.reportmetadata.licence.preset);
             if(md.reportmetadata.licence.preset === "Other") {
                 licenceRadioFile.css("display","inline");
@@ -981,7 +979,7 @@ define(["base/js/namespace",
             }
             licenceURL.val(md.reportmetadata.licence.url);
             if (licenceURL.val()) {
-                licenceRadioURL.click();
+                licenceRadioURL.prop("checked",true);
             }
         }
 
@@ -1006,6 +1004,14 @@ define(["base/js/namespace",
                 .text("Please enter an abstract");
 
             $("label[for=\"nb-abstract\"]").after(abstract_error);
+        }
+        if($("#author-first-name-0").val() === "" || $("#author-last-name-0").val() === "") {
+            var author_error = $("<div/>")
+                .attr("id","author-missing-error")
+                .addClass("metadata-form-error")
+                .text("Please enter an author");
+
+            $("label[for=\"author\"]").after(author_error);
         }
         var isInteger = function(str,greaterthan,lessthan) {
             var n = ~~Number(str); //convert into a number with no decimal part
