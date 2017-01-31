@@ -86,19 +86,19 @@ define(["base/js/namespace",
         form_body.append(final_page);
 
         var modal = dialog.modal({
-            title: "Publish Notebook",
+            title: "Publish Notebook and Data",
             body: form_body,
             buttons: {
                 Cancel: {},
                 Previous: { 
                     click: function() {
                         //make a multi page form by changing visibility of the forms
-                        if($("upload-data-container").hasClass("hide-me") &&
+                        if($("#upload-data-container").hasClass("hide-me") &&
                            !$("#fields1").hasClass("hide-me"))
                         {
                             $("#fields1").addClass("hide-me");
                             $("#upload-data-container").removeClass("hide-me");
-                            $("#previous").addClass("disabled");
+                            $("#previous").prop("disabled",true);
                             instructions.text("Check the files currently " +
                                               "associated with this notebook. " +
                                               "Click the \"Select Data\" button " +
@@ -144,7 +144,7 @@ define(["base/js/namespace",
 
                                 $("#upload-data-container").addClass("hide-me");
                                 $("#fields1").removeClass("hide-me");
-                                $("#previous").removeClass("disabled");
+                                $("#previous").prop("disabled",false);
                                 instructions.text("Check and edit the metadata for " +
                                                   "the notebook before uploading to eData.");
                             }
@@ -339,7 +339,7 @@ define(["base/js/namespace",
                         {
                             $("#fields2").addClass("hide-me");
                             $("#fields1").removeClass("hide-me");
-                            $("#previous").addClass("disabled");
+                            $("#previous").prop("disabled",true);
                         }
                         else if($("#fields2").hasClass("hide-me") &&
                                 !$("#final-page").hasClass("hide-me"))
@@ -363,7 +363,7 @@ define(["base/js/namespace",
                             if($(".metadata-form-error").length === 0) {
                                 $("#fields1").addClass("hide-me");
                                 $("#fields2").removeClass("hide-me");
-                                $("#previous").removeClass("disabled");
+                                $("#previous").prop("disabled",false);
                             }
                         }  else if (!$("#fields2").hasClass("hide-me")) {
                             add_metadata.validate_fields2();
@@ -528,19 +528,19 @@ define(["base/js/namespace",
         form_body.append(final_page);
 
         var modal = dialog.modal({
-            title: "Publish Notebook",
+            title: "Publish Data",
             body: form_body,
             buttons: {
                 Cancel: {},
                 Previous: { 
                     click: function() {
                         //make a multi page form by changing visibility of the forms
-                        if($("upload-data-container").hasClass("hide-me") &&
+                        if($("#upload-data-container").hasClass("hide-me") &&
                                 !($("#final-page").hasClass("hide-me")))
                         {
                             $("#final-page").addClass("hide-me");
                             $("#upload-data-container").removeClass("hide-me");
-                            $("#previous").addClass("disabled");
+                            $("#previous").prop("disabled",true);
 
                             //we want button text to be next
                             //on any page but the last one
@@ -567,7 +567,7 @@ define(["base/js/namespace",
 
                                 $("#upload-data-container").addClass("hide-me");
                                 $("#final-page").removeClass("hide-me");
-                                $("#previous").removeClass("disabled");
+                                $("#previous").prop("disabled",false);
                                 instructions.text("Confirm that you would like " + 
                                                   "to upload the data bundle.");
 
