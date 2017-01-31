@@ -183,6 +183,8 @@ casper.notebook_test(function() {
     this.then(function() {
         this.test.assertExists("#title-missing-error",
                                "Title missing error exists");
+        this.test.assertExists("#author-missing-error",
+                               "Author missing error exists");
         this.test.assertExists("#nb-abstract-missing-error",
                                "Abstract missing error exists");
         this.test.assertExists("#year-missing-error",
@@ -191,10 +193,12 @@ casper.notebook_test(function() {
 
     //testing the date validation
     this.then(function() {
-        this.fill("form#publish_form > fieldset#fields1", {
-            "title": "My Title",
-            "abstract": "My abstract",
-            "year": "4000",
+        this.fillSelectors("form#publish_form > fieldset#fields1", {
+            "#title": "My Title",
+            "#author-last-name-0": "Davies",
+            "#author-first-name-0": "Louise",
+            "#nb-abstract": "My abstract",
+            "#year": "4000",
         });
     });
     this.thenClick("#next");
@@ -363,9 +367,9 @@ casper.notebook_test(function() {
         this.test.assert(licence_file_disabled, "#licence-file is disabled when url is selected");
 
         var licence_file_button_disabled = this.evaluate(function() {
-            return $("#licence-file-button").prop("disabled");
+            return $("#licence-file-button").attr("disabled");
         });
-        this.test.assert(licence_file_button_disabled, "#licence-file-button is disabled when url is selected");
+        this.test.assertNotEquals(licence_file_button_disabled, undefined, "#licence-file-button is disabled when url is selected");
     });
 
 

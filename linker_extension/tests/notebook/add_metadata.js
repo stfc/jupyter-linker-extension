@@ -26,6 +26,8 @@ casper.notebook_test(function() {
     this.then(function() {
         this.test.assertExists("#title-missing-error",
                                "Title missing error exists");
+        this.test.assertExists("#author-missing-error",
+                               "Author missing error exists");
         this.test.assertExists("#nb-abstract-missing-error",
                                "Abstract missing error exists");
         this.test.assertExists("#year-missing-error",
@@ -34,10 +36,12 @@ casper.notebook_test(function() {
 
     //testing the date validation
     this.then(function() {
-        this.fill("form#add_metadata_form > fieldset#fields1", {
-            "title": "My Title",
-            "abstract": "My abstract",
-            "year": "4000",
+        this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
+            "#title": "My Title",
+            "#author-last-name-0": "Davies",
+            "#author-first-name-0": "Louise",
+            "#nb-abstract": "My abstract",
+            "#year": "4000",
         });
     });
     this.thenClick("#next");
@@ -148,10 +152,10 @@ casper.notebook_test(function() {
             "#day": "20",
             "#language": "en",
             "#tags": "tag1\ntag2",
-            "#author-last-name-0": "Davies",
-            "#author-first-name-0": "Louise",
-            "#author-last-name-2": "S'chn T'gai",
-            "#author-first-name-2": "Spock",
+            "#author-last-name-1": "S'chn T'gai",
+            "#author-first-name-1": "Spock",
+            "#author-last-name-3": "Kirk",
+            "#author-first-name-3": "James",
         });
     }); 
     this.thenClick("#next");
@@ -288,7 +292,7 @@ casper.notebook_test(function() {
         );
         this.test.assertEquals(
             metadata.authors,
-            [["Davies","Louise"],["S'chn T'gai","Spock"]],
+            [["Davies","Louise"],["S'chn T'gai","Spock"],["Kirk","James"]],
             "Authors have been set correctly"
         );
         this.test.assertEquals(
@@ -443,7 +447,7 @@ casper.notebook_test(function() {
         );
         this.test.assertEquals(
             metadata.authors,
-            [["Davies","Louise"],["S'chn T'gai","Spock"]],
+            [["Davies","Louise"],["S'chn T'gai","Spock"],["Kirk","James"]],
             "Authors have been saved correctly"
         );
         this.test.assertEquals(
@@ -606,15 +610,12 @@ casper.notebook_test(function() {
     //Add some test metadata
     this.then(function() {
         this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
-            "#author-last-name-2": "McCoy",
-            "#author-first-name-2": "Leonard",
-            "#author-last-name-3": "Kirk",
-            "#author-first-name-3": "James T.",
+            "#author-last-name-3": "McCoy",
+            "#author-first-name-3": "Leonard",
         });
     }); 
 
     this.thenEvaluate(function() {
-        $("#author-last-name-1").parent().find("button").click();
         $("#author-last-name-2").parent().find("button").click();
     });
 
@@ -685,7 +686,7 @@ casper.notebook_test(function() {
         });
         this.test.assertEquals(
             metadata.authors,
-            [["Davies","Louise"],["Kirk","James T."]],
+            [["Davies","Louise"],["S'chn T'gai","Spock"],["McCoy","Leonard"]],
             "Authors have been set correctly after deleting some"
         );
         this.test.assertEquals(
