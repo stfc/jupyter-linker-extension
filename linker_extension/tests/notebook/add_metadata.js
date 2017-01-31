@@ -30,9 +30,48 @@ casper.notebook_test(function() {
                                "Author missing error exists");
         this.test.assertExists("#nb-abstract-missing-error",
                                "Abstract missing error exists");
+        var date = [];
+        var curr_date = new Date();
+        date.push(curr_date.getDate().toString());
+        date.push((curr_date.getMonth() + 1).toString());
+        date.push(curr_date.getFullYear().toString());
+
+        var test_date = this.evaluate(function() {
+            var date_arr = [];
+            date_arr.push($("#day").val());
+            date_arr.push($("#month").val());
+            date_arr.push($("#year").val());
+            return date_arr;
+        });
+        this.test.assertEquals(date,test_date,"Current date has been inserted right");
+
+    });
+
+    this.thenClick("#clear-date");
+    this.thenClick("#next");
+    this.then(function() {
         this.test.assertExists("#year-missing-error",
                                "Year missing error exists");
     });
+    this.thenClick("#current-date");
+    this.then(function () {
+        var date = [];
+        var curr_date = new Date();
+        date.push(curr_date.getDate().toString());
+        date.push((curr_date.getMonth() + 1).toString());
+        date.push(curr_date.getFullYear().toString());
+        
+        var test_date = this.evaluate(function() {
+            var date_arr = [];
+            date_arr.push($("#day").val());
+            date_arr.push($("#month").val());
+            date_arr.push($("#year").val());
+            return date_arr;
+        });
+        this.test.assertEquals(date,test_date,"Current date has been reinserted right");
+    });
+
+    this.thenClick("#clear-date");
 
     //testing the date validation
     this.then(function() {
@@ -176,7 +215,7 @@ casper.notebook_test(function() {
     this.then(function(){
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
             "#repository": "edata/8", //the handle for SCD
-            "#licence-dropdown": "Other"
+            "#nb-licence-dropdown": "Other"
         });
     });
 
@@ -202,7 +241,7 @@ casper.notebook_test(function() {
 
     this.then(function(){
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
-            "#licence-dropdown": "CC0"
+            "#nb-licence-dropdown": "CC0"
         });
     });
 
@@ -490,24 +529,24 @@ casper.notebook_test(function() {
     this.then(function() {
         var vals = this.evaluate(function(){
             return {
-                titleval: document.getElementById("title").value,
-                abstractval: document.getElementById("nb-abstract").value,
-                yearval: document.getElementById("year").value,
-                monthval: document.getElementById("month").value,
-                dayval: document.getElementById("day").value,
-                tagsval: document.getElementById("tags").value,
-                authorfn0val: document.getElementById("author-first-name-0").value,
-                authorln0val: document.getElementById("author-last-name-0").value,
-                authorfn1val: document.getElementById("author-first-name-1").value,
-                authorln1val: document.getElementById("author-last-name-1").value,
-                languageval: document.getElementById("language").value,
-                publisherval: document.getElementById("publisher").value,
-                citation0val: document.getElementById("nb-citation-0").value,
-                citation1val: document.getElementById("nb-citation-1").value,
-                reference0val: document.getElementById("nb-referencedBy-0").value,
-                reference1val: document.getElementById("nb-referencedBy-1").value,
-                repositoryval: document.getElementById("repository").value,
-                licenceval: document.getElementById("licence-dropdown").value,
+                titleval: $("#title").val(),
+                abstractval: $("#nb-abstract").val(),
+                yearval: $("#year").val(),
+                monthval: $("#month").val(),
+                dayval: $("#day").val(),
+                tagsval: $("#tags").val(),
+                authorfn0val: $("#author-first-name-0").val(),
+                authorln0val: $("#author-last-name-0").val(),
+                authorfn1val: $("#author-first-name-1").val(),
+                authorln1val: $("#author-last-name-1").val(),
+                languageval: $("#language").val(),
+                publisherval: $("#publisher").val(),
+                citation0val: $("#nb-citation-0").val(),
+                citation1val: $("#nb-citation-1").val(),
+                reference0val: $("#nb-referencedBy-0").val(),
+                reference1val: $("#nb-referencedBy-1").val(),
+                repositoryval: $("#repository").val(),
+                licenceval: $("#nb-licence-dropdown").val(),
             };
         });
         this.test.assertEquals(
@@ -640,7 +679,7 @@ casper.notebook_test(function() {
             "#nb-citation-3": "Citation 4",
             "#nb-referencedBy-2": "URL3",
             "#nb-referencedBy-3": "URL4",
-            "#licence-dropdown": "Other"
+            "#nb-licence-dropdown": "Other"
         });
     });
 
