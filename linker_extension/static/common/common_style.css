@@ -130,7 +130,7 @@ span#login_widget {
   margin-left: 4px; 
 }
 
-#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation {
+#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input {
   margin-bottom: 8px;
   width: 600px;
 }
@@ -139,7 +139,7 @@ span#login_widget {
   width: 533px;
 }
 
-#fields1 > label, #fields2 > label, #data_fields > label {
+#fields1 > label, #fields2 > label, #data_fields > label, #extra_nb_metadata_1 > label, #extra_nb_metadata_2 > label {
   margin-bottom: 2px;
   display: block;
 }
@@ -298,4 +298,10 @@ input.fileinput {
 
 #licence-URL:disabled {
   cursor: not-allowed;
+}
+
+.btn-collapse {
+  margin-top: 10px;
+  margin-bottom: 6px;
+  display: block;
 }

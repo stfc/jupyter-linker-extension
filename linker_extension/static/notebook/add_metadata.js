@@ -392,7 +392,7 @@ define(["base/js/namespace",
             .attr("id","language")
             .append($("<option/>").attr("value","").text("n/A"))
             .append($("<option/>").attr("value","en_US").text("English (US)"))
-            .append($("<option/>").attr("value","en").text("English"))
+            .append($("<option/>").attr("value","en").text("English (GB) (Default)"))
             .append($("<option/>").attr("value","es").text("Spanish"))
             .append($("<option/>").attr("value","de").text("German"))
             .append($("<option/>").attr("value","fr").text("French"))
@@ -405,21 +405,37 @@ define(["base/js/namespace",
         //default - english?
         language.val("en");
 
-        var form1 = $("<fieldset/>").attr("title","fields1").attr("id","fields1")
-            .append(titleLabel)
-            .append(title)
-            .append(authorLabel)
-            .append(author)
+        var expand_button_1 = $("<button/>")
+            .addClass("btn btn-info btn-sm btn-collapse")
+            .attr("type","button")
+            .attr("data-toggle","collapse")
+            .attr("data-target","#extra_nb_metadata_1")
+            .attr("aria-expanded","false")
+            .attr("aria-controls","extra_nb_metadata_1")
+            .text("Additional Metadata (click to expand)");
+
+        var extra_nb_metadata_1 = $("<div/>")
+            .addClass("collapse")
+            .attr("id","extra_nb_metadata_1")
             .append(additionalAuthorsLabel)
             .append(additionalAuthors)
-            .append(abstractLabel)
-            .append(abstract)
             .append(tagsLabel)
             .append(tags)
             .append(dateLabel)
             .append(date)
             .append(languageLabel)
-            .append(language);            
+            .append(language);
+
+        var form1 = $("<fieldset/>").attr("title","fields1").attr("id","fields1")
+            .append(titleLabel)
+            .append(title)
+            .append(authorLabel)
+            .append(author)
+            .append(abstractLabel)
+            .append(abstract)
+            .append(expand_button_1)
+            .append(extra_nb_metadata_1);
+                       
 
         var publisherLabel = $("<label/>")
             .attr("for","publisher")
@@ -764,7 +780,18 @@ define(["base/js/namespace",
             $("label[for=\"repository\"]").after(repository_fetch_error);
         });
 
-        var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2")
+        var expand_button_2 = $("<button/>")
+            .addClass("btn btn-info btn-sm btn-collapse")
+            .attr("type","button")
+            .attr("data-toggle","collapse")
+            .attr("data-target","#extra_nb_metadata_2")
+            .attr("aria-expanded","false")
+            .attr("aria-controls","extra_nb_metadata_2")
+            .text("Additional Metadata (click to expand)");
+
+        var extra_nb_metadata_2 = $("<div/>")
+            .addClass("collapse")
+            .attr("id","extra_nb_metadata_2")
             .append(publisherLabel)
             .append(publisher)
             .append(citationsLabel)
@@ -772,13 +799,17 @@ define(["base/js/namespace",
             .append(referencedByLabel)
             .append(referencedBy_divs)
             .append(fundersLabel)
-            .append(funders)
+            .append(funders);
             //.append(sponsorsLabel)
             //.append(sponsors)
+
+        var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2")
             .append(licenceLabel)
             .append(licence)
             .append(repositoryLabel)
-            .append(repository);
+            .append(repository)
+            .append(expand_button_2)
+            .append(extra_nb_metadata_2);
 
         if(window.location.href.indexOf("user") !== -1) { //we're in jupyterhub
             console.log("jupyterhub!");
@@ -1226,7 +1257,7 @@ define(["base/js/namespace",
             if($(".metadata-form-error").length === 0) {
                 $("#fields1").addClass("hide-me");
                 $("#fields2").removeClass("hide-me");
-                $("#previous").removeClass("disabled");
+                $("#previous").prop("disabled",false);
 
                 //we want button text to be save on the last page
                 $("#next").text("Save");
