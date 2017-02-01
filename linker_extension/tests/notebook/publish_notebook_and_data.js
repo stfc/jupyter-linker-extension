@@ -162,11 +162,11 @@ casper.notebook_test(function() {
                                 "Licence missing error showing correctly");
     });
 
-    this.thenClick("#add-data-referencedBy-button");
+    //this.thenClick("#add-data-referencedBy-button");
     this.then(function() {
         this.evaluate(function() {
-            $("#data-referencedBy-0").val("URL1");
-            $("#data-referencedBy-1").val("URL2");
+            //$("#data-referencedBy-0").val("URL1");
+            //$("#data-referencedBy-1").val("URL2");
             $("#data-citation-0").val("Citation");
             $("#copyright").val("Copyright");
             $("#data-licence-dropdown").val("MIT");

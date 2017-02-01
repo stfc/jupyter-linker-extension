@@ -114,13 +114,13 @@ class UploadBundleHandler(IPythonHandler):
                     citation_xml.text = citation
                     metadata.append(citation_xml)
 
-        referencedBys = arguments['referencedBy']
+        '''referencedBys = arguments['referencedBy']
         if referencedBys is not []:
             if len(referencedBys) > 0:
                 for referencedBy in referencedBys:
                     reference_xml = ET.Element("dcterms:isReferencedBy")
                     reference_xml.text = referencedBy
-                    metadata.append(reference_xml)
+                    metadata.append(reference_xml)'''
 
         reference_xml = ET.Element("dc:type")
         reference_xml.text = "Dataset"

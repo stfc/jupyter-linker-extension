@@ -140,12 +140,12 @@ define([
                 stringauthors.push(authorstring); 
             });
 
-            var referencedBy_URLs = [];
+            /*var referencedBy_URLs = [];
             $(".data-referencedBy").each(function(i,e) {
                 if($(e).val() !== "") {
                     referencedBy_URLs.push($(e).val());
                 }
-            });
+            });*/
 
             var citations = [];
             $(".data-citation").each(function(i,e) {
@@ -197,7 +197,7 @@ define([
                         "file_paths": file_paths,
                         "file_types": file_types,
                         "abstract": abstract,
-                        "referencedBy": referencedBy_URLs,
+                        "referencedBy": md.reportmetadata.referencedBy,
                         "title":md.reportmetadata.title,
                         "authors":stringauthors,
                         "tags":md.reportmetadata.tags,
@@ -339,7 +339,7 @@ define([
 
         abstract.val(default_abstract);
 
-        var referencedBy_divs = $("<div/>")
+        /*var referencedBy_divs = $("<div/>")
             .addClass("data-referencedBy_divs");
 
         var referencedBy_label = $("<label/>")
@@ -397,7 +397,7 @@ define([
             referencedBy_divs.append(newURL.append(URL).append(addURLButton));
             urlcount++;
             return [URL,newURL];
-        }
+        }*/
 
         var licence_label = $("<label/>")
             .attr("for","data-licence-dropdown")
@@ -534,8 +534,8 @@ define([
             .attr("title","data_fields").attr("id","data_fields")
             .append(abstract_label)
             .append(abstract)
-            .append(referencedBy_label)
-            .append(referencedBy_divs)
+            //.append(referencedBy_label)
+            //.append(referencedBy_divs)
             .append(licence_label)
             .append(licenceDropdown)
             .append(TOS_label)
