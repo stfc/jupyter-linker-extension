@@ -27,7 +27,7 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
                          "nbextensions/linker_extension/common/logo.png");
 
         var favicon = document.querySelector("link[rel=\"shortcut icon\"]");
-        favicon.setAttribute("href",
+        favicon.setAttribute("href", utils.get_body_data("baseUrl") + 
                              "nbextensions/linker_extension/common/favicon.ico");
 
         $("head").append(
