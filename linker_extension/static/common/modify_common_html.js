@@ -10,13 +10,13 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
         $("#header").prepend(header_containter_container);
 
         var file_tree_button = $("<a/>")
-           .attr("id","file-tree-button")
-           .addClass("btn btn-default btn-sm navbar-btn " + 
+            .attr("id","file-tree-button")
+            .addClass("btn btn-default btn-sm navbar-btn " + 
                      "pull-right")
-           .css("margin-right","2px")
-           .css("margin-left","2px")
-           .attr("href",utils.get_body_data("baseUrl"))
-           .text("File Tree");
+            .css("margin-right","2px")
+            .css("margin-left","2px")
+            .attr("href",utils.get_body_data("baseUrl"))
+            .text("File Tree");
 
         $("#login_widget").after(file_tree_button);
         
@@ -26,8 +26,8 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
         logo.attr("src", utils.get_body_data("baseUrl") + 
                          "nbextensions/linker_extension/common/logo.png");
 
-        var favicon = $("head > link[rel=\"shortcut icon\"]");
-        favicon.attr("href", utils.get_body_data("baseUrl") + 
+        var favicon = document.querySelector("link[rel=\"shortcut icon\"]");
+        favicon.setAttribute("href",
                              "nbextensions/linker_extension/common/favicon.ico");
 
         $("head").append(
