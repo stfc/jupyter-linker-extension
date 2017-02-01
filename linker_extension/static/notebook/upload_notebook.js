@@ -7,6 +7,16 @@ define([
     "./modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_utils,custom_contents){
 
+    /*  
+     *  Actually upload the notebook. Requires a username & password, and if
+     *  a licence file was uploaded will be passed a file name and contents.
+     *  Stringifies all the metadata and other stuff needed by SWORDHandler
+     *  and sends the request. If successful, shows an success notification
+     *  that contains the url of the item uploaded. If it fails, will show
+     *  an error notification with the error message and a notice to contact
+     *  the devs. Also guards against there being no metadata, as it will also
+     *  create an error notification.
+     */ 
     var upload_notebook = function(
         username,
         password,
@@ -78,6 +88,12 @@ define([
         }
     };
 
+
+    /*  
+     *  Creates a dialog that prompts for username and password. Queries LDAP on
+     *  whether the user is vlaid before bothering to send a request to DSpace.
+     *  This is mostly here for testing purposes and will eventually be removed.
+     */ 
     var upload_notebook_dialog = function() {
         var login = $("<table/>").attr("id","login-fields-new-item");
         var login_labels = $("<tr/>");
@@ -168,6 +184,14 @@ define([
             $(".modal-footer > .btn-primary").removeAttr("data-dismiss");
         });
     };
+
+    /*  
+     *  The below adds an action to the notebook and assigns the add_metadata
+     *  function to the New Sword Item function, and handles exporting the
+     *  functions we use in other modules/files.
+     *  TODO: remove the new sword item button. Have this module exist to
+     *  support Publish Notebook
+     */ 
     
     var action = {
         help: "Upload notebook",

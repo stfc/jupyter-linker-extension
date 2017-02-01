@@ -5,8 +5,18 @@ define(["base/js/namespace",
         "./modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_contents){
 
+    /*  
+     *  Creates the modal that pops up when "Add Metadata" is clicked.
+     *  It uses the dialog module from the main notebook to create a dialog.
+     *  It creates the form body by running create_fields(), and adds some
+     *  labelling fluff. it also defines previous and next butttons and 
+     *  assigns the logic to these buttons that tells them when to change page,
+     *  which is done via toggling visibility using a class "hide-me" and also
+     *  calls the validator functions and uses them to dictate when a page is 
+     *  allowed to change. Also finally calls save metadata before the modal is
+     *  dismissed.
+     */ 
     var add_metadata = function() {
-
         var form_fields = create_fields();
 
         var form_body = $("<div/>").attr("title", "Add the metadata")
@@ -47,7 +57,28 @@ define(["base/js/namespace",
                 Next: { 
                     class : "btn-primary",
                     click: function() {
-                        validate();
+                        if(!$("#fields1").hasClass("hide-me") &&
+                           $("#fields2").hasClass("hide-me"))
+                        {
+                            validate_fields1();
+                            if($(".metadata-form-error").length === 0) {
+                                $("#fields1").addClass("hide-me");
+                                $("#fields2").removeClass("hide-me");
+                                $("#previous").prop("disabled",false);
+
+                                //we want button text to be save on the last page
+                                $("#next").text("Save");
+                            }
+                        }
+                        else if($("#fields1").hasClass("hide-me") &&
+                                !$("#fields2").hasClass("hide-me"))
+                        { //save our metadata
+                            validate_fields2();
+                            if($(".metadata-form-error").length === 0) {
+                                save_metadata();
+                                $(".modal").modal("hide");
+                            }
+                        }
                     },
                 }
             },
@@ -55,6 +86,13 @@ define(["base/js/namespace",
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
 
+        /*  
+         *  The default modal from the notebook automatically has all the buttons
+         *  dismiss the modal. This is obviously not desired, so remove the
+         *  data dismiss attriute. Also, add_metadata can't be used to select a
+         *  licence file due to JS limitations regarding remembering which
+         *  file was selected so just disable them.  
+         */ 
         modal.on("shown.bs.modal", function () {
             $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
                                                     .attr("id","previous")
@@ -69,6 +107,14 @@ define(["base/js/namespace",
         });
     };
 
+
+    /*  
+     *  Creates all the form fields and the containers they go in. Also fills
+     *  in the fields with any default or previously saved data in the notebook
+     *  metadata. It returns the divs form1 and form2, which are the two pages
+     *  of form fields in the modal. This is so that publish_notebook can reuse
+     *  this code to create the form fields.
+     */ 
     var create_fields = function () {
         var md = Jupyter.notebook.metadata;
         var md_set = false;
@@ -89,6 +135,11 @@ define(["base/js/namespace",
             .attr("for","title")
             .text("Title: ");
 
+
+        /*  
+         *  Creates an author field with it's autocomplete field. Takes an id
+         *  and a string (either "first" or "last"). Returns the field.
+         */ 
         var generate_author = function(id,first_or_last) {
             var generated_author = $("<input/>")
                 .attr("class","author-" + first_or_last + "-name")
@@ -152,6 +203,10 @@ define(["base/js/namespace",
                             $(this).parent().children().eq(0).val(sn);
                         }
                         
+                        /*  
+                         *  departments in LDAP have different names to DSpace
+                         *  repositories, so convert them using a "map"
+                         */ 
                         var deps_to_reps = {
                             "SC": "SCD",
                             "RALSP": "RAL Space",
@@ -254,6 +309,13 @@ define(["base/js/namespace",
             .append(additionalAuthorsFirstNameLabel)
             .append(additionalAuthor);
 
+
+        /*  
+         *  Creates a new additional author, adds the add button to the new
+         *  author and adds a remove button to the previous author.
+         *  Returns an array containing the  last name field, the first name field 
+         *  and the container that contains the entire author (both fields and the button)
+         */ 
         var authorcount = 2;
         function addAuthor() {
             var newAuthor = ($("<div/>"));
@@ -502,6 +564,10 @@ define(["base/js/namespace",
         var referencedByCount = 1;
         var citationCount = 1;
 
+        /*  
+         *  Similar to addAuthor, but for referencedBy. Again, returns the
+         *  actual new field and the container that hold both it and the button 
+         */ 
         function addReferencedBy() {
             var newReferencedBy_div = ($("<div/>")).addClass("nb-referencedBy_div");
             var newReferencedBy = $("<input/>")
@@ -533,6 +599,11 @@ define(["base/js/namespace",
             return [newReferencedBy,newReferencedBy_div];
         }
 
+        /*  
+         *  Similar to addAuthor and addReferencedBy, but for citation. R
+         *  Returns the actual new field and the container that hold both it 
+         *  and the button.
+         */ 
         function addCitation() {
             var newCitation_div = ($("<div/>")).addClass("nb-citation_div");
             var newCitation = $("<input/>")
@@ -563,9 +634,7 @@ define(["base/js/namespace",
 
             return [newCitation,newCitation_div];
         }
-
-        //TODO: i've removed these fields fro the form for now. Do we need them?
-        //if we do - figure out a way to use them
+        
         var fundersLabel = $("<label/>")
             .attr("for","funders")
             .text("Funders: ");
@@ -574,6 +643,7 @@ define(["base/js/namespace",
             .attr("name","funders")
             .attr("id","funders");         
 
+        //TODO: i've removed sponsors from the form for now. Do we need them?
         var sponsorsLabel = $("<label/>")
             .attr("for","sponsors")
             .text("Sponsors: ");
@@ -633,6 +703,10 @@ define(["base/js/namespace",
             .text("File Upload")
             .css("display","none");
 
+        /*  
+         *  I dislike the default file input, so hide it and use a button and 
+         *  a readonly text field to get the same functionality
+         */ 
         var licenceFile_container = $("<div/>").css("display","none");
         var licenceFile_button = $("<span/>")
             .attr("id","licence-file-button")
@@ -649,6 +723,10 @@ define(["base/js/namespace",
         licenceFile_button.append(licenceFile);
         licenceFile_container.append(licenceFile_button).append(licenceFile_feedback);
 
+        /*  
+         *  Add some event handlers that get the custom file input button
+         *  and readonly field to work.
+         */ 
         licenceFile.change(function() {
             var input = $(this);
             var numFiles = input.get(0).files ? input.get(0).files.length : 1;
@@ -675,6 +753,7 @@ define(["base/js/namespace",
                   "back to \"Other\" and upload your file when publishing.")
             .css("display","none");
 
+        //dont want to activate the file input if we accidentally click the label
         licenceFileLabel.click(function(e) {
             e.preventDefault();
         });
@@ -702,7 +781,8 @@ define(["base/js/namespace",
             .text("Provide a URL that links to your licence")
             .css("display","none");
 
-        licenceDropdown.change(function() { //switch visibility on "Other" selection
+        //switch visibility on "Other" selection
+        licenceDropdown.change(function() {
             if($(this).val() === "Other") {
                 licenceRadioFile.css("display","inline");
                 licenceRadioURL.css("display","inline");
@@ -724,6 +804,7 @@ define(["base/js/namespace",
             }
         });
 
+        //disable the other fields when one is selected.
         licenceRadioFile.change(function() {
             licenceURL.prop("disabled",true);
             licenceFile.prop("disabled",false);
@@ -749,7 +830,7 @@ define(["base/js/namespace",
                .append(licenceURLLabel)
                .append(licenceURL);
 
-        var repositoryLabel = $("<label/>") //TODO: it this the most sensible place to  put this? perhaps before upload?
+        var repositoryLabel = $("<label/>")
             .attr("for","repository")
             .text("Department: ");
 
@@ -758,8 +839,13 @@ define(["base/js/namespace",
             .attr("id","repository")
             .append($("<option/>").attr("value","").text(""));
 
+        //use a promise to do the repository fetch request
         var collections_promise = custom_contents.get_collections();
 
+        /*  
+         *  fill the repository/department selector once we've fetched from
+         *  DSpace, or add an error to the repository field.
+         */ 
         collections_promise.then(function(response) {
             var collections = JSON.parse(response);
             collections.forEach(function(collection) {
@@ -780,6 +866,12 @@ define(["base/js/namespace",
             $("label[for=\"repository\"]").after(repository_fetch_error);
         });
 
+
+        /*  
+         *  Users get scared by lots fo scary form fields, so hide the
+         *  non-essential ones in collapsible divs and have a button to expand
+         *  and collapse them.
+         */ 
         var expand_button_2 = $("<button/>")
             .addClass("btn btn-info btn-sm btn-collapse")
             .attr("type","button")
@@ -811,6 +903,9 @@ define(["base/js/namespace",
             .append(expand_button_2)
             .append(extra_nb_metadata_2);
 
+        /*  
+         *  Autofilling author and department from Jupyterhub
+         */ 
         if(window.location.href.indexOf("user") !== -1) { //we're in jupyterhub
             console.log("jupyterhub!");
             var url_arr = window.location.href.split("/");
@@ -852,7 +947,15 @@ define(["base/js/namespace",
             $.ajax(url + "?" + $.param({"fedID": fedID}),settings);
         }
 
-        if(md_set) { //repopulate the form fields with previously saved data
+
+        /*  
+         *  Repopulate the form fields with previously saved data. Most is pretty
+         *  simple, but need to add extra authors, citation and referencedBy fields.
+         *  Sadly, it can't add remove buttons on it's own because it requires the
+         *  fields already existing or something, so ugly code to add some remove
+         *  buttons is here :(
+         */ 
+        if(md_set) {
             title.val(md.reportmetadata.title);
             var authorsarr = md.reportmetadata.authors;
             var deleteAuthor;
@@ -1037,6 +1140,12 @@ define(["base/js/namespace",
         return {form1: form1, form2: form2};
     };
 
+    /*  
+     *  Validates the first page of the add_metadata form
+     *  If it finds errors it attaches an error div after
+     *  the offending fields asscoaited label. It also clears
+     *  any old errors before it runs.
+     */ 
     var validate_fields1 = function() {
         $(".metadata-form-error").remove(); //clear errors
 
@@ -1068,6 +1177,7 @@ define(["base/js/namespace",
             var n = ~~Number(str); //convert into a number with no decimal part
             return String(n) === str && n > greaterthan && n < lessthan;
         };
+        //checks to see if something is a valid date (including leap year stuff)
         var validDate = function(daystr,month,yearstr) {
             if(!isInteger(daystr,0,32)) {
                 return false;
@@ -1119,8 +1229,94 @@ define(["base/js/namespace",
         $(".metadata-form-error").css("color", "red");
     };
 
-    var validate_fields2 = function() {
+
+    /*  
+     *  Saves the form fields to the notebook metadata
+     */ 
+    var save_metadata = function() {
         var md = Jupyter.notebook.metadata;
+        md.reportmetadata = {};
+        md.reportmetadata.title = $("#title").val();
+
+        md.reportmetadata.authors = [];
+        $(".author").each(function(i,e) {
+            var authorarr = [];
+            var ln = $(e).children(".author-last-name").val();
+            var fn = $(e).children(".author-first-name").val();
+            if(ln !== "" || fn !== "") {
+                authorarr.push(ln);
+                authorarr.push(fn);
+                md.reportmetadata.authors.push(authorarr);
+            }
+        });
+        md.reportmetadata.abstract = $("#nb-abstract").val();
+
+        //Split our textarea by lines
+        var split = $("#tags").val().split("\n");
+        var lines = [];
+        for (var i = 0; i < split.length; i++) {
+            if (split[i]) { //make sure we don't add any empty lines!
+                lines.push(split[i]);
+            }
+        }
+        md.reportmetadata.tags = lines;
+
+        var monthstring = "";
+        if ($("#month").val() < 10) {
+            //we need a leading zero to match DSpace's date format
+            monthstring = "0" + $("#month").val();
+        } else {
+            monthstring = $("#month").val();
+        }
+        if(monthstring === "00") { //if no month set it to just be the year
+            md.reportmetadata.date = $("#year").val();
+        } else if ($("#day").val() === "") { //month is set but day isn"t
+            md.reportmetadata.date = $("#year").val() + "-" + monthstring;
+        } else {
+            md.reportmetadata.date = $("#year").val() + "-" + monthstring +
+                                     "-" + $("#day").val();
+        }
+
+        md.reportmetadata.language = $("#language").val();
+        md.reportmetadata.publisher = $("#publisher").val();
+
+        md.reportmetadata.citations = [];
+        $(".nb-citation").each(function(i,e) {
+            if($(e).val() !== "") {
+                md.reportmetadata.citations.push($(e).val());
+            }
+        });
+        
+        md.reportmetadata.referencedBy = [];
+        $(".nb-referencedBy").each(function(i,e) {
+            if($(e).val() !== "") {
+                md.reportmetadata.referencedBy.push($(e).val());
+            }
+        });
+
+        md.reportmetadata.funders = $("#funders").val();
+        md.reportmetadata.sponsors = $("#sponsors").val();
+
+        md.reportmetadata.licence = {
+            "preset": $("#nb-licence-dropdown").val(),
+            "url": $("#licence-url").val()
+        };
+
+        md.reportmetadata.repository = $("#repository").val();
+
+        Jupyter.notebook.metadata = md;
+        Jupyter.notebook.save_notebook();
+        $("#collections_loaded").remove();
+    };
+
+
+    /*  
+     *  Validates the second page of the add_metadata form
+     *  If it finds errors it attaches an error div after
+     *  the offending fields asscoaited label. It also clears
+     *  any old errors before it runs.
+     */ 
+    var validate_fields2 = function() {
         $(".metadata-form-error").remove(); //clear errors
 
         if($("#repository").val() === "") {
@@ -1172,83 +1368,14 @@ define(["base/js/namespace",
         }
 
         $(".metadata-form-error").css("color", "red");
-
-        if($(".metadata-form-error").length === 0) {
-            md.reportmetadata = {};
-            md.reportmetadata.title = $("#title").val();
-
-            md.reportmetadata.authors = [];
-            $(".author").each(function(i,e) {
-                var authorarr = [];
-                var ln = $(e).children(".author-last-name").val();
-                var fn = $(e).children(".author-first-name").val();
-                if(ln !== "" || fn !== "") {
-                    authorarr.push(ln);
-                    authorarr.push(fn);
-                    md.reportmetadata.authors.push(authorarr);
-                }
-            });
-            md.reportmetadata.abstract = $("#nb-abstract").val();
-
-            //Split our textarea by lines
-            var split = $("#tags").val().split("\n");
-            var lines = [];
-            for (var i = 0; i < split.length; i++) {
-                if (split[i]) { //make sure we don"t add any empty lines!
-                    lines.push(split[i]);
-                }
-            }
-            md.reportmetadata.tags = lines;
-
-            var monthstring = "";
-            if ($("#month").val() < 10) {
-                //we need a leading zero to match DSpace"s date format
-                monthstring = "0" + $("#month").val();
-            } else {
-                monthstring = $("#month").val();
-            }
-            if(monthstring === "00") { //if no month set it to just be the year
-                md.reportmetadata.date = $("#year").val();
-            } else if ($("#day").val() === "") { //month is set but day isn"t
-                md.reportmetadata.date = $("#year").val() + "-" + monthstring;
-            } else {
-                md.reportmetadata.date = $("#year").val() + "-" + monthstring +
-                                         "-" + $("#day").val();
-            }
-
-            md.reportmetadata.language = $("#language").val();
-            md.reportmetadata.publisher = $("#publisher").val();
-
-            md.reportmetadata.citations = [];
-            $(".nb-citation").each(function(i,e) {
-                if($(e).val() !== "") {
-                    md.reportmetadata.citations.push($(e).val());
-                }
-            });
-            
-            md.reportmetadata.referencedBy = [];
-            $(".nb-referencedBy").each(function(i,e) {
-                if($(e).val() !== "") {
-                    md.reportmetadata.referencedBy.push($(e).val());
-                }
-            });
-
-            md.reportmetadata.funders = $("#funders").val();
-            md.reportmetadata.sponsors = $("#sponsors").val();
-
-            md.reportmetadata.licence = {
-                "preset": $("#nb-licence-dropdown").val(),
-                "url": $("#licence-url").val()
-            };
-
-            md.reportmetadata.repository = $("#repository").val();
-
-            Jupyter.notebook.metadata = md;
-            Jupyter.notebook.save_notebook();
-            $("#collections_loaded").remove();
-        }
     };
 
+
+    /*  
+     *  Runs validate_fields 1 and 2 and if there are no errors,
+     *  it either goes to the next page or saves the metadata 
+     *  and dismisses the modal
+     */ 
     var validate = function() {
         if(!$("#fields1").hasClass("hide-me") &&
            $("#fields2").hasClass("hide-me"))
@@ -1268,11 +1395,17 @@ define(["base/js/namespace",
         { //save our metadata
             validate_fields2();
             if($(".metadata-form-error").length === 0) {
+                save_metadata();
                 $(".modal").modal("hide");
             }
         }
     };
-   
+
+    /*  
+     *  The below adds an action to the notebook and assigns the add_metadata
+     *  function to the Add metadata function, and handles exporting the
+     *  functions we use in other modules/files.
+     */ 
 
     var action = {
         help: "Add notebook metadata",
@@ -1293,7 +1426,6 @@ define(["base/js/namespace",
 
     module.exports = {
         load: load,
-        validate: validate,
         validate_fields1: validate_fields1,
         validate_fields2: validate_fields2,
         create_fields: create_fields,
