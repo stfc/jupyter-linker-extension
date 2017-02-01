@@ -345,6 +345,26 @@ casper.notebook_test(function() {
         );
     });
 
+    this.waitFor(function() {
+        var text = this.evaluate(function() {
+            return $("#toggle_cell_references_bar").text();
+        });
+        if(text !== "Show/Hide cell references toolbar" && text !== "") {
+            //this is the default text and empty string, so either unloaded yet
+            //or our promise hasn't resolved yet
+            return true;
+        }
+    }, function then() {
+        var text = this.evaluate(function() {
+            return $("#toggle_cell_references_bar").text();
+        });
+        this.test.assertEquals(
+            text,
+            "Hide cell references toolbar",
+            "Toggle button says hide when it is visible before reload"
+        );
+    });
+
     var nbname = "Untitled.ipynb";
     this.thenEvaluate(function (nbname) {
         require(["base/js/events"], function (events) {
@@ -374,10 +394,68 @@ casper.notebook_test(function() {
         this.test.assertEquals(success_failure[0], true, "Save OK");
     });
 
-    this.reload();
+    
+    //shutdown
+    this.then(function() {
+        this.shutdown_current_kernel();
+    });
+    this.wait(2000);
+
+    this.then(function() {
+        this.test.assertNot(this.kernel_running(),"Notebook shutdown successfully");
+    });
+
+    this.then(function() {
+        this.open(this.get_notebook_server());
+    });
 
     this.waitFor(this.page_loaded);
+    this.wait_for_dashboard();
+
+    //go back into notebook - we're doing this to check
+    //that the notebook was saved automatically
+    var nbname = "Untitled.ipynb";
+    this.then(function(){
+        var notebook_url = this.evaluate(function(nbname){
+            var escaped_name = encodeURIComponent(nbname);
+            var return_this_thing = null;
+            $("a.item_link").map(function (i,a) {
+                if (a.href.indexOf(escaped_name) >= 0) {
+                    return_this_thing = a.href;
+                    return;
+                }
+            });
+            return return_this_thing;
+        }, {nbname:nbname});
+        this.test.assertNotEquals(
+            notebook_url,
+            null,
+            "Found URL in notebook list"
+        );
+        // open the notebook
+        this.open(notebook_url);
+    });
+
+    //wait for redirect
     this.waitFor(this.kernel_running);
+    this.waitFor(function() {
+        return this.evaluate(function () {
+            return Jupyter && Jupyter.notebook && true;
+        });
+    });
+
+    //check that we're back in the notebook
+    //(via checking the notebook name in the ipython instance)
+    this.then( function() {
+        var name = this.evaluate(function() {
+            return Jupyter.notebook.notebook_name;
+        });
+        this.test.assertEquals(
+            name,
+            "Untitled.ipynb",
+            "Re-opened notebook successfully"
+        );
+    });
 
 
     this.waitFor(function() {
