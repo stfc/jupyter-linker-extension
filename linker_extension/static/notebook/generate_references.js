@@ -52,8 +52,9 @@ define([
             var text = "## References\n";
 
             Object.keys(reference_urls).forEach(function(reference) {
-                //markdown can use chevrons (< and >) to generate links
-                text = text +"<" + reference + ">\n\n";
+                //markdown uses format [title](url)
+                //text = text +"<" + reference + ">\n\n";
+                text = text +"[" + reference + "](" + reference + ")\n\n";
             });
 
             reference_cell.set_text(text);
@@ -78,6 +79,7 @@ define([
     var action = {
         help: "Generate references",
         help_index: "f",
+        icon: "fa-quote-right",
         handler : generate_references,
     };
 

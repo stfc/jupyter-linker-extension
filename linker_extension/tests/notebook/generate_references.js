@@ -32,6 +32,7 @@ casper.notebook_test(function() {
         md.reportmetadata = {
             "citations": [
               "https://www.metadata-url.com/",
+              "invalid_url",
               "https://cell-url.com/", //include this to check that we don't get repeats
             ]
         };
@@ -85,16 +86,50 @@ casper.notebook_test(function() {
             var ref_cell = Jupyter.notebook.get_cell(1);
             return ref_cell.get_text();
         });
-
-        var correct_ref_text = "## References\n" +
-                               "<https://databundle-url.com/>\n\n" +
-                               "<https://www.metadata-url.com/>\n\n" +
-                               "<https://cell-url.com/>\n\n";
+        var correct_ref_text = 
+            "## References\n" +
+            "[https://databundle-url.com/](https://databundle-url.com/)\n\n" +
+            "[https://www.metadata-url.com/](https://www.metadata-url.com/)\n\n" +
+            "[invalid_url](invalid_url)\n\n" +
+            "[https://cell-url.com/](https://cell-url.com/)\n\n";
 
         this.test.assertEquals(
             ref_cell_text,
             correct_ref_text,
             "Reference cell text is correct"
         );
+
+        var ref_cell_html = this.evaluate(function() {
+            var p_elements = $("#References").siblings();
+            var return_arr = [];
+            p_elements.each(function(index,item) {
+                var link = $(item).children();
+                return_arr.push(link.attr("href"));
+            });
+            return return_arr;
+        });
+
+        this.test.assertEquals(
+            ref_cell_html[0],
+            "https://databundle-url.com/",
+            "First reference rendered correctly"
+        );
+        this.test.assertEquals(
+            ref_cell_html[1],
+            "https://www.metadata-url.com/",
+            "Second reference rendered correctly"
+        );
+        this.test.assertEquals(
+            ref_cell_html[2],
+            "invalid_url",
+            "Third reference rendered correctly"
+        );
+        this.test.assertEquals(
+            ref_cell_html[3],
+            "https://cell-url.com/",
+            "Fourth reference rendered correctly"
+        );
+
+        
     });
 });
