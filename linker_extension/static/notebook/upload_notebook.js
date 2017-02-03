@@ -4,8 +4,11 @@ define([
     "base/js/dialog",
     "../custom_utils",
     "../custom_contents",
+    "./add_metadata",
     "./modify_notebook_html"
-],function(Jupyter,utils,dialog,custom_utils,custom_contents){
+],function(Jupyter,utils,dialog,custom_utils,custom_contents,add_metadata){
+
+    var Promise = require("es6-promise").Promise;
 
     /*  
      *  Actually upload the notebook. Requires a username & password, and if
@@ -17,81 +20,41 @@ define([
      *  the devs. Also guards against there being no metadata, as it will also
      *  create an error notification.
      */ 
-    var upload_notebook = function(
-        username,
-        password,
-        licence_file_name,
-        licence_file_contents
-    ) {
-        if ("reportmetadata" in Jupyter.notebook.metadata) {
-            var stringauthors = [];
-            var authors = Jupyter.notebook.metadata.reportmetadata.authors;
-            authors.forEach(function(author) {
-                var authorstring = author[0] + ", " + author[1];
-                stringauthors.push(authorstring); 
-            });
-
-            var data = JSON.stringify({
-                "username": username,
-                "password": password,
-                "licence_file_name":licence_file_name,
-                "licence_file_contents": licence_file_contents,
-                "notebookpath": Jupyter.notebook.notebook_path,
-                "title":Jupyter.notebook.metadata.reportmetadata.title,
-                "authors":stringauthors,
-                "abstract":Jupyter.notebook.metadata.reportmetadata.abstract,
-                "tags":Jupyter.notebook.metadata.reportmetadata.tags,
-                "date":Jupyter.notebook.metadata.reportmetadata.date,
-                "language":Jupyter.notebook.metadata.reportmetadata.language,
-                "publisher":Jupyter.notebook.metadata.reportmetadata.publisher,
-                "citations":Jupyter.notebook.metadata.reportmetadata.citations,
-                "referencedBy":Jupyter.notebook.metadata.reportmetadata.referencedBy,
-                "funders":Jupyter.notebook.metadata.reportmetadata.funders,
-                "sponsors":Jupyter.notebook.metadata.reportmetadata.sponsors,
-                "repository":Jupyter.notebook.metadata.reportmetadata.repository,
-                "licence_preset":Jupyter.notebook.metadata.reportmetadata.licence.preset,
-                "licence_url": Jupyter.notebook.metadata.reportmetadata.licence.url
-            });
-            custom_contents.sword_new_item(data).then(
-                function(response) {
-                    var id = "";
-                    var xml_str = response.split("\n");
-                    xml_str.forEach(function(item) {
-                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it"s not in the string
-                            var endtag = item.lastIndexOf("<");
-                            var without_endtag = item.slice(0,endtag);
-                            var starttag = without_endtag.indexOf(">");
-                            var without_starttag = without_endtag.slice(starttag + 1);
-                            id = without_starttag;
-                        }
-                    });
-                    custom_utils.create_alert("alert-success nb-upload-success-alert",
-                                              "Success! Item created in eData! " +
-                                              "It is located here: <a href =\"" +
-                                              id + "\">" + id + "</a>")
-                                .attr("item-id",id);
-                },
-                function(reason) {
-                    custom_utils.create_alert("alert-danger",
-                                              "Error! " + reason.message + 
-                                              ", please try again. If it " +
-                                              "continues to fail please " + 
-                                              "contact the developers.");
-                }
-                //TODO: aim the error messages at the user and not me
-            );
-        } else {
-            custom_utils.create_alert("alert-danger",
-                                      "Error! No metadata found. Please use " +
-                                      "the \"Add Metadata\" menu item to add " +
-                                      "the metadata for this report");
-        }
+    var upload_notebook = function(data) {
+        custom_contents.sword_new_item(JSON.stringify(data)).then(
+            function(response) {
+                var id = "";
+                var xml_str = response.split("\n");
+                xml_str.forEach(function(item) {
+                    if (item.indexOf("<atom:id>") !== -1) { // -1 means it"s not in the string
+                        var endtag = item.lastIndexOf("<");
+                        var without_endtag = item.slice(0,endtag);
+                        var starttag = without_endtag.indexOf(">");
+                        var without_starttag = without_endtag.slice(starttag + 1);
+                        id = without_starttag;
+                    }
+                });
+                custom_utils.create_alert("alert-success nb-upload-success-alert",
+                                          "Success! Item created in eData! " +
+                                          "It is located here: <a href =\"" +
+                                          id + "\">" + id + "</a>")
+                            .attr("item-id",id);
+            },
+            function(reason) {
+                custom_utils.create_alert("alert-danger",
+                                          "Error! " + reason.message + 
+                                          ", please try again. If it " +
+                                          "continues to fail please " + 
+                                          "contact the developers.");
+            }
+            //TODO: aim the error messages at the user and not me
+        );
     };
 
 
     /*  
      *  Creates a dialog that prompts for username and password. Queries LDAP on
-     *  whether the user is vlaid before bothering to send a request to DSpace.
+     *  whether the user is valid before bothering to send a request to DSpace.
      *  This is mostly here for testing purposes and will eventually be removed.
      */ 
     var upload_notebook_dialog = function() {
@@ -127,29 +90,27 @@ define([
                 Upload:  {
                     class : "btn-primary",
                     click: function() {
-                        $(".login-error").remove();
-                        var username_field_val = $("#username").val();
-                        var password_field_val = $("#password").val();
+                        if("reportmetadata" in Jupyter.notebook.metadata) {
+                            $(".login-error").remove();
+                            var username_field_val = $("#username").val();
+                            var password_field_val = $("#password").val();
 
-                        var login_details = JSON.stringify({
-                            username: username_field_val,
-                            password: password_field_val
-                        });
+                            var login_details = JSON.stringify({
+                                username: username_field_val,
+                                password: password_field_val
+                            });
 
-                        var request = custom_contents.ldap_auth(login_details);
+                            var request = custom_contents.ldap_auth(login_details);
 
-                        request.then(
-                            function() { //success function
-                                upload_notebook(
-                                    username_field_val,
-                                    password_field_val,
-                                    "",
-                                    ""
-                                );
+                            request.then(function() { //success function
+                                var data = add_metadata.get_values_from_metadata();
+                                data.username = username_field_val;
+                                data.password = password_field_val;
+                                data.notebookpath = Jupyter.notebook.notebook_path;
+                                upload_notebook(data);
 
                                 $(".modal").modal("hide");
-                            },
-                            function(reason) { //fail function
+                            }).catch(function(reason) { //fail function
                                 var error = $("<div/>")
                                     .addClass("login-error")
                                     .css("color","red");
@@ -169,8 +130,14 @@ define([
                                     error.text("Login failed - please try again.");
                                     login_fields.after(error);
                                 }
-                            }
-                        );
+                            });
+                        } else {
+                            custom_utils.create_alert(
+                                "alert-danger",
+                                "Error! No metadata found. Please use " +
+                                "the \"Add Metadata\" menu item to add " +
+                                "the metadata for this report");
+                        }
                     }
                 },
                 Cancel: {},
