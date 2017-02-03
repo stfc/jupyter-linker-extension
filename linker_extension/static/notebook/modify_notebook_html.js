@@ -3,6 +3,9 @@ define([
     "base/js/utils"
 ],function(Jupyter,utils){
 
+    /*  
+     *  Makes all the hacky changes to the notebook page.
+     */ 
     var load = function() {
         var Promise = require("es6-promise").Promise;
         //make publish menu
@@ -82,6 +85,12 @@ define([
                                              .attr("href","#")
                                              .text("Publish Notebook and associated data")));
 
+        /*  
+         *  The notebook metadata doesn't exist immediately and we need it to
+         *  determine whether the toggle cell toolbar button needs to say show or
+         *  hide. So we use a promise to poll the metadata every second until it
+         *  exists, and then we can check whether to say show or hide
+         */ 
         var promise = new Promise(function(resolve) {
             function poll() {
                 if(Jupyter.notebook.metadata) {
@@ -101,6 +110,12 @@ define([
             }
         });
 
+        /*  
+         *  We want to use our custom template to download via PDF, so this stuff
+         *  is literally just replacing the button but specifying our custom
+         *  template rather than the default. This code is pretty much lifted from
+         *  the notebook's code.
+         */ 
         $("#download_pdf").remove();
         var new_pdf_menu_item = $("<li>")
             .attr("id","#download_pdf")

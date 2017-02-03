@@ -6,6 +6,10 @@ define([
     "./select_data_notebook",
 ],function(Jupyter,dialog,utils,select_data){
     
+    /*  
+     *  Generates the modal dialog that displays the selected data files
+     *  generated from view_data
+     */ 
     var view_data_dialog = function () {
         var dialog_body = $("<div/>").append(
             $("<p/>").addClass("bundle-message")
@@ -27,6 +31,14 @@ define([
         });
     };
 
+    /*  
+     *  Displays selected data. Generates divs that visualise the data files 
+     *  selected, plus a button that allows them to change the selected data
+     *  and it displays a notification/attention thingy if they have already
+     *  published their data. Returns the div that contains all the fields
+     *  for the dialog and also returns the file paths, names and types of
+     *  the selected files to be used when doing data upload.
+     */ 
     var view_data = function() {
         var view_data_div = $("<div/>").attr("id","view_data_container");
         var file_names = [];
@@ -126,6 +138,8 @@ define([
                 file_types: file_types};
     };
     
+    //actions, buttons and exports...
+
     var action = {
         help: "View associated data",
         help_index: "c",

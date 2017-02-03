@@ -4,6 +4,11 @@ define([
     "./modify_notebook_html"
 ],function(Jupyter,utils){
     
+    /*  
+     *  Add the notebook_path to the session storage so we can access it when
+     *  we're on the tree page. Then redirect to the tree page so they can
+     *  start selecting data
+     */ 
     var select_data = function () {
         sessionStorage.setItem("bundle",Jupyter.notebook.notebook_path);
 
@@ -15,7 +20,7 @@ define([
     };
 
     
-
+    //register actions and set up button
     var action = {
         help: "Select associated data",
         help_index: "d",

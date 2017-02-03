@@ -10,6 +10,11 @@ var view_data_dialog = require("./view_data_dialog.js");
 var publish_notebook = require("./publish_notebook.js");
 var generate_references = require("./generate_references.js");
 
+/*  
+ *  This is the main entry point that is used by webpack to bundle everything
+ *  together. So, we "require" all the modules used by the notebook part of
+ *  the extension and run all their load functions when the extension loads.
+ */ 
 
 function load_ipython_extension(){
     console.log("Linker extension (notebook) loaded");
