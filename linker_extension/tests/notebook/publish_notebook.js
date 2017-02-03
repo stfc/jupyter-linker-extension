@@ -308,6 +308,7 @@ casper.notebook_test(function() {
     }); //TODO: add funders and sponsors if we can use them
     this.thenClick("#next");
 
+    /* do we need to save to notebook metadata?
     //Should be within notebook metadata now.     
     this.then(function() {
         var metadata = this.evaluate(function() {
@@ -392,7 +393,7 @@ casper.notebook_test(function() {
             "edata/8",
             "Repository has been set correctly"
         );
-    });
+    });*/
 
     this.thenClick("#next");
     //if it doesn't show, this will fail, so no need to make an assertion

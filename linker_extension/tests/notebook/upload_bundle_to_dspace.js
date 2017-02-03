@@ -66,10 +66,8 @@ casper.notebook_test(function() {
                   "citation2",
                 ],
                 "funders":"",
-                "licence": {
-                  "preset":"CCO",
-                  "url": ""
-                }
+                "licence_preset": "CC0",
+                "licence_url": "",
             };
             md.databundle = [
                 {

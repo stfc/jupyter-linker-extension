@@ -73,10 +73,8 @@ casper.notebook_test(function() {
                   "citation2",
                 ],
                 "funders":"",
-                "licence": {
-                    "preset": "MIT",
-                    "url": "",
-                }
+                "licence_preset": "MIT",
+                "licence_url": "",
             };
             Jupyter._save_success = Jupyter._save_failed = false;
             events.on("notebook_saved.Notebook", function () {

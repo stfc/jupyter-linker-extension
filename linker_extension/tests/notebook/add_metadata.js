@@ -285,7 +285,7 @@ casper.notebook_test(function() {
                     citations: "",
                     referencedBy: [],
                     repository: "",
-                    licence: "",
+                    licence_preset: "",
                 };
             } else {
                 return {
@@ -299,7 +299,7 @@ casper.notebook_test(function() {
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
                     repository: md.reportmetadata.repository,
-                    licence: md.reportmetadata.licence.preset,
+                    licence_preset: md.reportmetadata.licence_preset,
                 };
             }
             
@@ -355,7 +355,7 @@ casper.notebook_test(function() {
             "Repository has been set correctly"
         );
         this.test.assertEquals(
-            metadata.licence,
+            metadata.licence_preset,
             "CC0",
             "Licence has been set correctly"
         );
@@ -440,7 +440,7 @@ casper.notebook_test(function() {
                     citations: "",
                     referencedBy: [],
                     repository: "",
-                    licence: "",
+                    licence_preset: "",
                 };
             } else {
                 return {
@@ -454,7 +454,7 @@ casper.notebook_test(function() {
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
                     repository: md.reportmetadata.repository,
-                    licence: md.reportmetadata.licence.preset,
+                    licence_preset: md.reportmetadata.licence_preset,
                 };
             }
             
@@ -510,7 +510,7 @@ casper.notebook_test(function() {
             "Repository has been saved correctly"
         );
         this.test.assertEquals(
-            metadata.licence,
+            metadata.licence_preset,
             "CC0",
             "Licence has been saved correctly"
         );
@@ -717,8 +717,8 @@ casper.notebook_test(function() {
                     authors: md.reportmetadata.authors,
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
-                    licence_preset: md.reportmetadata.licence.preset,
-                    licence_url: md.reportmetadata.licence.url
+                    licence_preset: md.reportmetadata.licence_preset,
+                    licence_url: md.reportmetadata.licence_url
                 };
             }
             
@@ -741,12 +741,12 @@ casper.notebook_test(function() {
         this.test.assertEquals(
             metadata.licence_preset,
             "Other",
-            "Licence.preset has been changed properly"
+            "Licence_preset has been changed properly"
         );
         this.test.assertEquals(
             metadata.licence_url,
             "Test",
-            "Licence.url has been saved to the metadata"
+            "Licence_url has been saved to the metadata"
         );
     });
 });

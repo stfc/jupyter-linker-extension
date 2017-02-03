@@ -30,7 +30,7 @@ casper.notebook_test(function() {
     this.thenEvaluate(function () {
         var md = Jupyter.notebook.metadata;
         md.reportmetadata = {
-            "referencedBy": [
+            "citations": [
               "https://www.metadata-url.com/",
               "https://cell-url.com/", //include this to check that we don't get repeats
             ]
