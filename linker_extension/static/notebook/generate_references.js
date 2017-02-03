@@ -6,6 +6,11 @@ define([
     "./modify_notebook_html"
 ],function(Jupyter,utils,custom_utils){
 
+    /*  
+     *  Generate a reference cell at the bottom of the notebook that creates
+     *  links defined in various places (any citations in the nb metadata,
+     *  links from cells and if a databundle has been uploaded then that too)
+     */ 
     var generate_references = function() {
         var cells = Jupyter.notebook.get_cells(); 
 
@@ -18,7 +23,7 @@ define([
             reference_urls[Jupyter.notebook.metadata.databundle_url] = true;
         }
         if("reportmetadata" in Jupyter.notebook.metadata) {
-            Jupyter.notebook.metadata.reportmetadata.referencedBy.forEach(
+            Jupyter.notebook.metadata.reportmetadata.citations.forEach(
                 function(item) {
                     reference_urls[item] = true;
                 }
@@ -54,7 +59,7 @@ define([
             reference_cell.set_text(text);
             reference_cell.execute();
 
-            //can't use cell ids since they"re regenerated on load so
+            //can't use cell ids since they're regenerated on load so
             //put a bool in the reference cell metadata which we can search for
             reference_cell.metadata.reference_cell = true;
         } else { //no references - show alert to user to tell them
@@ -67,6 +72,9 @@ define([
         
     };
 
+    /*  
+     *  Register action and create button etc.
+     */ 
     var action = {
         help: "Generate references",
         help_index: "f",
