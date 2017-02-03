@@ -69,8 +69,9 @@ class SWORDHandler(IPythonHandler):
         if authors is not []:
             if len(authors) > 0:
                 for author in authors:
+                    concat_author = ", ".join(author)
                     author_xml = ET.Element("dc:creator")
-                    author_xml.text = author
+                    author_xml.text = concat_author
                     metadata.append(author_xml)
 
         abstract = arguments['abstract']
@@ -144,8 +145,13 @@ class SWORDHandler(IPythonHandler):
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
-        licence_file_name = arguments['licence_file_name']
-        licence_file_contents = arguments['licence_file_contents']
+        licence_file_name = ""
+        licence_file_contents = ""
+        if "licence_file_name" in arguments:
+            licence_file_name = arguments['licence_file_name']
+        if "licence_file_contents" in arguments:
+            licence_file_contents = arguments['licence_file_contents']
+            
         licence_preset = arguments['licence_preset']
         licence_url = arguments['licence_url']
 
@@ -164,8 +170,10 @@ class SWORDHandler(IPythonHandler):
                         f.write("Licence located at: ")
                         f.write(licence_url)
                         f.write("\n")
-                else:
+                elif licence_file_name != "" and licence_file_contents != "":
+
                     base64_data = licence_file_contents.split(",")[1]
+                    print(base64_data)
 
                     encoding_info = licence_file_contents.split(",")[0]
                     encoding_info = encoding_info.split(";")[0]
@@ -173,6 +181,8 @@ class SWORDHandler(IPythonHandler):
 
                     with open(licence_file_name, "wb") as f:
                         f.write(base64.decodestring(base64_data.encode("utf-8")))
+                else:
+                    raise web.HTTPError(500, "No licence?")
             else:
                 licence_file_path = os.path.join(
                     os.path.dirname(os.path.dirname(__file__)),

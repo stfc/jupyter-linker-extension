@@ -69,8 +69,9 @@ class UploadBundleHandler(IPythonHandler):
         if authors is not []:
             if len(authors) > 0:
                 for author in authors:
+                    concat_author = ", ".join(author)
                     author_xml = ET.Element("dc:creator")
-                    author_xml.text = author
+                    author_xml.text = concat_author
                     metadata.append(author_xml)
 
         abstract = arguments['abstract']
