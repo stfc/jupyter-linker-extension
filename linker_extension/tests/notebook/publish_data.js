@@ -77,76 +77,27 @@ casper.notebook_test(function() {
             md.databundle = [
                 {
                   "type": "directory",
-                  "mimetype": null,
-                  "format": "json",
-                  "content": [
-                    {
-                      "type": "directory",
-                      "mimetype": null,
-                      "format": null,
-                      "content": null,
-                      "path": "sub ∂ir1/sub ∂ir 1a",
-                      "writable": true,
-                      "name": "sub ∂ir 1a",
-                    },
-                    {
-                      "type": "file",
-                      "mimetype": null,
-                      "format": null,
-                      "content": null,
-                      "path": "sub ∂ir1/file_in_sub_∂ir1.txt",
-                      "writable": true,
-                      "name": "file_in_sub_∂ir1.txt",
-                    }
-                  ],
                   "path": "sub ∂ir1",
-                  "writable": true,
                   "name": "sub ∂ir1",
                 },
                 {
                   "type": "file",
-                  "mimetype": "text/plain",
-                  "format": "text",
-                  "content": "",
                   "path": "file_in_nbdir.txt",
-                  "writable": true,
                   "name": "file_in_nbdir.txt",
                 },
                 {
                   "type": "directory",
-                  "mimetype": null,
-                  "format": "json",
-                  "content": [
-                    {
-                      "type": "file",
-                      "mimetype": null,
-                      "format": null,
-                      "content": null,
-                      "path": "sub ∂ir1/sub ∂ir 1a/file_in_sub_∂ir1a.txt",
-                      "writable": true,
-                      "name": "file_in_sub_∂ir1a.txt",
-                    }
-                  ],
                   "path": "sub ∂ir1/sub ∂ir 1a",
-                  "writable": true,
                   "name": "sub ∂ir 1a",
                 },
                 {
                   "type": "file",
-                  "mimetype": "text/plain",
-                  "format": "text",
-                  "content": "",
                   "path": "sub ∂ir1/file_in_sub_∂ir1.txt",
-                  "writable": true,
                   "name": "file_in_sub_∂ir1.txt",
                 },
                 {
                   "type": "file",
-                  "mimetype": "text/plain",
-                  "format": "text",
-                  "content": "",
                   "path": "sub ∂ir1/sub ∂ir 1a/file_in_sub_∂ir1a.txt",
-                  "writable": true,
                   "name": "file_in_sub_∂ir1a.txt",
                 }
             ];
