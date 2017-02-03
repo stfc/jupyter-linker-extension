@@ -19,16 +19,20 @@ class CustomsdistCommand(sdist):
             webpack = subprocess.call('npm list -g webpack', shell=True)
             es6_promise = subprocess.call('npm list -g es6-promise', shell=True)
             install_cmd = "npm install -g"
+            install = False
 
             if webpack != 0:  # 0 means it is installed
                 install_cmd = install_cmd + " webpack"
+                install = True
 
             if es6_promise != 0:
                 install_cmd = install_cmd + " es6-promise"
+                install = True
 
             install_cmd = install_cmd + " --progress=false"
+            if install:
+                subprocess.call(install_cmd, shell=True)
 
-            subprocess.call(install_cmd, shell=True)
             subprocess.call(['webpack'])
         except OSError as e:
             print("Failed to run `npm install`: %s" % e, file=sys.stderr)
