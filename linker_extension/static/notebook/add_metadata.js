@@ -75,7 +75,11 @@ define(["base/js/namespace",
                         { //save our metadata
                             validate_fields2();
                             if($(".metadata-form-error").length === 0) {
-                                save_metadata();
+                                get_values_from_fields().then(function(result) {
+                                    Jupyter.notebook.metadata.reportmetadata = result;
+                                    Jupyter.notebook.save_notebook();
+                                });
+                                $("#collections_loaded").remove();
                                 $(".modal").modal("hide");
                             }
                         }
@@ -1120,8 +1124,8 @@ define(["base/js/namespace",
                 repository.val(md.reportmetadata.repository);
             });
 
-            licenceDropdown.val(md.reportmetadata.licence.preset);
-            if(md.reportmetadata.licence.preset === "Other") {
+            licenceDropdown.val(md.reportmetadata.licence_preset);
+            if(md.reportmetadata.licence_preset === "Other") {
                 licenceRadioFile.css("display","inline");
                 licenceRadioURL.css("display","inline");
                 licenceFileLabel.css("display","block");
@@ -1131,7 +1135,7 @@ define(["base/js/namespace",
                 licenceFile_container.css("display","block");
                 licenceURL.css("display","block");
             }
-            licenceURL.val(md.reportmetadata.licence.url);
+            licenceURL.val(md.reportmetadata.licence_url);
             if (licenceURL.val()) {
                 licenceRadioURL.prop("checked",true);
             }
@@ -1229,16 +1233,16 @@ define(["base/js/namespace",
         $(".metadata-form-error").css("color", "red");
     };
 
-
     /*  
-     *  Saves the form fields to the notebook metadata
+     *  Extract the values from the form fields and return a promise that will
+     *  have all the values in a single object once it is resolved.
+     *  This is needed so we can wait for file upload to complete.
      */ 
-    var save_metadata = function() {
-        var md = Jupyter.notebook.metadata;
-        md.reportmetadata = {};
-        md.reportmetadata.title = $("#title").val();
+    var get_values_from_fields = function() {
+        var return_data = {};
+        return_data.title = $("#title").val();
 
-        md.reportmetadata.authors = [];
+        return_data.authors = [];
         $(".author").each(function(i,e) {
             var authorarr = [];
             var ln = $(e).children(".author-last-name").val();
@@ -1246,10 +1250,10 @@ define(["base/js/namespace",
             if(ln !== "" || fn !== "") {
                 authorarr.push(ln);
                 authorarr.push(fn);
-                md.reportmetadata.authors.push(authorarr);
+                return_data.authors.push(authorarr);
             }
         });
-        md.reportmetadata.abstract = $("#nb-abstract").val();
+        return_data.abstract = $("#nb-abstract").val();
 
         //Split our textarea by lines
         var split = $("#tags").val().split("\n");
@@ -1259,7 +1263,7 @@ define(["base/js/namespace",
                 lines.push(split[i]);
             }
         }
-        md.reportmetadata.tags = lines;
+        return_data.tags = lines;
 
         var monthstring = "";
         if ($("#month").val() < 10) {
@@ -1269,44 +1273,96 @@ define(["base/js/namespace",
             monthstring = $("#month").val();
         }
         if(monthstring === "00") { //if no month set it to just be the year
-            md.reportmetadata.date = $("#year").val();
+            return_data.date = $("#year").val();
         } else if ($("#day").val() === "") { //month is set but day isn"t
-            md.reportmetadata.date = $("#year").val() + "-" + monthstring;
+            return_data.date = $("#year").val() + "-" + monthstring;
         } else {
-            md.reportmetadata.date = $("#year").val() + "-" + monthstring +
+            return_data.date = $("#year").val() + "-" + monthstring +
                                      "-" + $("#day").val();
         }
 
-        md.reportmetadata.language = $("#language").val();
-        md.reportmetadata.publisher = $("#publisher").val();
+        return_data.language = $("#language").val();
+        return_data.publisher = $("#publisher").val();
 
-        md.reportmetadata.citations = [];
+        return_data.citations = [];
         $(".nb-citation").each(function(i,e) {
             if($(e).val() !== "") {
-                md.reportmetadata.citations.push($(e).val());
+                return_data.citations.push($(e).val());
             }
         });
         
-        md.reportmetadata.referencedBy = [];
+        return_data.referencedBy = [];
         $(".nb-referencedBy").each(function(i,e) {
             if($(e).val() !== "") {
-                md.reportmetadata.referencedBy.push($(e).val());
+                return_data.referencedBy.push($(e).val());
             }
         });
 
-        md.reportmetadata.funders = $("#funders").val();
-        md.reportmetadata.sponsors = $("#sponsors").val();
+        return_data.funders = $("#funders").val();
+        return_data.sponsors = $("#sponsors").val();
 
-        md.reportmetadata.licence = {
-            "preset": $("#nb-licence-dropdown").val(),
-            "url": $("#licence-url").val()
+        return_data.licence_preset = $("#nb-licence-dropdown").val();
+        return_data.licence_url = $("#licence-url").val();
+        
+
+        return_data.repository = $("#repository").val();
+
+        /* 
+         *  need to ensure that the file has been upload before
+         *  we go off uploading so have a promise that resolves
+         *  when the file upload is done. If there is no file
+         *  upload to be done, then just return a resolved
+         *  promise
+         */
+        var promise;
+        if($("#licence-file").val()) {
+            var licence_file = $("#licence-file").prop("files")[0];
+
+            promise = new Promise(function(resolve,reject) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    return_data.licence_file_name = $("#licence-file").val();
+                    return_data.licence_file_contents = e.target.result;
+                    resolve(return_data);
+                };
+
+                reader.onerror = function() {
+                    //TODO: handle error
+                    reject();
+                };
+
+                reader.readAsDataURL(licence_file);
+            });
+        } else {
+            promise = Promise.resolve(return_data);
+        }
+
+        return promise;        
+    };
+
+    /*  
+     *  Get metadata from saved metadata. Used for bundle upload only as well
+     *  as the test notebook upload.
+     */ 
+    var get_values_from_metadata = function() {
+        var data = {
+            "title":Jupyter.notebook.metadata.reportmetadata.title,
+            "authors":Jupyter.notebook.metadata.reportmetadata.authors,
+            "abstract":Jupyter.notebook.metadata.reportmetadata.abstract,
+            "tags":Jupyter.notebook.metadata.reportmetadata.tags,
+            "date":Jupyter.notebook.metadata.reportmetadata.date,
+            "language":Jupyter.notebook.metadata.reportmetadata.language,
+            "publisher":Jupyter.notebook.metadata.reportmetadata.publisher,
+            "citations":Jupyter.notebook.metadata.reportmetadata.citations,
+            "referencedBy":Jupyter.notebook.metadata.reportmetadata.referencedBy,
+            "funders":Jupyter.notebook.metadata.reportmetadata.funders,
+            "sponsors":Jupyter.notebook.metadata.reportmetadata.sponsors,
+            "repository":Jupyter.notebook.metadata.reportmetadata.repository,
+            "licence_preset":Jupyter.notebook.metadata.reportmetadata.licence_preset,
+            "licence_url": Jupyter.notebook.metadata.reportmetadata.licence_url
         };
-
-        md.reportmetadata.repository = $("#repository").val();
-
-        Jupyter.notebook.metadata = md;
-        Jupyter.notebook.save_notebook();
-        $("#collections_loaded").remove();
+        return data;
     };
 
 
@@ -1370,37 +1426,6 @@ define(["base/js/namespace",
         $(".metadata-form-error").css("color", "red");
     };
 
-
-    /*  
-     *  Runs validate_fields 1 and 2 and if there are no errors,
-     *  it either goes to the next page or saves the metadata 
-     *  and dismisses the modal
-     */ 
-    var validate = function() {
-        if(!$("#fields1").hasClass("hide-me") &&
-           $("#fields2").hasClass("hide-me"))
-        {
-            validate_fields1();
-            if($(".metadata-form-error").length === 0) {
-                $("#fields1").addClass("hide-me");
-                $("#fields2").removeClass("hide-me");
-                $("#previous").prop("disabled",false);
-
-                //we want button text to be save on the last page
-                $("#next").text("Save");
-            }
-        }
-        else if($("#fields1").hasClass("hide-me") &&
-                !$("#fields2").hasClass("hide-me"))
-        { //save our metadata
-            validate_fields2();
-            if($(".metadata-form-error").length === 0) {
-                save_metadata();
-                $(".modal").modal("hide");
-            }
-        }
-    };
-
     /*  
      *  The below adds an action to the notebook and assigns the add_metadata
      *  function to the Add metadata function, and handles exporting the
@@ -1429,5 +1454,7 @@ define(["base/js/namespace",
         validate_fields1: validate_fields1,
         validate_fields2: validate_fields2,
         create_fields: create_fields,
+        get_values_from_fields: get_values_from_fields,
+        get_values_from_metadata: get_values_from_metadata
     };
 });
