@@ -6,7 +6,11 @@ define([
 ], function(Jupyter,celltoolbar,dialog,events) {
     "use strict";
 
-
+    /*  
+     *  This contains the stuff we want doing when the extension/page is loaded.
+     *  We have to register our toolbar as a CellToolbar preset. We also add an
+     *  action and button for our toggle button.
+     */  
     var load = function() {
         var CellToolbar = celltoolbar.CellToolbar;
 
@@ -51,6 +55,11 @@ define([
         });
     };
 
+    /*  
+     *  Toggles the visibility of our toolbar. This is due to the celltoolbar
+     *  menu being a bit of a pain to find. It changes text depending whether
+     *  our toolbar preset is currently active or not.
+     */ 
     var toggle_cell_references_bar = function() {
         var CellToolbar = celltoolbar.CellToolbar;
         if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
@@ -69,6 +78,13 @@ define([
         }
     };
 
+    /*  
+     *  The actual celltoolbar stuff. The CellToolbar stuff in Jupyter gives our
+     *  preset the div that we can attach our stuff to and the cell that is currently
+     *  being edited. We add some help text and a text input with a button that spawns
+     *  more text inputs. We have it so that when any of the inputs changes they
+     *  update the cell's metadata. 
+     */ 
     var add_reference_url = function(div, cell) {
         var help_text = "Add the reference URLs that relate to this cell:\n";
         var toolbar_container = $(div).addClass("cell-urls-container");
@@ -91,6 +107,73 @@ define([
             .addClass("referenceURL_div_" + cell.cell_id);
 
         base_referenceURL_div.append(base_referenceURL);
+
+        //on focus switch into edit mode so we can type text normally
+        base_referenceURL.focus(function() {
+            Jupyter.keyboard_manager.edit_mode();
+        });
+
+        //does what it says - updates the notebook metadata. Note - it doesn't
+        //save the metadata, just updates it.
+        function update_metadata() {
+            cell.metadata.referenceURLs = [];
+            $(".referenceURL_" + cell.cell_id).each(function(i,e) {
+                if($(e).val()) {
+                    cell.metadata.referenceURLs.push($(e).val());
+                }
+            });
+        }
+
+        //put all values in metadata on change
+        base_referenceURL.change(function() {
+            update_metadata();
+        });
+
+        /*  
+         *  Adds an extra URL input box whilst adding a remove button to the
+         *  previous input box. 
+         */ 
+        function addURL() {
+            var newURL = ($("<div/>"))
+                          .addClass("referenceURL_div")
+                          .addClass("referenceURL_div_" + cell.cell_id);
+            var URL = $("<input/>")
+                .attr("class","referenceURL referenceURL_" + cell.cell_id)
+                .attr("type","text")
+                .attr("name","referenceURL");
+
+            //on focus switch into edit mode so we can type text normally
+            URL.focus(function() {
+                Jupyter.keyboard_manager.edit_mode();
+            });
+
+            URL.change(function() { //save all values to metadata on change
+                update_metadata();
+            });
+
+            var previousURL = $(".referenceURL_div_" + cell.cell_id).last();
+
+            //detach from the previously last url input so
+            //we can put it back on the new one
+            addURLButton.detach(); 
+            var deleteURL = $("<button/>")
+                .addClass("btn btn-xs btn-default remove-cell-url-button")
+                .attr("type","button")
+                .attr("aria-label","Remove reference URL")
+                    .click(function() {
+                        previousURL.remove();
+                        $(this).remove();
+                        update_metadata();
+                    }); //add a remove button to the previously last url
+
+            deleteURL.append($("<i>")
+                             .addClass("fa fa-trash")
+                             .attr("aria-hidden","true"));
+            previousURL.append(deleteURL);
+            URL_container.append(newURL.append(URL).append(addURLButton));
+            return [URL,newURL];
+        }
+
         var addURLButton = $("<button/>")
             .addClass("btn btn-xs btn-default add-cell-url-button")
             .attr("type","button")
@@ -102,25 +185,9 @@ define([
 
         URL_container.append(base_referenceURL_div);
 
-        //on focus switch into edit mode so we can type text normally
-        base_referenceURL.focus(function() {
-            Jupyter.keyboard_manager.edit_mode();
-        });
-
-        function update_metadata() {
-            cell.metadata.referenceURLs = [];
-            $(".referenceURL_" + cell.cell_id).each(function(i,e) {
-                if($(e).val()) {
-                    cell.metadata.referenceURLs.push($(e).val());
-                }
-            });
-        }
-
-        //save all values to metadata on change
-        base_referenceURL.change(function() {
-            update_metadata();
-        });
-
+        /*  
+         *  Repopulate from existig notebook metadata 
+         */ 
         if(md_set) {
             var URLarr = cell.metadata.referenceURLs;
             var deleteURL;
@@ -166,49 +233,7 @@ define([
                 }
             });
         }
-
-        function addURL() {
-            var newURL = ($("<div/>"))
-                          .addClass("referenceURL_div")
-                          .addClass("referenceURL_div_" + cell.cell_id);
-            var URL = $("<input/>")
-                .attr("class","referenceURL referenceURL_" + cell.cell_id)
-                .attr("type","text")
-                .attr("name","referenceURL");
-
-            //on focus switch into edit mode so we can type text normally
-            URL.focus(function() {
-                Jupyter.keyboard_manager.edit_mode();
-            });
-
-            URL.change(function() { //save all values to metadata on change
-                update_metadata();
-            });
-
-            var previousURL = $(".referenceURL_div_" + cell.cell_id).last();
-
-            //detach from the previously last url input so
-            //we can put it back on the new one
-            addURLButton.detach(); 
-            var deleteURL = $("<button/>")
-                .addClass("btn btn-xs btn-default remove-cell-url-button")
-                .attr("type","button")
-                .attr("aria-label","Remove reference URL")
-                    .click(function() {
-                        previousURL.remove();
-                        $(this).remove();
-                        update_metadata();
-                    }); //add a remove button to the previously last url
-
-            deleteURL.append($("<i>")
-                             .addClass("fa fa-trash")
-                             .attr("aria-hidden","true"));
-            previousURL.append(deleteURL);
-            URL_container.append(newURL.append(URL).append(addURLButton));
-            return [URL,newURL];
-        }
     };
-
 
     module.exports = {load: load};
 });
