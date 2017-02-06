@@ -22,10 +22,12 @@ class UploadBundleHandler(IPythonHandler):
                               "resources",
                               "blank.xml")
 
+    # upload a data bundle to DSpace
     @web.authenticated
     @json_errors
     @gen.coroutine
     def post(self):
+        # get the arguments from the request body
         arguments = escape.json_decode(self.request.body)
 
         un = arguments['username']
@@ -33,27 +35,35 @@ class UploadBundleHandler(IPythonHandler):
 
         repository = arguments['repository']
 
+        # ET = ElementTree which is how python works easily with XML
+        # register the namespaces that are used
         ET.register_namespace("", "http://www.loc.gov/METS/")
         ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
         ET.register_namespace("dc", "http://purl.org/dc/elements/1.1/")
         ET.register_namespace("dcterms", "http://purl.org/dc/terms/")
 
+        # try opening our blank file as an ElementTree
         try:
             tree = ET.ElementTree(file=UploadBundleHandler.blank_file)
         except ET.ParseError:
             raise web.HTTPError(500, "IndexError occured when "
                                      "fetching metadata node")
 
+        # get the root, and add in some attributes
         root = tree.getroot()
         root.set("xmlns:xlink", "http://www.w3.org/1999/xlink")
         root.set("xmlns:dc", "http://purl.org/dc/elements/1.1/")
         root.set("xmlns:dcterms", "http://purl.org/dc/terms/")
 
+        # fetch the metadata node. all our metadata but be a child of this node
         try:
             metadata = tree.getroot()[1][0][0]
         except IndexError:
             raise web.HTTPError(500, "IndexError occured when "
                                      "fetching metadata node")
+
+        # get each piece of metadata from the request body and create a node/nodes
+        # in the xml doc for them
 
         title = arguments['title']
 
@@ -123,6 +133,7 @@ class UploadBundleHandler(IPythonHandler):
                     reference_xml.text = referencedBy
                     metadata.append(reference_xml)'''
 
+        # set type to Dataset
         reference_xml = ET.Element("dc:type")
         reference_xml.text = "Dataset"
         metadata.append(reference_xml)
@@ -137,6 +148,9 @@ class UploadBundleHandler(IPythonHandler):
         #if funders is not None:
         #    metadata.append({"key": "dc.description.sponsorship", "value": sponsors})
 
+
+        # transform the notebook path given by jupyter to an actual system path.
+        # also get the notebook name so that we cna use it to name the file.
         try:
             notebook_path = arguments['notebookpath']
             notebook_split = notebook_path.split('/')
@@ -148,6 +162,7 @@ class UploadBundleHandler(IPythonHandler):
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
+        # get the file names, paths and types, plus the TOS files and the licence
         file_names = arguments['file_names']
         file_paths = arguments['file_paths']
         file_types = arguments['file_types']
@@ -155,13 +170,18 @@ class UploadBundleHandler(IPythonHandler):
         TOS_files = arguments["TOS"]
         licence = arguments["licence"]
 
+        # make a temporary directory for us to play around in since we're
+        # creating files
         try:
             tempdir = tempfile.mkdtemp()
             os.chdir(tempdir)
         except IOError:
+            # on error remember to delete our temp directory. this happens in
+            # all future error handling
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when opening temp dir")
 
+        # for each TOS file, write to a file. They're names TOD [ID].txt
         try:
             for index, file in enumerate(TOS_files):
                 base64_data = file.split(",")[1]
@@ -176,26 +196,29 @@ class UploadBundleHandler(IPythonHandler):
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when writing the TOS files")
 
-        try:
-            licence_file_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "resources",
-                "licences",
-                licence,
-                "LICENSE.txt"
-            )
-        except IOError:
-            shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when fetching the licence file")
+        # set licence file path to the relevant licence preset
+        licence_file_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "resources",
+            "licences",
+            licence,
+            "LICENSE.txt"
+        )
 
+        # now we need to specify the files contained in the sword package.
+        # we have to create specific xml nodes for our files with specific
+        # attributes.
+        # we cycle through our actual data files first, then through the TOS
+        # files, and finally add the licence file. We only add data files, not
+        # any data directories.
         try:
             files = tree.getroot()[2][0]
-            id_count = 0
+            i = 0
             if file_paths is not []:  # TODO: enforce that this doesn't happen
                 if len(file_names) > 0:
                     for index, file_path in enumerate(file_paths):
                         if(file_types[index] == 'file'):
-                            file_attr = {"GROUPID": "sword-mets-fgid-" + str(id_count),
+                            file_attr = {"GROUPID": "sword-mets-fgid-" + str(i),
                                          "ID": file_path,
                                          "MIMETYPE": "application/octet-stream"}
                             files_xml = ET.Element('file', file_attr)
@@ -206,8 +229,9 @@ class UploadBundleHandler(IPythonHandler):
 
                             files_xml.append(FLocat_xml)
                             files.append(files_xml)
-                            id_count += 1
-            for i in list(range(0,len(TOS_files))):
+                            i += 1
+
+            for i in list(range(0, len(TOS_files))):
                 file_attr = {"GROUPID": "TOS-File-" + str(i),
                              "ID": "TOS " + str(i),
                              "MIMETYPE": encoding_info}
@@ -225,7 +249,8 @@ class UploadBundleHandler(IPythonHandler):
                             "MIMETYPE": "text/plain"}
             licence_xml = ET.Element('file', licence_attr)
 
-            licence_FLocat_attr = {"LOCTYPE": "URL", "xlink:href": "LICENSE.txt"}
+            licence_FLocat_attr = {"LOCTYPE": "URL",
+                                   "xlink:href": "LICENSE.txt"}
             licence_FLocat_xml = ET.Element('FLocat', licence_FLocat_attr)
 
             licence_xml.append(licence_FLocat_xml)
@@ -236,6 +261,10 @@ class UploadBundleHandler(IPythonHandler):
             raise web.HTTPError(500, "IndexError when getting"
                                      "'files' root node")
 
+        # now we have to create the structure. for TOS files and the licene they
+        # are just straight at the base so just plonk them in. For data files,
+        # we use dir_search specified in the helper class at the bottom of this
+        # file that creates the correct directory structure
         try:
             struct = tree.getroot()[3]
 
@@ -254,7 +283,7 @@ class UploadBundleHandler(IPythonHandler):
 
             struct.append(struct_xml)
 
-            for i in list(range(0,len(TOS_files))):
+            for i in list(range(0, len(TOS_files))):
                 TOS_struct_attr = {"ID": "sword-mets-div-2",
                                    "DMDID": "sword-mets-dmd-2",
                                    "TYPE": "TOS"}
@@ -289,13 +318,15 @@ class UploadBundleHandler(IPythonHandler):
                                      "'struct' root node")
 
         try:
-            # this is writing to the cwd - might need to change?
-            # TODO: check that this is still sensible
+            # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except IOError:
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when writing tree to mets.xml")
 
+        # create a zip file for our sword submission. Write mets.xml,
+        # our data files, TOS files and the licence file to the zip.
+        # TODO: might need to zip all the stuff except mets.xml together
         try:
             created_zip_file = zipfile.ZipFile("data_bundle.zip", "w")
             created_zip_file.write("mets.xml")
@@ -304,7 +335,7 @@ class UploadBundleHandler(IPythonHandler):
                     for file_path in file_paths:
                         created_zip_file.write(notebook_dir + "/" + file_path, file_path)
 
-            for i in list(range(0,len(TOS_files))):
+            for i in list(range(0, len(TOS_files))):
                 created_zip_file.write("TOS " + str(i))
 
             created_zip_file.write(licence_file_path, "LICENSE.txt")
@@ -313,8 +344,11 @@ class UploadBundleHandler(IPythonHandler):
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
+            # close the zip either way
             created_zip_file.close()
 
+        # reading the newly created zip file as binary so we can send it via
+        # a http request
         try:
             with open("data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
@@ -323,8 +357,10 @@ class UploadBundleHandler(IPythonHandler):
             raise web.HTTPError(500, "IOError when reading zip file"
                                      "as binary data")
 
+        # get out of our temp directory and back to the notebook directory
         os.chdir(notebook_dir)
 
+        # set up some variables needed for the request
         notebook_name_no_extension = notebook_name.split(".")[0]
 
         url = ("https://epublicns05.esc.rl.ac.uk/sword/deposit/" +
@@ -337,6 +373,7 @@ class UploadBundleHandler(IPythonHandler):
                    "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP",
                    "X-On-Behalf-Of": un}
 
+        # try sending off the request
         try:
             r = requests.request('POST',
                                  url,
@@ -372,6 +409,7 @@ class UploadBundleHandler(IPythonHandler):
             print(r.status_code)
             retries -= 1
 
+        # Delete temp directory and pass along the status code and request text
         if(r.status_code == 201):  # created
             shutil.rmtree(tempdir)
             self.clear()

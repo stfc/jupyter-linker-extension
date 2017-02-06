@@ -18,6 +18,8 @@ from notebook.base.handlers import (
 
 class LDAPHandler(IPythonHandler):
 
+    # searches the ldap server for a user via their names or via fedID
+    # returns a list of users that match, with the attributes listed below
     @web.authenticated
     @json_errors
     @gen.coroutine
@@ -67,44 +69,10 @@ class LDAPHandler(IPythonHandler):
         self.set_header('Content-Type', 'application/json')
         self.finish(json.dumps(json_entries))
 
-    @web.authenticated
-    @json_errors
-    @gen.coroutine
-    def patch(self):
-        firstname = self.get_query_argument('firstname', default="")
-        lastname = self.get_query_argument('lastname', default="")
-
-        server = ldap3.Server('logon10.fed.cclrc.ac.uk', get_info=ldap3.ALL)
-
-        conn = ldap3.Connection(server, auto_bind=True)
-
-        result = []
-
-        if firstname and not lastname:
-            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
-                        '(givenName=*' + firstname + '*)',
-                        attributes=['sn', 'givenName'])
-            result = conn.entries
-
-        if lastname and not firstname:
-            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
-                        '(sn=*' + lastname + '*)',
-                        attributes=['sn', 'givenName'])
-            result = conn.entries
-
-        if lastname and firstname:
-            conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
-                        '(&(sn=*' + lastname + '*)(givenName=*' + firstname + '*))',
-                        attributes=['sn', 'givenName'])
-            result = conn.entries
-
-        json_entries = []
-        for entry in conn.entries:
-            json_entries.append(entry.entry_to_json())
-
-        self.set_header('Content-Type', 'application/json')
-        self.finish(json.dumps(json_entries))
-
+    # this is used to authenticate a user via ldap.
+    # requires a username and password via the request body
+    # returns nothing, but the status code of the response is used to determine
+    # what happened
     @web.authenticated
     @json_errors
     @gen.coroutine
@@ -114,8 +82,11 @@ class LDAPHandler(IPythonHandler):
         username = json_obj['username']
         password = json_obj['password']
 
+        #stops ldap injection attacks by only allowing safe characters
         valid_username_regex = r'^[a-z][.a-z0-9_-]*$'
 
+        # bind_dn_template lists all the bind templates that a user could have
+        # TODO: check that this covers everyone/most people
         bind_dn_template = [
             'cn={username},ou=fbu,dc=fed,dc=cclrc,dc=ac,dc=uk',
             'cn={username},ou=tbu,dc=fed,dc=cclrc,dc=ac,dc=uk',
@@ -129,6 +100,7 @@ class LDAPHandler(IPythonHandler):
             'cn={username},ou=RCaH,dc=cclrc,dc=ac,dc=uk'
         ]
 
+        #invalid username
         if not re.match(valid_username_regex, username):
             self.set_status(400)
             self.finish()
@@ -140,6 +112,7 @@ class LDAPHandler(IPythonHandler):
             conn = ldap3.Connection(server, user=userdn, password=password)
             return conn
 
+        # try to bind the user using one of the templates
         for dn in bind_dn_template:
             userdn = dn.format(username=username)
             conn = getConnection(userdn, username, password)
@@ -147,6 +120,7 @@ class LDAPHandler(IPythonHandler):
             if isBound:
                 break
 
+        # either they're logged in (200) or they're not (401)
         if isBound:
             self.set_status(200)
             self.finish()

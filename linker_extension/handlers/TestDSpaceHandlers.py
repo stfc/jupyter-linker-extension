@@ -12,6 +12,8 @@ from notebook.base.handlers import (
 
 class FindIDViaMetadata(IPythonHandler):
 
+    # given an item url, return an dspace item. done via searching DSpace on the
+    # field dc.identifier
     @web.authenticated
     @json_errors
     @gen.coroutine
@@ -53,6 +55,7 @@ class FindIDViaMetadata(IPythonHandler):
 
 class DeleteItem(IPythonHandler):
 
+    # given an item id, delete the item with that id
     @web.authenticated
     @json_errors
     @gen.coroutine
@@ -94,6 +97,7 @@ class DeleteItem(IPythonHandler):
 
 class GetBitstreams(IPythonHandler):
 
+    # given an id, return the bitstreams associated with that item
     @web.authenticated
     @json_errors
     @gen.coroutine
@@ -131,6 +135,8 @@ class GetBitstreams(IPythonHandler):
 
 class GetBitstreamData(IPythonHandler):
 
+    # given the IDs of multiple bitstreams, return the data inside those
+    # bitstreams
     @web.authenticated
     @json_errors
     @gen.coroutine

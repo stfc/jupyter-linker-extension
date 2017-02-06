@@ -18,6 +18,8 @@ from ipython_genutils import text
 # ----------------------------------------------------------------------------
 
 
+# This is copied from notbook.nbconvert.NbconvertFileHandler
+# I just change it so that the exporter has a template file passed to it.
 class CustomNbconvertHandler(IPythonHandler):
 
     SUPPORTED_METHODS = ('GET',)

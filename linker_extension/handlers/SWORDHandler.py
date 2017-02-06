@@ -23,10 +23,12 @@ class SWORDHandler(IPythonHandler):
                               "resources",
                               "blank.xml")
 
+    # create a new notebook item
     @web.authenticated
     @json_errors
     @gen.coroutine
     def post(self):
+        # get the arguments from the request body
         arguments = escape.json_decode(self.request.body)
 
         un = arguments['username']
@@ -34,27 +36,35 @@ class SWORDHandler(IPythonHandler):
 
         repository = arguments['repository']
 
+        # ET = ElementTree which is how python works easily with XML
+        # register the namespaces that are used
         ET.register_namespace("", "http://www.loc.gov/METS/")
         ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
         ET.register_namespace("dc", "http://purl.org/dc/elements/1.1/")
         ET.register_namespace("dcterms", "http://purl.org/dc/terms/")
 
+        # try opening our blank file as an ElementTree
         try:
             tree = ET.ElementTree(file=SWORDHandler.blank_file)
         except ET.ParseError:
             raise web.HTTPError(500, "IndexError occured when "
                                      "fetching metadata node")
 
+        # get the root, and add in some attributes
         root = tree.getroot()
         root.set("xmlns:xlink", "http://www.w3.org/1999/xlink")
         root.set("xmlns:dc", "http://purl.org/dc/elements/1.1/")
         root.set("xmlns:dcterms", "http://purl.org/dc/terms/")
 
+        # fetch the metadata node. all our metadata but be a child of this node
         try:
             metadata = tree.getroot()[1][0][0]
         except IndexError:
             raise web.HTTPError(500, "IndexError occured when "
                                      "fetching metadata node")
+
+        # get each piece of metadata from the request body and create a node/nodes
+        # in the xml doc for them
 
         title = arguments['title']
         # should never happen but just in case
@@ -133,6 +143,9 @@ class SWORDHandler(IPythonHandler):
         #if funders is not None:
         #    metadata.append({"key": "dc.description.sponsorship", "value": sponsors})
 
+
+        # transform the notebook path given by jupyter to an actual system path.
+        # also get the notebook name so that we cna use it to name the file.
         try:
             notebook_path = arguments['notebookpath']
             notebook_split = notebook_path.split('/')
@@ -145,6 +158,9 @@ class SWORDHandler(IPythonHandler):
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
+        # deal with the licence. try getting the licence file and contents if
+        # specified. also get the preset and url.
+
         licence_file_name = ""
         licence_file_contents = ""
         if "licence_file_name" in arguments:
@@ -156,13 +172,23 @@ class SWORDHandler(IPythonHandler):
         licence_url = arguments['licence_url']
 
         licence_file_path = ""
+
+        # make a temporary directory for us to play around in since we're
+        # creating files
         try:
             tempdir = tempfile.mkdtemp()
             os.chdir(tempdir)
         except IOError:
+            # on error remember to delete our temp directory. this happens in
+            # all future error handling
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when opening tem dir")
+            raise web.HTTPError(500, "IOError when opening temp dir")
 
+        # determine what our licence path is going to be and, if needed, write
+        # a licence file. if we were passed a licence file we can create a file
+        # from the name and contents. if a licene url - create a file which tells
+        # you where the licence is found. If a preset, set licence file path to 
+        # be the relevant preset file.
         try:
             if licence_preset == "Other":
                 if licence_url != "":
@@ -195,6 +221,10 @@ class SWORDHandler(IPythonHandler):
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when sorting out licence file")
 
+        # now we need to specify the files contained in the sword package.
+        # realistically, this is just the notebook file itself and the licence.
+        # we have to create specific xml nodes for our files with specific
+        # attributes.
         try:
             files = tree.getroot()[2][0]
 
@@ -233,6 +263,8 @@ class SWORDHandler(IPythonHandler):
             raise web.HTTPError(500, "IndexError when getting "
                                      "'files' root node")
 
+        # now we have to create the structure. for this, pretty much the same
+        # as the files node.
         try:
             struct = tree.getroot()[3]
 
@@ -269,13 +301,15 @@ class SWORDHandler(IPythonHandler):
                                      "'struct' root node")
 
         try:
-            # this is writing to the cwd - might need to change?
-            # TODO: check that this is still sensible
+            # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except IOError:
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when writing tree to mets.xml")
 
+        # create a zip file for our sword submission. Write mets.xml,
+        # our notebook file and the licence file to the zip.
+        # TODO: might need to zip the notebook and licence together
         try:
             created_zip_file = zipfile.ZipFile("notebook.zip", "w")
             created_zip_file.write("mets.xml")
@@ -293,7 +327,11 @@ class SWORDHandler(IPythonHandler):
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
+            # close the zip either way
             created_zip_file.close()
+
+        # reading the newly created zip file as binary so we can send it via
+        # a http request
         try:
             with open("notebook.zip", "rb") as f:
                 binary_zip_file = f.read()
@@ -301,8 +339,11 @@ class SWORDHandler(IPythonHandler):
             shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IOError when reading zip file "
                                      "as binary data")
+
+        # get out of our temp directory and back to the notebook directory
         os.chdir(notebook_dir)
 
+        # set up some variables needed for the request
         notebook_name_no_extension = notebook_name.split(".")[0]
 
         url = ("https://epublicns05.esc.rl.ac.uk/sword/deposit/" +
@@ -314,6 +355,8 @@ class SWORDHandler(IPythonHandler):
                    "Content-Type": "application/zip",
                    "X-Packaging": "http://purl.org/net/sword-types/METSDSpaceSIP",
                    "X-On-Behalf-Of": un}
+
+        # try sending off the request
         try:
             r = requests.request('POST',
                                  url,
@@ -349,12 +392,13 @@ class SWORDHandler(IPythonHandler):
             print(r.status_code)
             retries -= 1
 
-        if(r.status_code == 201):
+        # Delete temp directory and pass along the status code and request text
+        if(r.status_code == 201):  # created
             shutil.rmtree(tempdir)
             self.clear()
             self.set_status(201)
             self.finish(r.text)
-        elif (r.status_code == 202):
+        elif (r.status_code == 202):  # accepted (waiting for approval)
             shutil.rmtree(tempdir)
             self.clear()
             self.set_status(202)

@@ -17,6 +17,8 @@ from notebook.base.handlers import (
 
 class DSpaceHandler(IPythonHandler):
 
+    # this get allows us to get the collections, we use this to populate the
+    # repository/department dropdown.
     @web.authenticated
     @json_errors
     @gen.coroutine
@@ -25,6 +27,7 @@ class DSpaceHandler(IPythonHandler):
         r = requests.request('GET', url, verify=False)
         self.finish(r.text)
 
+    # unused? here as an example of how to do submit via dspace api
     @web.authenticated
     @json_errors
     @gen.coroutine
