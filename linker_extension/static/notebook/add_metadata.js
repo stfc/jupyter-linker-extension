@@ -133,15 +133,17 @@ define(["base/js/namespace",
             .attr("name","title")
             .attr("id","title")
             .attr("type","text")
+            .attr("required","required")
             .val("");
 
         var titleLabel =  $("<label/>")
             .attr("for","title")
+            .addClass("required")
             .text("Title: ");
 
 
         /*  
-         *  Creates an author field with it's autocomplete field. Takes an id
+         *  Creates an author field with its autocomplete field. Takes an id
          *  and a string (either "first" or "last"). Returns the field.
          */ 
         var generate_author = function(id,first_or_last) {
@@ -149,13 +151,6 @@ define(["base/js/namespace",
                 .attr("class","author-" + first_or_last + "-name")
                 .attr("type","text")
                 .attr("id","author-" + first_or_last + "-name-" + id)
-                .on("keydown", function(event) {
-                    if (event.keyCode === $.ui.keyCode.TAB &&
-                        $(this).autocomplete().data("ui-autocomplete").menu.active)
-                    {
-                        event.preventDefault();
-                    }
-                })
                 .autocomplete({
                     source: function( request, response ) {
                         var url = Jupyter.notebook.contents.base_url + "ldap";
@@ -186,6 +181,22 @@ define(["base/js/namespace",
                     focus: function() {
                       // prevent value inserted on focus
                         return false;
+                    },
+                    search: function() { 
+                        //called when search starts, so move our spinner to the
+                        //currently autocompleteing element (since only one
+                        //autocomplete can be active at a time this is okay)
+                        //and show it
+                        var spinner = $("#author-autocomplete-spinner").detach();
+                        var accessibility_spinner = $("accessibility-spinner").detach();
+                        $(this).after(spinner);
+                        $(this).after(accessibility_spinner);
+                        spinner.show();
+                        accessibility_spinner.show();
+                    },
+                    response: function() {
+                        //called when search is completed - hide the spinner
+                        $("#author-autocomplete-spinner").hide();
                     },
                     minLength:1,
                 });
@@ -252,18 +263,38 @@ define(["base/js/namespace",
         };
 
         var defaultAuthorLastName = generate_author(0,"last");
+        defaultAuthorLastName.attr("required","required");
         var defaultAuthorFirstName = generate_author(0,"first");
+        defaultAuthorFirstName.attr("required","required");
+
+        //we only have one spinner that is passed around, so we create it
+        //(hidden by default) and attach it somewhere (it doesn't matter
+        //where it is attached tbh, i've appended it to author)
+        var spinner = $("<i/>")
+            .addClass("fa fa-spinner fa-spin fa-fw fa-lg")
+            .attr("id","author-autocomplete-spinner")
+            .attr("aria-label","Searching for authors...")
+            .hide();
+
+        var accessibility_spinner = $("<span/>")
+            .addClass("sr-only")
+            .attr("id","accessibility-spinner")
+            .text("Searching for authors...")
+            .hide();
 
         var authorLabel = $("<label/>")
             .attr("for","author")
+            .addClass("required")
             .text("Author: ");
 
         var authorsFirstNameLabel = $("<label/>")
             .attr("for","author-first-name-0")
+            .addClass("required")
             .text("First name(s), e.g. John: ");
 
         var authorsLastNameLabel = $("<label/>")
             .attr("for","author-last-name-0")
+            .addClass("required")
             .text("Last name, e.g. Smith: ");
 
         var defaultAuthor = ($("<div/>"))
@@ -355,9 +386,13 @@ define(["base/js/namespace",
 
         var abstractLabel = $("<label/>")
             .attr("for","nb-abstract")
+            .addClass("required")
             .text("Abstract: ");
 
-        var abstract = $("<textarea/>").attr("name","abstract").attr("id","nb-abstract");
+        var abstract = $("<textarea/>")
+            .attr("name","abstract")
+            .attr("id","nb-abstract")
+            .attr("required","required");
 
         var tagsLabel = $("<label/>")
             .attr("for","tags")
@@ -367,15 +402,20 @@ define(["base/js/namespace",
 
         var dateLabel = $("<label/>")
             .attr("for","date")
+            .addClass("required")
             .text("Date: ");
 
         var date = $("<table/>").attr("id","date");
 
         var yearLabel = $("<label/>")
             .attr("for","year")
+            .addClass("required")
             .text("Year: ")
             .attr("id","year-label");
-        var year = $("<input/>").attr("name","year").attr("id","year");
+        var year = $("<input/>")
+            .attr("name","year")
+            .attr("required","required")
+            .attr("id","year");
 
         var monthLabel = $("<label/>")
             .attr("for","month")
@@ -501,7 +541,9 @@ define(["base/js/namespace",
             .append(abstract)
             .append(expand_button_1)
             .append(extra_nb_metadata_1);
-                       
+        
+        author.append(spinner);
+        author.append(accessibility_spinner);
 
         var publisherLabel = $("<label/>")
             .attr("for","publisher")
@@ -658,6 +700,7 @@ define(["base/js/namespace",
 
         var licenceLabel = $("<label/>")
             .attr("for","licence")
+            .addClass("required")
             .text("Licence: ");
 
         var licence = $("<div/>")
@@ -668,6 +711,7 @@ define(["base/js/namespace",
         //ones that users may select
         var licenceDropdown = $("<select/>")
             .attr("name","licence dropdown")
+            .attr("required","required")
             .attr("id","nb-licence-dropdown")
             .append($("<option/>").attr("value","").text("None Selected"))
             .append($("<option/>").attr("value","CC0").text("CC0"))
@@ -836,10 +880,12 @@ define(["base/js/namespace",
 
         var repositoryLabel = $("<label/>")
             .attr("for","repository")
+            .addClass("required")
             .text("Department: ");
 
         var repository = $("<select/>")
             .attr("name","repository")
+            .attr("required","required")
             .attr("id","repository")
             .append($("<option/>").attr("value","").text(""));
 

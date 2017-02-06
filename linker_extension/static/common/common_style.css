@@ -305,3 +305,14 @@ input.fileinput {
   margin-bottom: 6px;
   display: block;
 }
+
+#author-autocomplete-spinner {
+  position: relative;
+  right: 26px;
+  margin-right: -22px;
+}
+
+label.required:after {
+  content:"*";
+  color:red;
+}
