@@ -53,7 +53,6 @@ define([
 
             Object.keys(reference_urls).forEach(function(reference) {
                 //markdown uses format [title](url)
-                //text = text +"<" + reference + ">\n\n";
                 text = text +"[" + reference + "](" + reference + ")\n\n";
             });
 
