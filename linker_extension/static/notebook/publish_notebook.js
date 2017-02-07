@@ -69,14 +69,19 @@ define(["base/js/namespace",
 
         var username_label = $("<label/>")
             .attr("for","username")
+            .addClass("required")
             .text("Username: ");
-        var username_field = $("<input/>").attr("id","username");
+        var username_field = $("<input/>")
+            .attr("id","username")
+            .attr("required","required");
 
         var password_label = $("<label/>")
             .attr("for","password")
+            .addClass("required")
             .text("Password: ");
         var password_field = $("<input/>")
             .attr("id","password")
+            .attr("required","required")
             .attr("type","password");
 
         login_labels.append($("<td/>").append(username_label))
@@ -309,14 +314,19 @@ define(["base/js/namespace",
 
         var username_label = $("<label/>")
             .attr("for","username")
+            .addClass("required")
             .text("Username: ");
-        var username_field = $("<input/>").attr("id","username");
+        var username_field = $("<input/>")
+            .attr("id","username")
+            .attr("required","required");
 
         var password_label = $("<label/>")
             .attr("for","password")
+            .addClass("required")
             .text("Password: ");
         var password_field = $("<input/>")
             .attr("id","password")
+            .attr("required","required")
             .attr("type","password");
 
         login_labels.append($("<td/>").append(username_label))
@@ -493,14 +503,19 @@ define(["base/js/namespace",
 
         var username_label = $("<label/>")
             .attr("for","username")
+            .addClass("required")
             .text("Username: ");
-        var username_field = $("<input/>").attr("id","username");
+        var username_field = $("<input/>")
+            .attr("id","username")
+            .attr("required","required");
 
         var password_label = $("<label/>")
             .attr("for","password")
+            .addClass("required")
             .text("Password: ");
         var password_field = $("<input/>")
             .attr("id","password")
+            .attr("required","required")
             .attr("type","password");
 
         login_labels.append($("<td/>").append(username_label))
