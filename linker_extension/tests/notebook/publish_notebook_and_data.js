@@ -15,12 +15,10 @@ casper.notebook_test(function() {
 
     var username = "";
     var password = "";
+    //we need username and password to authenticate with dspace
+    //so either read the info via the login_credentials text file
+    //or prompt the user for their username and password
     this.then(function() {
-        var path_parts = fs.absolute(this.test.currentTestFile).split("/");
-        path_parts.pop();
-        path_parts.pop();
-        var test_path = path_parts.join("/") + "/";
-
         if (fs.exists(test_path + "login_credentials.txt")) {
             var text = fs.read(test_path + "login_credentials.txt");
             var lines = text.split(/\r\n|[\r\n]/g);
@@ -40,6 +38,7 @@ casper.notebook_test(function() {
 
     var nbname = "Untitled.ipynb";
 
+    //fill in some dummy metadata
     this.thenEvaluate(function (nbname) {
         require(["base/js/events"], function (events) {
             Jupyter.notebook.set_notebook_name(nbname);
@@ -91,6 +90,7 @@ casper.notebook_test(function() {
     this.waitUntilVisible(".modal-body");
     this.wait(1000);
 
+    //check that the default abstract is correct
     this.then(function() {
         var test_textarea_val = this.evaluate(function() {
             return $("#data-abstract").val();
@@ -103,6 +103,7 @@ casper.notebook_test(function() {
                                "Default string in abstract form field correct");
     });
 
+    //check that validation works
     this.thenClick(".btn-primary");
     this.then(function() {
         this.test.assertVisible("#TOS-missing-error",
@@ -158,6 +159,7 @@ casper.notebook_test(function() {
 
     });
 
+    //test the clear date and set to current date buttons
     this.thenClick("#clear-date");
     this.thenClick("#next");
     this.then(function() {
@@ -330,8 +332,6 @@ casper.notebook_test(function() {
         });
     });
 
-    //TODO: test licence file stuff
-
     this.thenClick("#next");
     this.then(function() {
         this.test.assertExists("#no-licence-error",
@@ -389,7 +389,6 @@ casper.notebook_test(function() {
     }); //TODO: add funders and sponsors if we can use them
     this.thenClick("#next");
 
-    /*
     //Should be within notebook metadata now.     
     this.then(function() {
         var metadata = this.evaluate(function() {
@@ -422,8 +421,8 @@ casper.notebook_test(function() {
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
                     repository: md.reportmetadata.repository,
-                    licence_preset: md.reportmetadata.licence.preset,
-                    licence_url: md.reportmetadata.licence.url
+                    licence_preset: md.reportmetadata.licence_preset,
+                    licence_url: md.reportmetadata.licence_url
                 };
             }
             
@@ -481,15 +480,16 @@ casper.notebook_test(function() {
         this.test.assertEquals(
             metadata.licence_preset,
             "Other",
-            "Licence.preset has been changed properly"
+            "Licence_preset has been changed properly"
         );
         this.test.assertEquals(
             metadata.licence_url,
             "www.mylicence.com",
-            "Licence.url has been saved to the metadata"
+            "Licence_url has been saved to the metadata"
         );
     });
-    */
+
+    //test login validation
 
     this.thenClick("#next");
     //if it doesn't show, this will fail, so no need to make an assertion
@@ -520,6 +520,8 @@ casper.notebook_test(function() {
         });
     });
 
+    //check that we see the success alerts
+
     this.then(function() {
         this.test.assertExists(".nb-upload-success-alert",
                                "Notebook upload success alert seen");
@@ -529,7 +531,7 @@ casper.notebook_test(function() {
                                "Data upload success alert seen");
     });
 
-    
+    //find the item in dspace by id
     var id = "";
 
     this.then(function() {
@@ -558,7 +560,6 @@ casper.notebook_test(function() {
 
     this.waitForSelector("#test-item-id");
 
-
     this.then(function() {
         id = this.getElementAttribute("#test-item-id","item-id");
         this.test.assertNotEquals(
@@ -567,6 +568,8 @@ casper.notebook_test(function() {
             "The item exists in DSpace with the ID " + id
         );
     });
+
+    //get the bitstreams of the item
 
     this.then(function() {
         this.evaluate(function(id,un,pw) {
@@ -598,6 +601,8 @@ casper.notebook_test(function() {
     });
 
     this.waitForSelector(".test-bitstream-id");
+
+    //get the content from the bistreams
 
     this.then(function() {
         this.evaluate(function(un,pw) {
@@ -632,6 +637,7 @@ casper.notebook_test(function() {
 
     this.waitForSelector(".test-bitstream-content");
 
+    //test that the bitstream content is correct
     this.then(function() {
         var bitstream_data = this.getElementsAttribute(".test-bitstream-content",
                                                        "bitstream-content");
@@ -644,6 +650,7 @@ casper.notebook_test(function() {
 
     var delete_once_finished = true;
 
+    //delete the item in dspace so we don't clutter up the test server
     if(delete_once_finished) {
         this.then(function() {
             this.evaluate(function(id,un,pw) {
@@ -686,6 +693,8 @@ casper.notebook_test(function() {
         $("#test-delete-status").remove();
     });
 
+    //find the item in dspace by id
+
     this.then(function() {
         this.evaluate(function(un,pw) {
             var id_url = $(".data-upload-success-alert").attr("item-id");
@@ -722,6 +731,8 @@ casper.notebook_test(function() {
         );
     });
 
+    //get the bitstreams of the item
+
     this.then(function() {
         this.evaluate(function(id,un,pw) {
             var nb_utils = require("base/js/utils");
@@ -752,6 +763,8 @@ casper.notebook_test(function() {
     });
 
     this.waitForSelector(".test-bitstream-id");
+
+    //get the content from the bistreams
 
     this.then(function() {
         this.evaluate(function(un,pw) {
@@ -786,6 +799,7 @@ casper.notebook_test(function() {
 
     this.waitForSelector(".test-bitstream-content");
 
+    //test that the bitstream content is correct
     this.then(function() {
         var bitstream_data = this.getElementsAttribute(".test-bitstream-content",
                                                        "bitstream-content");
@@ -835,6 +849,7 @@ casper.notebook_test(function() {
         );
     });
 
+    //delete the item in dspace so we don't clutter up the test server
     if(delete_once_finished) {
         this.then(function() {
             this.evaluate(function(id,un,pw) {
