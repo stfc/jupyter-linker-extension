@@ -8,14 +8,17 @@ casper.notebook_test(function() {
 
     this.viewport(1280, 720);
 
+    var path_parts = fs.absolute(this.test.currentTestFile).split("/");
+    path_parts.pop();
+    path_parts.pop();
+    var test_path = path_parts.join("/") + "/";
+
     var username = "";
     var password = "";
+    //we need username and password to authenticate with dspace
+    //so either read the info via the login_credentials text file
+    //or prompt the user for their username and password
     this.then(function() {
-        var path_parts = fs.absolute(this.test.currentTestFile).split("/");
-        path_parts.pop();
-        path_parts.pop();
-        var test_path = path_parts.join("/") + "/";
-
         if (fs.exists(test_path + "login_credentials.txt")) {
             var text = fs.read(test_path + "login_credentials.txt");
             var lines = text.split(/\r\n|[\r\n]/g);

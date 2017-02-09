@@ -49,6 +49,7 @@ casper.notebook_test(function() {
     this.waitForSelector("#generate_references");
     this.thenClick("#generate_references");
 
+    //test that the generated cell is correct
     this.then(function() {
         var ref_cell_exist = this.evaluate(function() {
             var cells = Jupyter.notebook.get_cells();

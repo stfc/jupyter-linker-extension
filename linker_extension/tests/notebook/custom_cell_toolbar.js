@@ -82,12 +82,12 @@ casper.notebook_test(function() {
     this.thenClick(selector); //click on first cell again
 
     this.thenEvaluate(function() {
-        //matches the first cell"s first input box
+        //matches the first cell's first input box
         $(".cell-urls:eq(0) > .referenceURL_div:nth-child(1) > input").val("URL1");
         //have to manually trigger change event
         $(".cell-urls:eq(0) > .referenceURL_div:nth-child(1) > input").change();
        
-        //matches first cell"s add url button
+        //matches first cell's add url button
         $(".cell-urls:eq(0) .add-cell-url-button").click();
 
         $(".cell-urls:eq(0) > .referenceURL_div:nth-child(2) > input").val("URL2");
@@ -103,17 +103,18 @@ casper.notebook_test(function() {
 
         $(".cell-urls:eq(0) .add-cell-url-button").click();
 
-        //matches the second cell"s first input box
+        //matches the second cell's first input box
         $(".cell-urls:eq(1) > .referenceURL_div:nth-child(1) > input").val("URL5");
         $(".cell-urls:eq(1) > .referenceURL_div:nth-child(1) > input").change();
 
-        //matches second cell"s add url button
+        //matches second cell's add url button
         $(".cell-urls:eq(1) .add-cell-url-button").click();
         $(".cell-urls:eq(1) > .referenceURL_div:nth-child(2) > input").val("URL6");
         $(".cell-urls:eq(1) > .referenceURL_div:nth-child(2) > input").change();
 
     });
 
+    //check the cell metadata using edit metadata
     selector = "li[data-name=\"Edit%20Metadata\"] > a";
     this.thenClick(selector);
 
@@ -239,6 +240,8 @@ casper.notebook_test(function() {
         $(".cell-urls:eq(1) .remove-cell-url-button:eq(1)").click(); //remove URL6
     });
 
+    //check the cell metadata using edit metadata
+
     selector = "li[data-name=\"Edit%20Metadata\"] > a";
     this.thenClick(selector);
 
@@ -344,6 +347,8 @@ casper.notebook_test(function() {
             "Cell 2 input 1 refilled successfully"
         );
     });
+
+    //check text of toggle button before reload
 
     this.waitFor(function() {
         var text = this.evaluate(function() {
@@ -457,6 +462,7 @@ casper.notebook_test(function() {
         );
     });
 
+    //check text of toggle button after reload
 
     this.waitFor(function() {
         var text = this.evaluate(function() {

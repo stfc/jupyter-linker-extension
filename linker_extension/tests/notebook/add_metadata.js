@@ -5,11 +5,6 @@ casper.notebook_test(function() {
 
     this.viewport(1024, 768);
 
-    var path_parts = fs.absolute(this.test.currentTestFile).split("/");
-    path_parts.pop();
-    path_parts.pop();
-    var test_path = path_parts.join("/") + "/";
-
     //Click on menu item
     var selector = "#add_metadata > a";
     this.waitForSelector(selector);
@@ -47,6 +42,7 @@ casper.notebook_test(function() {
 
     });
 
+    //test the clear date and set to current date buttons
     this.thenClick("#clear-date");
     this.thenClick("#next");
     this.then(function() {
@@ -219,6 +215,7 @@ casper.notebook_test(function() {
         });
     });
 
+    //test that the licence file upload is disabled on add metadata
     this.then(function() {
         var disabled = this.evaluate(function() {
             return ($("#licence-file").prop("disabled") && $("#licence-file-radio").prop("disabled"));
