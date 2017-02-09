@@ -164,6 +164,18 @@ define(["base/js/namespace",
                                     var parsed = JSON.parse(item);
                                     return parsed.attributes.displayName;
                                 }));
+                            },
+                            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                                var ldap_error = $("<div/>")
+                                    .addClass("ldap-error")
+                                    .text("Error: " + errorThrown + " when connecting " + 
+                                          "to the LDAP server. You may want to " +
+                                          "check that your ldap server details in" +
+                                          "~/.jupyter/linker_extension_config.ini" + 
+                                          " is correct. If the error persists " +
+                                          "please contact the developers.")
+                                    .css("color","red");
+                                $("label[for=\"author\"]").after(ldap_error);
                             }
                         };
                         if(first_or_last === "last") {

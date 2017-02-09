@@ -8,6 +8,8 @@ from tornado import web, gen, escape
 from notebook.base.handlers import (
     IPythonHandler, json_errors
 )
+from linker_extension.serverextension.BaseHandler import LinkerExtensionConfig
+from urllib.parse import urljoin
 
 
 class FindIDViaMetadata(IPythonHandler):
@@ -18,14 +20,15 @@ class FindIDViaMetadata(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
-        print(self.request)
-        print(self.request.body)
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
         arguments = escape.json_decode(self.request.body)
 
         un = arguments['username']
         pw = arguments['password']
 
-        url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
+        url = urljoin(dspace_url, "/rest/login")
         headers = {'Content-Type': 'application/json',
                    'Accept': 'application/json'}
 
@@ -34,12 +37,11 @@ class FindIDViaMetadata(IPythonHandler):
                                  headers=headers,
                                  json={"email": un, "password": pw},
                                  verify=False)
-        print(login.status_code)
         token = login.text
 
         URL = arguments["ID"]
 
-        url = 'https://epublicns05.esc.rl.ac.uk/rest/items/find-by-metadata-field'
+        url = urljoin(dspace_url, "/rest/items/find-by-metadata-field")
         headers = {'Content-Type': 'application/json',
                    'Accept': 'application/json',
                    'rest-dspace-token': token}
@@ -60,13 +62,16 @@ class DeleteItem(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
         arguments = escape.json_decode(self.request.body)
 
         un = arguments['username']
         pw = arguments['password']
         ID = arguments["ID"]
 
-        login_url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
+        login_url = urljoin(dspace_url, "/rest/login")
         login_headers = {'Content-Type': 'application/json',
                          'Accept': 'application/json'}
 
@@ -79,7 +84,7 @@ class DeleteItem(IPythonHandler):
 
         headers = {'Content-Type': 'application/json',
                    'rest-dspace-token': token}
-        url = 'https://epublicns05.esc.rl.ac.uk/rest/items/' + ID
+        url = urljoin(dspace_url, "/rest/items/" + ID)
 
         delete_item = requests.request('DELETE',
                                        url,
@@ -102,13 +107,16 @@ class GetBitstreams(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
         arguments = escape.json_decode(self.request.body)
 
         un = arguments['username']
         pw = arguments['password']
         ID = arguments["ID"]
 
-        login_url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
+        login_url = urljoin(dspace_url, "/rest/login")
         login_headers = {'Content-Type': 'application/json',
                          'Accept': 'application/json'}
 
@@ -119,7 +127,7 @@ class GetBitstreams(IPythonHandler):
                                  verify=False)
         token = login.text
 
-        url = "https://epublicns05.esc.rl.ac.uk/rest/items/" + ID + "/bitstreams"
+        url = urljoin(dspace_url, "rest/items/" + ID + "/bitstreams")
         headers = {'Content-Type': 'application/json',
                    'rest-dspace-token': token}
 
@@ -141,13 +149,16 @@ class GetBitstreamData(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
         arguments = escape.json_decode(self.request.body)
 
         un = arguments['username']
         pw = arguments['password']
         IDs = arguments["IDs"]
 
-        login_url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
+        login_url = urljoin(dspace_url, "/rest/login")
         login_headers = {'Content-Type': 'application/json',
                          'Accept': 'application/json'}
 
@@ -163,8 +174,7 @@ class GetBitstreamData(IPythonHandler):
                    'rest-dspace-token': token}
 
         for index, ID in enumerate(IDs):
-            url = ("https://epublicns05.esc.rl.ac.uk/rest/bitstreams/" + ID +
-                   "/retrieve")
+            url = urljoin(dspace_url, "/rest/bitstreams/" + ID + "/retrieve")
 
             get_bitstream_data = requests.request('GET',
                                                   url,

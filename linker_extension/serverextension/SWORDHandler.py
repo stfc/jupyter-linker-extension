@@ -15,6 +15,8 @@ from tornado import web, gen, escape
 from notebook.base.handlers import (
     IPythonHandler, json_errors
 )
+from linker_extension.serverextension.BaseHandler import LinkerExtensionConfig
+from urllib.parse import urljoin
 
 
 class SWORDHandler(IPythonHandler):
@@ -28,6 +30,9 @@ class SWORDHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
         # get the arguments from the request body
         arguments = escape.json_decode(self.request.body)
 
@@ -346,8 +351,7 @@ class SWORDHandler(IPythonHandler):
         # set up some variables needed for the request
         notebook_name_no_extension = notebook_name.split(".")[0]
 
-        url = ("https://epublicns05.esc.rl.ac.uk/sword/deposit/" +
-               repository)
+        url = urljoin(dspace_url, "sword/deposit/" + repository)
 
         headers = {"Content-Disposition": ("filename=" +
                                            notebook_name_no_extension +

@@ -186,7 +186,7 @@ define(["base/js/namespace",
                                 $("#fields1").addClass("hide-me");
                                 $("#fields2").removeClass("hide-me");
                             }
-                        }  else if (!$("#fields2").hasClass("hide-me")) {
+                        } else if (!$("#fields2").hasClass("hide-me")) {
                             add_metadata.validate_fields2();
                             if($(".metadata-form-error").length === 0) {
                                 add_metadata.get_values_from_fields().then(function(result) {
@@ -211,8 +211,7 @@ define(["base/js/namespace",
                                 });
 
                             }
-                        }
-                        else if (!$("#final-page").hasClass("hide-me")) {
+                        } else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
                             $(".login-error").remove();
                             var username_field_val = $("#username").val();
@@ -254,10 +253,19 @@ define(["base/js/namespace",
                                     //you dun goofed on ur login
                                     error.text("Login details not valid.");
                                     instructions.after(error);
+                                } else if (reason.xhr.status === 404) { //server wrong
+                                    error.text("LDAP server is invalid. " +
+                                               "Please check the config file; " +
+                                               "~/.jupyter/linker_extension_config.ini," +
+                                               " to check that your server url " +
+                                               "is correct.");
+                                    login_fields.after(error);
                                 } else {
+                                    console.log(reason);
+                                    console.log(reason.text);
                                     //shouldn't really get here?
                                     error.text("Login failed - please try again.");
-                                    instructions.after(error);
+                                    login_fields.after(error);
                                 }
                             });
                         }
@@ -440,10 +448,19 @@ define(["base/js/namespace",
                                     //you dun goofed on ur login
                                     error.text("Login details not valid.");
                                     instructions.after(error);
+                                } else if (reason.xhr.status === 404) { //server wrong
+                                    error.text("LDAP server is invalid. " +
+                                               "Please check the config file; " +
+                                               "~/.jupyter/linker_extension_config.ini," +
+                                               " to check that your server url " +
+                                               "is correct.");
+                                    login_fields.after(error);
                                 } else {
+                                    console.log(reason);
+                                    console.log(reason.text);
                                     //shouldn't really get here?
                                     error.text("Login failed - please try again.");
-                                    instructions.after(error);
+                                    login_fields.after(error);
                                 }
                             });
                         }
@@ -637,10 +654,19 @@ define(["base/js/namespace",
                                     //you dun goofed on ur login
                                     error.text("Login details not valid.");
                                     instructions.after(error);
+                                } else if (reason.xhr.status === 404) { //server wrong
+                                    error.text("LDAP server is invalid. " +
+                                               "Please check the config file; " +
+                                               "~/.jupyter/linker_extension_config.ini," +
+                                               " to check that your server url " +
+                                               "is correct.");
+                                    login_fields.after(error);
                                 } else {
+                                    console.log(reason);
+                                    console.log(reason.text);
                                     //shouldn't really get here?
                                     error.text("Login failed - please try again.");
-                                    instructions.after(error);
+                                    login_fields.after(error);
                                 }
                             });
                         }

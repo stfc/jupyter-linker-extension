@@ -1,7 +1,11 @@
-"""LDAP Tornado handlers for the notebook server that authenticate a user (post) or search the LDAP server (get)."""
+"""
+LDAP Tornado handlers for the notebook server that authenticate a user
+(post) or search the LDAP server (get).
+"""
 
 import json
 import ldap3
+from ldap3.core.exceptions import LDAPExceptionError
 import re
 
 from tornado import web, gen, escape
@@ -10,6 +14,7 @@ from notebook.utils import url_path_join
 from notebook.base.handlers import (
     IPythonHandler, json_errors
 )
+from linker_extension.serverextension.BaseHandler import LinkerExtensionConfig
 
 # ----------------------------------------------------------------------------
 # LDAP handler
@@ -24,40 +29,49 @@ class LDAPHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def get(self):
+        config = LinkerExtensionConfig()
+        server_url = config.ldap_server
+
         firstname = self.get_query_argument('firstname', default="")
         lastname = self.get_query_argument('lastname', default="")
         fedID = self.get_query_argument('fedID', default="")
 
-        server = ldap3.Server('logon10.fed.cclrc.ac.uk', get_info=ldap3.ALL)
+        server = ldap3.Server(server_url, get_info=ldap3.ALL)
 
-        conn = ldap3.Connection(server, auto_bind=True)
+        # test if server url is valid
+        try:
+            conn = ldap3.Connection(server, auto_bind=True)
+        except LDAPExceptionError as e:
+            self.set_status(404)  # we can't find the server so 404 not found
+            self.finish()
+            return None
 
         result = []
 
         if firstname and not lastname and not fedID:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(givenName=*' + firstname + '*)',
-                        attributes=['sn', 'givenName','cn','department','displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName'])
             result = conn.entries
 
         elif lastname and not firstname and not fedID:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(sn=*' + lastname + '*)',
-                        attributes=['sn', 'givenName','cn','department','displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName'])
             result = conn.entries
 
         elif lastname and firstname and not fedID:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(&(sn=*' + lastname + '*)(givenName=*' + firstname + '*))',
-                        attributes=['sn', 'givenName','cn','department','displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName'])
             result = conn.entries
 
         elif fedID and not firstname and not lastname:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(cn=*' + fedID + '*)',
-                        attributes=['sn', 'givenName','cn','department','displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName'])
             result = conn.entries
-        else: #malformed request
+        else:  # malformed request
             self.set_status(400)
             self.finish()
             return
@@ -66,6 +80,7 @@ class LDAPHandler(IPythonHandler):
         for entry in conn.entries:
             json_entries.append(entry.entry_to_json())
 
+        conn.unbind()
         self.set_header('Content-Type', 'application/json')
         self.finish(json.dumps(json_entries))
 
@@ -77,12 +92,15 @@ class LDAPHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
+        config = LinkerExtensionConfig()
+        server_url = config.ldap_server
+
         json_obj = escape.json_decode(self.request.body)
 
         username = json_obj['username']
         password = json_obj['password']
 
-        #stops ldap injection attacks by only allowing safe characters
+        # stops ldap injection attacks by only allowing safe characters
         valid_username_regex = r'^[a-z][.a-z0-9_-]*$'
 
         # bind_dn_template lists all the bind templates that a user could have
@@ -100,23 +118,34 @@ class LDAPHandler(IPythonHandler):
             'cn={username},ou=RCaH,dc=cclrc,dc=ac,dc=uk'
         ]
 
-        #invalid username
+        # invalid username
         if not re.match(valid_username_regex, username):
             self.set_status(400)
             self.finish()
             return None
 
         def getConnection(userdn, username, password):
-            server = ldap3.Server('logon10.fed.cclrc.ac.uk', get_info=ldap3.ALL)
+            server = ldap3.Server(server_url, get_info=ldap3.ALL)
 
             conn = ldap3.Connection(server, user=userdn, password=password)
             return conn
+
+        # see if the server url is valid
+        try:
+            conn = getConnection("", "", "")
+            conn.bind()
+            conn.unbind()
+        except LDAPExceptionError as e:
+            self.set_status(404)  # we can't find the server so 404 not found
+            self.finish()
+            return None
 
         # try to bind the user using one of the templates
         for dn in bind_dn_template:
             userdn = dn.format(username=username)
             conn = getConnection(userdn, username, password)
             isBound = conn.bind()
+            conn.unbind()
             if isBound:
                 break
 

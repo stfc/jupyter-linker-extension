@@ -122,6 +122,13 @@ define([
                                     //you dun goofed on ur login
                                     error.text("Login details not valid.");
                                     login_fields.after(error);
+                                } else if (reason.xhr.status === 404) { //server wrong
+                                    error.text("LDAP server is invalid. " +
+                                               "Please check the config file; " +
+                                               "~/.jupyter/linker_extension_config.ini," +
+                                               " to check that your server url " +
+                                               "is correct.");
+                                    login_fields.after(error);
                                 } else {
                                     console.log(reason);
                                     console.log(reason.text);

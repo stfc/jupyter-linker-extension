@@ -9,6 +9,7 @@ from setuptools.command.sdist import sdist
 from setuptools.command.install import install
 from distutils.cmd import Command
 
+
 # On build, build the javascript files
 class CustomsdistCommand(sdist):
 
@@ -121,12 +122,12 @@ def package_files(directory):
 notebook_tests = package_files('linker_extension/tests/notebook')
 tree_tests = package_files('linker_extension/tests/tree')
 resource_files = package_files('linker_extension/resources')
-jsfiles = ['static/notebook/linker_extension_notebook.js',
-           'static/tree/linker_extension_tree.js',
-           'static/common/linker_extension_common.js']
-cssfiles = ['static/notebook/notebook_style.css',
-            'static/tree/tree_style.css',
-            'static/common/common_style.css']
+jsfiles = ['nbextensions/notebook/linker_extension_notebook.js',
+           'nbextensions/tree/linker_extension_tree.js',
+           'nbextensions/common/linker_extension_common.js']
+cssfiles = ['nbextensions/notebook/notebook_style.css',
+            'nbextensions/tree/tree_style.css',
+            'nbextensions/common/common_style.css']
 
 setup_args = dict(
     name='LinkerExtension',
@@ -139,7 +140,7 @@ setup_args = dict(
     package_data={
         '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
              notebook_tests + tree_tests + resource_files + ['tests/*.txt']
-             + ["static/common/logo.png","static/common/favicon.ico"])
+             + ["nbextensions/common/logo.png","nbextensions/common/favicon.ico"])
     },
     install_requires=[
         'notebook>=4',

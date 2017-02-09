@@ -9,6 +9,8 @@ from tornado import web, gen
 from notebook.base.handlers import (
     IPythonHandler, json_errors
 )
+from urllib.parse import urljoin
+from linker_extension.serverextension.BaseHandler import LinkerExtensionConfig
 
 # -----------------------------------------------------------------------------
 # DSpace handler
@@ -23,7 +25,10 @@ class DSpaceHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def get(self):
-        url = 'https://epublicns05.esc.rl.ac.uk/rest/collections'
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+        url = urljoin(dspace_url, "/rest/collections")
+
         r = requests.request('GET', url, verify=False)
         self.finish(r.text)
 
@@ -32,6 +37,9 @@ class DSpaceHandler(IPythonHandler):
     @json_errors
     @gen.coroutine
     def post(self):
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
         login_file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
                                        "resources",
                                        "admin.txt"),
@@ -39,7 +47,7 @@ class DSpaceHandler(IPythonHandler):
 
         un = login_file.readline().strip()
         pw = login_file.readline().strip()
-        login_url = 'https://epublicns05.esc.rl.ac.uk/rest/login'
+        login_url = urljoin(dspace_url, "/rest/login")
         login_headers = {'Content-Type': 'application/json',
                          'Accept': 'application/json'}
 
@@ -108,8 +116,7 @@ class DSpaceHandler(IPythonHandler):
             metadata.append({"key": "dc.description.sponsorship",
                              "value": sponsors})
 
-        url = ('https://epublicns05.esc.rl.ac.uk/rest/collections/' +
-               repository + '/items')
+        url = urljoin(dspace_url, "/rest/collections/" + repository + "/items")
         headers = {'Content-Type': 'application/json',
                    'Accept': 'application/json',
                    'rest-dspace-token': token}
@@ -129,8 +136,7 @@ class DSpaceHandler(IPythonHandler):
         file = open(full_path, "rb")
         binary_data = file.read()
 
-        url = ('https://epublicns05.esc.rl.ac.uk/rest/items/' +
-               str(new_item_id) + '/bitstreams')
+        url = urljoin(dspace_url, "/rest/items/" + str(new_item_id) + "/bitstreams")
         headers = {'Content-Type': 'multipart/form-data',
                    'Accept': 'application/json',
                    'rest-dspace-token': token}
@@ -143,8 +149,7 @@ class DSpaceHandler(IPythonHandler):
         reponse_notebook = json.loads(add_notebook.text)
         add_notebook_id = reponse_notebook["id"]
 
-        url = ('https://epublicns05.esc.rl.ac.uk/rest/bitstreams/' +
-               str(add_notebook_id))
+        url = urljoin(dspace_url, "/rest/bitstreams/" + str(add_notebook_id))
         headers = {'Content-Type': 'application/json',
                    'Accept': 'application/json',
                    'rest-dspace-token': token}
