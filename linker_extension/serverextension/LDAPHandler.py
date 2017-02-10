@@ -42,9 +42,13 @@ class LDAPHandler(IPythonHandler):
         try:
             conn = ldap3.Connection(server, auto_bind=True)
         except LDAPExceptionError as e:
-            self.set_status(404)  # we can't find the server so 404 not found
-            self.finish()
-            return None
+            raise web.HTTPError(404, "LDAPEXceptionError when trying to " +
+                                     "connect to the LDAP server. " +
+                                     "Please check the LDAP server url in " +
+                                     "the config, located at ~/.jupyter/" +
+                                     "linker_extension_config.ini, "
+                                     "and try again. If the error " +
+                                     "persists, please contact the developers")
 
         result = []
 
@@ -72,9 +76,8 @@ class LDAPHandler(IPythonHandler):
                         attributes=['sn', 'givenName', 'cn', 'displayName'])
             result = conn.entries
         else:  # malformed request
-            self.set_status(400)
-            self.finish()
-            return
+            raise web.HTTPError(400, "Invalid request If the error " +
+                                     "persists, please contact the developers")
 
         json_entries = []
         for entry in conn.entries:
@@ -120,9 +123,8 @@ class LDAPHandler(IPythonHandler):
 
         # invalid username
         if not re.match(valid_username_regex, username):
-            self.set_status(400)
-            self.finish()
-            return None
+            raise web.HTTPError(400, "Invalid username. If the error " +
+                                     "persists, please contact the developers")
 
         def getConnection(userdn, username, password):
             server = ldap3.Server(server_url, get_info=ldap3.ALL)
@@ -136,9 +138,13 @@ class LDAPHandler(IPythonHandler):
             conn.bind()
             conn.unbind()
         except LDAPExceptionError as e:
-            self.set_status(404)  # we can't find the server so 404 not found
-            self.finish()
-            return None
+            raise web.HTTPError(404, "LDAPEXceptionError when trying to " +
+                                     "connect to the LDAP server. " +
+                                     "Please check the LDAP server url in " +
+                                     "the config, located at ~/.jupyter/" +
+                                     "linker_extension_config.ini, "
+                                     "and try again. If the error " +
+                                     "persists, please contact the developers")
 
         # try to bind the user using one of the templates
         for dn in bind_dn_template:
@@ -154,5 +160,6 @@ class LDAPHandler(IPythonHandler):
             self.set_status(200)
             self.finish()
         else:
-            self.set_status(401)
-            self.finish()
+            raise web.HTTPError(401, "Login details not recognised - please try " +
+                                     "again. If the error persists, please " +
+                                     "contact the developers")
