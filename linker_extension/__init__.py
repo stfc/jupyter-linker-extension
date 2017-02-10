@@ -2,12 +2,6 @@
 Main extension file. Specifies the server extension and the the JS extensions
 """
 
-from .linkerextensionapp import LinkerExtensionApp
-
-__all__ = [
-    'LinkerExtensionApp',
-]
-
 
 def _jupyter_server_extension_paths():
     return [
