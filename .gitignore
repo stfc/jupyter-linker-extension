@@ -7,6 +7,6 @@ __pycache__/
 *.egg
 MANIFEST
 .ipynb_checkpoints
-linker_extension/static/notebook/linker_extension_notebook.js
-linker_extension/static/tree/linker_extension_tree.js
-linker_extension/static/common/linker_extension_common.js
+linker_extension/nbextensions/notebook/linker_extension_notebook.js
+linker_extension/nbextensions/tree/linker_extension_tree.js
+linker_extension/nbextensions/common/linker_extension_common.js
