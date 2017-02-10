@@ -74,6 +74,32 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
+    //updates the config filewith user defined options during a notebook session
+    var update_config = function(data) {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/linker_config"]);
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "POST",
+            data: data,
+            contentType: "application/json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    //updates the config filewith user defined options during a notebook session
+    var get_config = function() {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/linker_config"]);
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "GET",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
     //export them so we can use the functions
     module.exports = {
         sword_get_servicedocument: sword_get_servicedocument,
@@ -81,5 +107,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         sword_new_item: sword_new_item,
         upload_data: upload_data,
         ldap_auth: ldap_auth,
+        update_config: update_config,
+        get_config: get_config,
     };
 });

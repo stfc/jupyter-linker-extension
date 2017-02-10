@@ -8,8 +8,6 @@ define([
     "./modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_utils,custom_contents,add_metadata){
 
-    var Promise = require("es6-promise").Promise;
-
     /*  
      *  Actually upload the notebook. Requires a username & password, and if
      *  a licence file was uploaded will be passed a file name and contents.
@@ -58,6 +56,8 @@ define([
      *  This is mostly here for testing purposes and will eventually be removed.
      */ 
     var upload_notebook_dialog = function() {
+        var config_username = "";
+
         var login = $("<table/>").attr("id","login-fields-new-item");
         var login_labels = $("<tr/>");
         var login_fields = $("<tr/>");
@@ -87,6 +87,17 @@ define([
 
         login.append(login_labels).append(login_fields);
 
+        custom_contents.get_config().then(function(response){
+            config_username = response.username;
+            username_field.val(config_username);
+        }).catch(function(reason){
+            var error = $("<div/>")
+                .addClass("config-error")
+                .css("color","red");
+            error.text(reason.message);
+            login.after(error);
+        });
+
         var modal_obj = dialog.modal({
             title: "Upload Notebook",
             body: login,
@@ -114,34 +125,28 @@ define([
                                 data.notebookpath = Jupyter.notebook.notebook_path;
                                 upload_notebook(data);
 
+                                if(username_field_val !== config_username) {
+                                    var config = JSON.stringify({username: username_field_val});
+                                    custom_contents.update_config(config).catch(
+                                        function(reason){
+                                            custom_utils.create_alert(
+                                                "alert-danger",
+                                                "Error! " + reason.message + 
+                                                ", please try again. If it " +
+                                                "continues to fail please " + 
+                                                "contact the developers.");
+                                        }
+                                    );
+                                }
+
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //fail function
                                 var error = $("<div/>")
                                     .addClass("login-error")
                                     .css("color","red");
 
-                                if (reason.xhr.status === 401) { //unauthorised
-                                    //you dun goofed on ur login
-                                    error.text("Login details not recognised.");
-                                    login_fields.after(error);
-                                } else if (reason.xhr.status === 400) { //invalid
-                                    //you dun goofed on ur login
-                                    error.text("Login details not valid.");
-                                    login_fields.after(error);
-                                } else if (reason.xhr.status === 404) { //server wrong
-                                    error.text("LDAP server is invalid. " +
-                                               "Please check the config file; " +
-                                               "~/.jupyter/linker_extension_config.ini," +
-                                               " to check that your server url " +
-                                               "is correct.");
-                                    login_fields.after(error);
-                                } else {
-                                    console.log(reason);
-                                    console.log(reason.text);
-                                    //shouldn't really get here?
-                                    error.text("Login failed - please try again.");
-                                    login_fields.after(error);
-                                }
+                                error.text(reason.message);
+                                login.after(error);
                             });
                         } else {
                             custom_utils.create_alert(

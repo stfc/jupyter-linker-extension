@@ -7,7 +7,7 @@ from notebook.base.handlers import (
     path_regex
 )
 
-from .BaseHandler import LinkerExtensionConfig
+from .ConfigHandler import LinkerExtensionConfig, ConfigHandler
 from .DSpaceHandler import DSpaceHandler
 from .SWORDHandler import SWORDHandler
 from .TestDSpaceHandlers import (
@@ -75,6 +75,10 @@ def load_jupyter_server_extension(nbapp):
     route_pattern_ldap = url_path_join(web_app.settings['base_url'],
                                        '/ldap')
     web_app.add_handlers(host_pattern, [(route_pattern_ldap, LDAPHandler)])
+
+    route_pattern_ldap = url_path_join(web_app.settings['base_url'],
+                                       '/linker_config')
+    web_app.add_handlers(host_pattern, [(route_pattern_ldap, ConfigHandler)])
 
     route_pattern_nbconvert = url_path_join(web_app.settings['base_url'],
                                             r"/nbconvert/%s/%s%s"
