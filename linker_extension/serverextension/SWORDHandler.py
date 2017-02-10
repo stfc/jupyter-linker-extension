@@ -183,11 +183,11 @@ class SWORDHandler(IPythonHandler):
         try:
             tempdir = tempfile.mkdtemp()
             os.chdir(tempdir)
-        except IOError:
+        except OSError:
             # on error remember to delete our temp directory. this happens in
             # all future error handling
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when opening temp dir")
+            raise web.HTTPError(500, "OSError when opening temp dir")
 
         # determine what our licence path is going to be and, if needed, write
         # a licence file. if we were passed a licence file we can create a file
@@ -224,7 +224,7 @@ class SWORDHandler(IPythonHandler):
                 )
         except:
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when sorting out licence file")
+            raise web.HTTPError(500, "OSError when sorting out licence file")
 
         # now we need to specify the files contained in the sword package.
         # realistically, this is just the notebook file itself and the licence.
@@ -308,9 +308,9 @@ class SWORDHandler(IPythonHandler):
         try:
             # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
-        except IOError:
+        except OSError:
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when writing tree to mets.xml")
+            raise web.HTTPError(500, "OSError when writing tree to mets.xml")
 
         # create a zip file for our sword submission. Write mets.xml,
         # our notebook file and the licence file to the zip.
@@ -340,9 +340,9 @@ class SWORDHandler(IPythonHandler):
         try:
             with open("notebook.zip", "rb") as f:
                 binary_zip_file = f.read()
-        except IOError:
+        except OSError:
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when reading zip file "
+            raise web.HTTPError(500, "OSError when reading zip file "
                                      "as binary data")
 
         # get out of our temp directory and back to the notebook directory

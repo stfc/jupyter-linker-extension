@@ -180,11 +180,11 @@ class UploadBundleHandler(IPythonHandler):
         try:
             tempdir = tempfile.mkdtemp()
             os.chdir(tempdir)
-        except IOError:
+        except OSError:
             # on error remember to delete our temp directory. this happens in
             # all future error handling
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when opening temp dir")
+            raise web.HTTPError(500, "OSError when opening temp dir")
 
         # for each TOS file, write to a file. They're names TOD [ID].txt
         try:
@@ -197,9 +197,9 @@ class UploadBundleHandler(IPythonHandler):
 
                 with open("TOS " + str(index), "wb") as f:
                     f.write(base64.decodestring(base64_data.encode("utf-8")))
-        except IOError:
+        except OSError:
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when writing the TOS files")
+            raise web.HTTPError(500, "OSError when writing the TOS files")
 
         # set licence file path to the relevant licence preset
         licence_file_path = os.path.join(
@@ -325,9 +325,9 @@ class UploadBundleHandler(IPythonHandler):
         try:
             # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
-        except IOError:
+        except OSError:
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when writing tree to mets.xml")
+            raise web.HTTPError(500, "OSError when writing tree to mets.xml")
 
         # create a zip file for our sword submission. Write mets.xml,
         # our data files, TOS files and the licence file to the zip.
@@ -357,9 +357,9 @@ class UploadBundleHandler(IPythonHandler):
         try:
             with open("data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
-        except IOError:
+        except OSError:
             shutil.rmtree(tempdir)
-            raise web.HTTPError(500, "IOError when reading zip file"
+            raise web.HTTPError(500, "OSError when reading zip file"
                                      "as binary data")
 
         # get out of our temp directory and back to the notebook directory
