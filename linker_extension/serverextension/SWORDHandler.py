@@ -15,7 +15,7 @@ from tornado import web, gen, escape
 from notebook.base.handlers import (
     IPythonHandler, json_errors
 )
-from linker_extension.serverextension.BaseHandler import LinkerExtensionConfig
+from linker_extension.serverextension.ConfigHandler import LinkerExtensionConfig
 from urllib.parse import urljoin
 
 

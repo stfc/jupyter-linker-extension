@@ -10,7 +10,7 @@ from notebook.base.handlers import (
     IPythonHandler, json_errors
 )
 from urllib.parse import urljoin
-from linker_extension.serverextension.BaseHandler import LinkerExtensionConfig
+from linker_extension.serverextension.ConfigHandler import LinkerExtensionConfig
 
 # -----------------------------------------------------------------------------
 # DSpace handler
