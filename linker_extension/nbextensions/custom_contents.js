@@ -74,7 +74,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
-    //updates the config filewith user defined options during a notebook session
+    //updates the config file with user defined options during a notebook session
     var update_config = function(data) {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
                                                   "/linker_config"]);
@@ -88,7 +88,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
-    //updates the config filewith user defined options during a notebook session
+    //updates the config file with user defined options during a notebook session
     var get_config = function() {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
                                                   "/linker_config"]);
