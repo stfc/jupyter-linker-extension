@@ -103,6 +103,16 @@ class LDAPHandler(IPythonHandler):
         username = json_obj['username']
         password = json_obj['password']
 
+        if username is "" and password is "":
+            raise web.HTTPError(400, "Please enter a username and password")
+
+        if username is "":
+            raise web.HTTPError(400, "Please enter a username")
+
+        if password is "":
+            raise web.HTTPError(400, "Please enter a password")
+
+
         # stops ldap injection attacks by only allowing safe characters
         valid_username_regex = r'^[a-z][.a-z0-9_-]*$'
 
@@ -138,7 +148,7 @@ class LDAPHandler(IPythonHandler):
             conn.bind()
             conn.unbind()
         except LDAPExceptionError as e:
-            raise web.HTTPError(404, "LDAPEXceptionError when trying to " +
+            raise web.HTTPError(404, "LDAPExceptionError when trying to " +
                                      "connect to the LDAP server. " +
                                      "Please check the LDAP server url in " +
                                      "the config, located at ~/.jupyter/" +
@@ -160,6 +170,7 @@ class LDAPHandler(IPythonHandler):
             self.set_status(200)
             self.finish()
         else:
-            raise web.HTTPError(401, "Login details not recognised - please try " +
+            raise web.HTTPError(401, "The username and password combination " +
+                                     "entered is incorrect - please try " +
                                      "again. If the error persists, please " +
                                      "contact the developers")
