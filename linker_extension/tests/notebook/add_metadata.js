@@ -262,8 +262,11 @@ casper.notebook_test(function() {
             "#nb-referencedBy-2": "URL2"
         });
     }); //TODO: add funders and sponsors if we can use them
+
     this.thenClick("#next");
     this.waitWhileVisible(".modal");
+    //wait until save notification pops up
+    this.waitUntilVisible("#notification_notebook");
 
     //Should be within notebook metadata now.     
     this.then(function() {
