@@ -15,6 +15,21 @@ casper.notebook_test(function() {
 
     var username = "";
     var password = "";
+
+    this.evaluate(function() {
+        var nb_utils = require("base/js/utils");
+        var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
+                                                 "/linker_config");
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "POST",
+            contentType: "application/json",
+            data: JSON.stringify({"username": ""}),
+        };
+        var request = nb_utils.promising_ajax(request_url, settings);
+    });
+    
     //we need username and password to authenticate with dspace
     //so either read the info via the login_credentials text file
     //or prompt the user for their username and password
@@ -405,11 +420,79 @@ casper.notebook_test(function() {
         );
     });
 
-    //test login validation
+    //test login errors
 
     this.thenClick("#next");
-    //if it doesn't show, this will fail, so no need to make an assertion
     this.waitUntilVisible(".login-error");
+
+    this.then(function() {
+        var msg = this.evaluate(function() {
+            return $(".login-error").text();
+        });
+        this.test.assertEquals(
+            msg,
+            "Please enter a username and password",
+            "Username and password missing error correct");
+    });
+
+    this.then(function() {
+        this.evaluate(function() {
+            $("#username").val("fakeusername");
+        });
+    });
+
+    this.thenClick("#next");
+    this.waitUntilVisible(".login-error");
+
+    this.then(function() {
+        var msg = this.evaluate(function() {
+            return $(".login-error").text();
+        });
+        this.test.assertEquals(
+            msg,
+            "Please enter a password",
+            "Password missing error correct");
+    });
+
+    this.then(function() {
+        this.evaluate(function() {
+            $("#username").val("");
+            $("#password").val("not a real password");
+        });
+    });
+
+    this.thenClick("#next");
+    this.waitUntilVisible(".login-error");
+
+    this.then(function() {
+        var msg = this.evaluate(function() {
+            return $(".login-error").text();
+        });
+        this.test.assertEquals(
+            msg,
+            "Please enter a username",
+            "Username missing error correct");
+    });
+
+    this.then(function() {
+        this.evaluate(function() {
+            $("#username").val("bad*username");
+            $("#password").val("not a real password");
+        });
+    });
+
+    this.thenClick("#next");
+    this.waitUntilVisible(".login-error");
+
+    this.then(function() {
+        var msg = this.evaluate(function() {
+            return $(".login-error").text();
+        });
+        this.test.assertEquals(
+            msg,
+            "Invalid username. If the error persists, please contact the developers",
+            "Invalid username error correct");
+    });
 
     this.then(function() {
         this.evaluate(function() {
@@ -422,6 +505,19 @@ casper.notebook_test(function() {
     this.waitUntilVisible(".login-error");
 
     this.then(function() {
+        var msg = this.evaluate(function() {
+            return $(".login-error").text();
+        });
+        this.test.assertEquals(
+            msg,
+            "The username and password combination " +
+            "entered is incorrect - please try " +
+            "again. If the error persists, please " +
+            "contact the developers",
+            "Invalid login error correct");
+    });
+
+    this.then(function() {
         this.evaluate(function(un,pw) {
             $("#username").val(un);
             $("#password").val(pw);
@@ -429,6 +525,10 @@ casper.notebook_test(function() {
     });
 
     this.thenClick("#next");
+
+    this.then(function() {
+        this.test.assertNotVisible(".login-error","Login validation correct");
+    });
 
     //check that we see the success alert
     var alert = ".alert";
