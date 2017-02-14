@@ -406,4 +406,30 @@ casper.notebook_test(function() {
             );
         });
     }
+
+    /* 
+     * test that username is refilled from config - this tests both the
+     * saving of username to config after a successful request and refilling
+     * from config when trying to send a new request
+     */
+
+    //Click on menu item
+    selector = "#upload_data > a";
+    this.waitForSelector(selector);
+    this.thenClick(selector);
+
+    this.waitForSelector(".modal");
+    this.wait(1000); //need to wait for modal to be fully visible
+
+    this.then(function() {
+        var config_username = this.evaluate(function() {
+            return $("#username").val();
+        });
+
+        this.test.assertEquals(
+            config_username,
+            username,
+            "Username refilled from config"
+        );
+    });
 });

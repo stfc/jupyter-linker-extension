@@ -30,6 +30,8 @@ define([
 
         var dialog_body = upload_data_info.dialog_body;
 
+        var config_username = "";
+
         var login = $("<table/>").attr("id","login-fields-upload-data");
         var login_labels = $("<tr/>");
         var login_fields = $("<tr/>");
@@ -60,6 +62,17 @@ define([
         login.append(login_labels).append(login_fields);
 
         dialog_body.append(login);
+
+        custom_contents.get_config().then(function(response){
+            config_username = response.username;
+            username_field.val(config_username);
+        }).catch(function(reason){
+            var error = $("<div/>")
+                .addClass("config-error")
+                .css("color","red");
+            error.text(reason.message);
+            login.after(error);
+        });
 
         var modal_obj = dialog.modal({
             title: "Upload Associated Data",
@@ -95,12 +108,28 @@ define([
                                     data_metadata.file_types =  upload_data_info.file_types;
                                     data_metadata.notebookpath = Jupyter.notebook.notebook_path;
                                     var metadata = add_metadata.get_values_from_metadata();
+
                                     Object.keys(metadata).forEach(function(key) {
                                         if(!data_metadata.hasOwnProperty(key)) {
                                             data_metadata[key] = metadata[key];
                                         }
                                     });
+
                                     upload_data(data_metadata);
+
+                                    if(username_field_val !== config_username) {
+                                        var config = JSON.stringify({username: username_field_val});
+                                        custom_contents.update_config(config).catch(
+                                            function(reason){
+                                                custom_utils.create_alert(
+                                                    "alert-danger",
+                                                    "Error! " + reason.message + 
+                                                    ", please try again. If it " +
+                                                    "continues to fail please " + 
+                                                    "contact the developers.");
+                                            }
+                                        );
+                                    }
                                     $(".modal").modal("hide");
                                 }).catch(function() {
                                     var error = $("<div/>")
@@ -114,28 +143,8 @@ define([
                                     .addClass("login-error")
                                     .css("color","red");
 
-                                if (reason.xhr.status === 401) { //unauthorised
-                                    //you dun goofed on ur login
-                                    error.text("Login details not recognised.");
-                                    login_fields.after(error);
-                                } else if (reason.xhr.status === 400) { //unauthorised
-                                    //you dun goofed on ur login
-                                    error.text("Login details not valid.");
-                                    login_fields.after(error);
-                                } else if (reason.xhr.status === 404) { //server wrong
-                                    error.text("LDAP server is invalid. " +
-                                               "Please check the config file; " +
-                                               "~/.jupyter/linker_extension_config.ini," +
-                                               " to check that your server url " +
-                                               "is correct.");
-                                    login_fields.after(error);
-                                } else {
-                                    console.log(reason);
-                                    console.log(reason.text);
-                                    //shouldn't really get here?
-                                    error.text("Login failed - please try again.");
-                                    login_fields.after(error);
-                                }
+                                error.text(reason.message);
+                                login.after(error);
                             });
                         }
                     }
