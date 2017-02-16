@@ -108,6 +108,19 @@ define(["base/js/namespace",
             $("#licence-file-radio").prop("disabled",true);
             $("#licence-file").prop("disabled",true);
             $("#licence-file-button").attr("disabled","disabled");
+
+            //need to move the autocomplete widgets since they were generated
+            //before the modal had fully loaded
+            $(".author-first-name").each(function(index,item) {
+                var full_id = $(item).attr("id");
+                var id = full_id.split("-").pop(); //get the number at the end of the id
+                $("#author-first-name-" + id).autocomplete("option","appendTo","#author-" + id);
+            });
+            $(".author-last-name").each(function(index,item) {
+                var full_id = $(item).attr("id");
+                var id = full_id.split("-").pop(); //get the number at the end of the id
+                $("#author-last-name-" + id).autocomplete("option","appendTo","#author-" + id);
+            });
         });
     };
 
@@ -128,6 +141,9 @@ define(["base/js/namespace",
         if(md.hasOwnProperty("reportmetadata")) { 
             md_set = true;
         }
+
+        var form1 = $("<fieldset/>").attr("title","fields1").attr("id","fields1");
+        var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2");
 
         var title = $("<input/>")
             .attr("name","title")
@@ -153,42 +169,40 @@ define(["base/js/namespace",
                 .attr("id","author-" + first_or_last + "-name-" + id)
                 .autocomplete({
                     source: function( request, response ) {
-                        var url = Jupyter.notebook.contents.base_url + "ldap";
-                        var settings = {
-                            processData : false,
-                            cache: false,
-                            type : "GET",
-                            dataType : "json",
-                            success: function(data) {
-                                response($.map(data, function(item) {
-                                    var parsed = JSON.parse(item);
-                                    return parsed.attributes.displayName;
-                                }));
-                            },
-                            error: function(XMLHttpRequest, textStatus, errorThrown) {
-                                var ldap_error = $("<div/>")
-                                    .addClass("ldap-error")
-                                    .text("Error: " + errorThrown + " when connecting " + 
-                                          "to the LDAP server. You may want to " +
-                                          "check that your ldap server details in" +
-                                          "~/.jupyter/linker_extension_config.ini" + 
-                                          " is correct. If the error persists " +
-                                          "please contact the developers.")
-                                    .css("color","red");
-                                $("label[for=\"author\"]").after(ldap_error);
-                            }
-                        };
+                        var query;
                         if(first_or_last === "last") {
-                            $.ajax(url + "?" +
-                                   $.param({"lastname": request.term,
-                                            "firstname": $("#author-first-name-" + id).val()}
-                                  ),settings);
+                            query = custom_contents.ldap_search(
+                                {
+                                    "lastname": request.term,
+                                    "firstname": $("#author-first-name-" + id).val()
+                                }
+                            );
                         } else if (first_or_last === "first") {
-                            $.ajax(url + "?" +
-                                   $.param({"lastname": $("#author-last-name-" + id).val(),
-                                            "firstname": request.term}
-                                  ),settings);
+                            query = custom_contents.ldap_search(
+                                {
+                                    "firstname": request.term,
+                                    "lastname": $("#author-last-name-" + id).val()
+                                }
+                            );
+                        } else {
+                            //set the promise to a reject to protect against if,
+                            //for some reason, first_or_last is wrong.
+                            query = Promise.reject("Neither a first nor last " +
+                                                   "name field generated this " +
+                                                   "request so invalid"); 
                         }
+                        query.then(function(data) {
+                            response($.map(data, function(item) {
+                                var parsed = JSON.parse(item);
+                                return parsed.attributes.displayName;
+                            }));
+                        }).catch(function(reason) {
+                            var ldap_error = $("<div/>")
+                                .addClass("ldap-error")
+                                .text("Error: " + reason.text)
+                                .css("color","red");
+                            $("label[for=\"author\"]").after(ldap_error);
+                        });
                     },
                     focus: function() {
                       // prevent value inserted on focus
@@ -210,7 +224,9 @@ define(["base/js/namespace",
                         //called when search is completed - hide the spinner
                         $("#author-autocomplete-spinner").hide();
                     },
+                    appendTo: "#author-" + id,
                     minLength:1,
+                    delay: 750,
                 });
 
             if(id === 0) {
@@ -311,6 +327,7 @@ define(["base/js/namespace",
 
         var defaultAuthor = ($("<div/>"))
             .addClass("author")
+            .attr("id","author-0")
             .append(defaultAuthorLastName)
             .append(defaultAuthorFirstName);
 
@@ -336,6 +353,7 @@ define(["base/js/namespace",
 
         var additionalAuthor = ($("<div/>"))
             .addClass("author additional-author")
+            .attr("id","author-1")
             .append(additionalLastName)
             .append(additionalFirstName);
 
@@ -371,6 +389,7 @@ define(["base/js/namespace",
             var lastName = generate_author(authorcount,"last");
 
             newAuthor.addClass("author additional-author")
+                .attr("id","author-" + authorcount)
                 .append(lastName)
                 .append(firstName);
             var previousAuthor = $(".additional-author").last();
@@ -544,15 +563,14 @@ define(["base/js/namespace",
             .append(languageLabel)
             .append(language);
 
-        var form1 = $("<fieldset/>").attr("title","fields1").attr("id","fields1")
-            .append(titleLabel)
-            .append(title)
-            .append(authorLabel)
-            .append(author)
-            .append(abstractLabel)
-            .append(abstract)
-            .append(expand_button_1)
-            .append(extra_nb_metadata_1);
+        form1.append(titleLabel)
+             .append(title)
+             .append(authorLabel)
+             .append(author)
+             .append(abstractLabel)
+             .append(abstract)
+             .append(expand_button_1)
+             .append(extra_nb_metadata_1);
         
         author.append(spinner);
         author.append(accessibility_spinner);
@@ -957,13 +975,13 @@ define(["base/js/namespace",
             //.append(sponsorsLabel)
             //.append(sponsors)
 
-        var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2")
-            .append(licenceLabel)
-            .append(licence)
-            .append(repositoryLabel)
-            .append(repository)
-            .append(expand_button_2)
-            .append(extra_nb_metadata_2);
+        
+        form2.append(licenceLabel)
+             .append(licence)
+             .append(repositoryLabel)
+             .append(repository)
+             .append(expand_button_2)
+             .append(extra_nb_metadata_2);
 
         /*  
          *  Autofilling author and department from Jupyterhub
@@ -977,6 +995,15 @@ define(["base/js/namespace",
                 }
             }
             var fedID = url_arr[i + 1]; //the url part right after user will be the username
+            custom_contents.update_config(JSON.stringify({"username":fedID})).catch(function(reason) {
+                var error = $("<div/>")
+                    .addClass("config-error")
+                    .css("color","red");
+                error.text(reason.message);
+                form1.prepend(error);
+                form2.prepend(error);
+            });
+            /*
             var url = Jupyter.notebook.contents.base_url + "ldap";
             var settings = {
                 processData : false,
@@ -1006,9 +1033,63 @@ define(["base/js/namespace",
                     });
                 }
             };
-            $.ajax(url + "?" + $.param({"fedID": fedID}),settings);
+            $.ajax(url + "?" + $.param({"fedID": fedID}),settings);*/
         }
 
+        /*  
+         *  Autofill from config. we only autofill if there hasn't been metadata
+         *  saved because author and deparment are required fields and so must
+         *  have been filled by the user - since we don't want to overwrite user
+         *  values only do it on md_set = false
+         */
+
+        if(!md_set) {
+            var config_username = "";
+
+            custom_contents.get_config().then(function(response){
+                config_username = response.username;
+
+                //activate ldap_search promise
+                return custom_contents.ldap_search({fedID: config_username});
+            }).catch(function(reason){
+                var error = $("<div/>")
+                    .addClass("config-error")
+                    .css("color","red");
+                error.text(reason.message);
+                form1.prepend(error);
+                form2.prepend(error);
+            }).then(function(response) {
+                //resolve the ldap_search promise
+                var parsed = JSON.parse(response);
+                $("#author-first-name-0").val(parsed.attributes.givenName);
+                $("#author-last-name-0").val(parsed.attributes.sn);
+                var department = parsed.attributes.department[0];
+                department = department.toUpperCase();
+                var deps_to_reps = {
+                    "SC": "SCD",
+                    "RALSP": "RAL Space",
+                    "DIA": "DLS",
+                    "TECH":"Technology",
+                    "CLF":"CLF",
+                    "ISIS":"ISIS",
+                    "PPD":"PPD",
+                    "AST":"ASTeC",
+                    "UKATC":"UKATC"
+                };
+                var repository = deps_to_reps[department];
+                $("#repository").val($("#repository option").filter(function() {
+                    return $(this).text() === repository;
+                }).val());
+            }).catch(function(reason) {
+                var error = $("<div/>")
+                    .addClass("ldap-error")
+                    .css("color","red");
+                error.text(reason.message);
+                form1.prepend(error);
+                form2.prepend(error);
+            });
+        }
+        
 
         /*  
          *  Repopulate the form fields with previously saved data. Most is pretty
