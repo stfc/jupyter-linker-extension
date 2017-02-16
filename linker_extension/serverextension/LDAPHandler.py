@@ -55,28 +55,28 @@ class LDAPHandler(IPythonHandler):
         if firstname and not lastname and not fedID:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(givenName=*' + firstname + '*)',
-                        attributes=['sn', 'givenName', 'cn', 'displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName', 'department'])
             result = conn.entries
 
         elif lastname and not firstname and not fedID:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(sn=*' + lastname + '*)',
-                        attributes=['sn', 'givenName', 'cn', 'displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName', 'department'])
             result = conn.entries
 
         elif lastname and firstname and not fedID:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(&(sn=*' + lastname + '*)(givenName=*' + firstname + '*))',
-                        attributes=['sn', 'givenName', 'cn', 'displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName', 'department'])
             result = conn.entries
 
         elif fedID and not firstname and not lastname:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
                         '(cn=*' + fedID + '*)',
-                        attributes=['sn', 'givenName', 'cn', 'displayName'])
+                        attributes=['sn', 'givenName', 'cn', 'displayName', 'department'])
             result = conn.entries
         else:  # malformed request
-            raise web.HTTPError(400, "Invalid request If the error " +
+            raise web.HTTPError(400, "Invalid request. If the error " +
                                      "persists, please contact the developers")
 
         json_entries = []
