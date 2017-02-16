@@ -74,6 +74,18 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
+    //authenticates a user with the ldap server
+    var ldap_search = function(data) {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/ldap"]);
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "GET",
+        };
+        return utils.promising_ajax(url + "?" + $.param(data), settings);
+    };
+
     //updates the config file with user defined options during a notebook session
     var update_config = function(data) {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
@@ -107,6 +119,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         sword_new_item: sword_new_item,
         upload_data: upload_data,
         ldap_auth: ldap_auth,
+        ldap_search: ldap_search,
         update_config: update_config,
         get_config: get_config,
     };
