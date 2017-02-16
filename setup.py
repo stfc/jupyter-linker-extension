@@ -10,8 +10,8 @@ from setuptools.command.install import install
 from distutils.cmd import Command
 
 
-# On build, build the javascript files
-class CustomsdistCommand(sdist):
+# On build, build the javascript files (production ver)
+class CustomsdistCommandProd(sdist):
 
     def run(self):
         # insert custom code here
@@ -34,7 +34,38 @@ class CustomsdistCommand(sdist):
             if install:
                 subprocess.call(install_cmd, shell=True)
 
-            subprocess.call(['webpack'])
+            subprocess.call("webpack -p")
+        except OSError as e:
+            print("Failed to run `npm install`: %s" % e, file=sys.stderr)
+            print("npm is required to build the notebook.", file=sys.stderr)
+        sdist.run(self)
+
+
+# On build, build the javascript files (dev ver)
+class CustomsdistCommandDev(sdist):
+
+    def run(self):
+        # insert custom code here
+        try:
+            import subprocess
+            webpack = subprocess.call('npm list -g webpack', shell=True)
+            es6_promise = subprocess.call('npm list -g es6-promise', shell=True)
+            install_cmd = "npm install -g"
+            install = False
+
+            if webpack != 0:  # 0 means it is installed
+                install_cmd = install_cmd + " webpack"
+                install = True
+
+            if es6_promise != 0:
+                install_cmd = install_cmd + " es6-promise"
+                install = True
+
+            install_cmd = install_cmd + " --progress=false"
+            if install:
+                subprocess.call(install_cmd, shell=True)
+
+            subprocess.call("webpack")
         except OSError as e:
             print("Failed to run `npm install`: %s" % e, file=sys.stderr)
             print("npm is required to build the notebook.", file=sys.stderr)
@@ -150,7 +181,8 @@ setup_args = dict(
     ],
     cmdclass={
         'install': CustomInstallCommand,
-        'sdist': CustomsdistCommand,
+        'build_prod': CustomsdistCommandProd,
+        'build_dev': CustomsdistCommandDev,
         'installextensions': CustomInstallExtenstionsCommand,
         'uninstallextensions': CustomUninstallExtenstionsCommand,
     }

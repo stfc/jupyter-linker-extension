@@ -19,8 +19,5 @@ module.exports = {
         "base/js/dialog": "base/js/dialog",
         "base/js/events": "base/js/events",
         "notebook/js/celltoolbar": "notebook/js/celltoolbar",
-    },
-    plugins: [
-        new webpack.optimize.UglifyJsPlugin({minimize: true,sourceMap: true})
-    ]
+    }
 };
