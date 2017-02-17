@@ -1,9 +1,51 @@
+var system = require("system");
+var fs = require("fs");
+
 casper.notebook_test(function() {
     "use strict";
 
     casper.test.info("Testing adding report metadata");
 
     this.viewport(1024, 768);
+
+    var path_parts = fs.absolute(this.test.currentTestFile).split("/");
+    path_parts.pop();
+    path_parts.pop();
+    var test_path = path_parts.join("/") + "/";
+
+    var username = "";
+
+    //we need username to test autofill
+    //so either read the info via the login_credentials text file
+    //or prompt the user for their username and password
+    this.then(function() {
+        if (fs.exists(test_path + "login_credentials.txt")) {
+            var text = fs.read(test_path + "login_credentials.txt");
+            var lines = text.split(/\r\n|[\r\n]/g);
+            username = lines[1];
+        }
+        if (username == "[Your Username Here]" || username == "")
+        {
+            system.stdout.writeLine("Username: ");
+            username = system.stdin.readLine();
+        }
+    });
+
+    this.then(function() {
+        this.evaluate(function(username) {
+            var nb_utils = require("base/js/utils");
+            var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
+                                                     "/linker_config");
+            var settings = {
+                processData : false,
+                cache : false,
+                type : "POST",
+                contentType: "application/json",
+                data: JSON.stringify({"username": username}),
+            };
+            var request = nb_utils.promising_ajax(request_url, settings);
+        },{username: username});
+    });
 
     //Click on menu item
     var selector = "#add_metadata > a";
@@ -21,8 +63,6 @@ casper.notebook_test(function() {
     this.then(function() {
         this.test.assertExists("#title-missing-error",
                                "Title missing error exists");
-        this.test.assertExists("#author-missing-error",
-                               "Author missing error exists");
         this.test.assertExists("#nb-abstract-missing-error",
                                "Abstract missing error exists");
         var date = [];
@@ -42,12 +82,32 @@ casper.notebook_test(function() {
 
     });
 
+    this.waitForSelector("#collections_loaded"); //feels dirty...
+
+    this.waitFor(function check() {
+        return this.evaluate(function() {
+            return ($("#author-last-name-0").val() && $("#author-first-name-0").val() && $("#repository").val());
+        });
+    }, function success() { //success
+        this.test.assert(true,"Author and repository successfully filled from username in config");
+    }, function fail() {
+        this.test.assert(false,"Author and repository unsuccessfully filled from username in config");
+    }, 10000);
+
     //test the clear date and set to current date buttons
     this.thenClick("#clear-date");
+    this.then(function() {
+        this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
+            "#author-last-name-0": "",
+            "#author-first-name-0": "",
+        });
+    });
     this.thenClick("#next");
     this.then(function() {
         this.test.assertExists("#year-missing-error",
                                "Year missing error exists");
+        this.test.assertExists("#author-missing-error",
+                               "Author missing error exists");
     });
     this.thenClick("#current-date");
     this.then(function () {
@@ -86,7 +146,6 @@ casper.notebook_test(function() {
             "Upper bound on year limit working"
         );
     });
-
 
     this.then(function() {
         this.fill("form#add_metadata_form > fieldset#fields1", {
@@ -198,19 +257,31 @@ casper.notebook_test(function() {
         this.test.assertVisible("#fields2","Valid data has been accepted");
     });
 
-    this.waitForSelector("#collections_loaded"); //feels dirty...
-
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertExists("#repository-missing-error",
-                               "Repository missing error exists");
         this.test.assertExists("#licence-dropdown-error",
                                "Licence dropdown invalid error exists");
     });
 
+    //keep track of the autofilled repository so that we can refill it
+    //later - this ensures that whoever's user credentials are used for the
+    //test is posting to the repository that they most likely have access to.
+    var repository = "";
+    this.then(function() {
+        repository = this.evaluate(function() {
+            return $("#repository").val();
+        });
+    });
+
+    this.then(function() {
+        repository = this.evaluate(function() {
+            return $("#repository").val();
+        });
+    });
+
     this.then(function(){
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
-            "#repository": "edata/8", //the handle for SCD
+            "#repository": "",
             "#nb-licence-dropdown": "Other"
         });
     });
@@ -225,6 +296,8 @@ casper.notebook_test(function() {
 
     this.thenClick("#next");
     this.then(function() {
+        this.test.assertExists("#repository-missing-error",
+                               "Repository missing error exists");
         this.test.assertExists("#no-licence-error",
                                "No checkbox selected error exists");
     });
@@ -238,7 +311,8 @@ casper.notebook_test(function() {
 
     this.then(function(){
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
-            "#nb-licence-dropdown": "CC0"
+            "#nb-licence-dropdown": "CC0",
+            "#repository": repository,
         });
     });
 

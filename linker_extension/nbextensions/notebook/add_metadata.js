@@ -1513,8 +1513,7 @@ define(["base/js/namespace",
      */ 
     var validate_fields2 = function() {
         $(".metadata-form-error").remove(); //clear errors
-
-        if($("#repository").val() === "") {
+        if(!$("#repository").val()) {
             var repository_error = $("<div/>")
                 .attr("id","repository-missing-error")
                 .addClass("metadata-form-error")
