@@ -86,12 +86,12 @@ casper.notebook_test(function() {
 
     this.waitFor(function check() {
         return this.evaluate(function() {
-            return ($("#author-last-name-0").val() && $("#author-first-name-0").val() && $("#repository").val());
+            return ($("#author-last-name-0").val() && $("#author-first-name-0").val() && $("#department").val());
         });
     }, function success() { //success
-        this.test.assert(true,"Author and repository successfully filled from username in config");
+        this.test.assert(true,"Author and department successfully filled from username in config");
     }, function fail() {
-        this.test.assert(false,"Author and repository unsuccessfully filled from username in config");
+        this.test.assert(false,"Author and department unsuccessfully filled from username in config");
     }, 10000);
 
     //test the clear date and set to current date buttons
@@ -261,27 +261,23 @@ casper.notebook_test(function() {
     this.then(function() {
         this.test.assertExists("#licence-dropdown-error",
                                "Licence dropdown invalid error exists");
+        this.test.assertExists("#repository-missing-error",
+                               "Repository missing error exists");
     });
 
-    //keep track of the autofilled repository so that we can refill it
+    //keep track of the autofilled department so that we can refill it
     //later - this ensures that whoever's user credentials are used for the
-    //test is posting to the repository that they most likely have access to.
-    var repository = "";
+    //test is posting to the department that they most likely have access to.
+    var department = "";
     this.then(function() {
-        repository = this.evaluate(function() {
-            return $("#repository").val();
-        });
-    });
-
-    this.then(function() {
-        repository = this.evaluate(function() {
-            return $("#repository").val();
+        department = this.evaluate(function() {
+            return $("#department").val();
         });
     });
 
     this.then(function(){
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
-            "#repository": "",
+            "#department": "",
             "#nb-licence-dropdown": "Other"
         });
     });
@@ -296,6 +292,8 @@ casper.notebook_test(function() {
 
     this.thenClick("#next");
     this.then(function() {
+        this.test.assertExists("#department-missing-error",
+                               "Department missing error exists");
         this.test.assertExists("#repository-missing-error",
                                "Repository missing error exists");
         this.test.assertExists("#no-licence-error",
@@ -309,9 +307,16 @@ casper.notebook_test(function() {
                                "URL empty error exists");
     });
 
+    //todo: when communities finalised make it so we always test to the default
+    //repository
+
     this.then(function(){
+        var repository = this.evaluate(function() {
+            return $("repository").children().eq(0).val(); //get first option
+        });
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
             "#nb-licence-dropdown": "CC0",
+            "#department": department,
             "#repository": repository,
         });
     });
@@ -358,6 +363,7 @@ casper.notebook_test(function() {
                     publisher: "",
                     citations: "",
                     referencedBy: [],
+                    department: "",
                     repository: "",
                     licence_preset: "",
                 };
@@ -372,6 +378,7 @@ casper.notebook_test(function() {
                     publisher: md.reportmetadata.publisher,
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
+                    department: md.reportmetadata.department,
                     repository: md.reportmetadata.repository,
                     licence_preset: md.reportmetadata.licence_preset,
                 };
@@ -422,6 +429,11 @@ casper.notebook_test(function() {
             metadata.referencedBy,
             ["URL1","URL2"],
             "ReferencedBy had been set correctly"
+        );
+        this.test.assertEquals(
+            metadata.department,
+            "12",
+            "Department has been set correctly"
         );
         this.test.assertEquals(
             metadata.repository,
@@ -513,6 +525,7 @@ casper.notebook_test(function() {
                     publisher: "",
                     citations: "",
                     referencedBy: [],
+                    department: "",
                     repository: "",
                     licence_preset: "",
                 };
@@ -527,6 +540,7 @@ casper.notebook_test(function() {
                     publisher: md.reportmetadata.publisher,
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
+                    department: md.reportmetadata.department,
                     repository: md.reportmetadata.repository,
                     licence_preset: md.reportmetadata.licence_preset,
                 };
@@ -579,6 +593,11 @@ casper.notebook_test(function() {
             "ReferencedBy had been saved correctly"
         );
         this.test.assertEquals(
+            metadata.department,
+            "12",
+            "Department has been saved correctly"
+        );
+        this.test.assertEquals(
             metadata.repository,
             "edata/8",
             "Repository has been saved correctly"
@@ -619,6 +638,7 @@ casper.notebook_test(function() {
                 citation1val: $("#nb-citation-1").val(),
                 reference0val: $("#nb-referencedBy-0").val(),
                 reference1val: $("#nb-referencedBy-1").val(),
+                departmentval: $("#department").val(),
                 repositoryval: $("#repository").val(),
                 licenceval: $("#nb-licence-dropdown").val(),
             };
@@ -702,6 +722,11 @@ casper.notebook_test(function() {
             vals.reference1val,
             "URL2",
             "Reference 1 displays properly in the form once set"
+        );
+        this.test.assertEquals(
+            vals.departmentval,
+            "12",
+            "Department displays properly in the form once set"
         );
         this.test.assertEquals(
             vals.repositoryval,

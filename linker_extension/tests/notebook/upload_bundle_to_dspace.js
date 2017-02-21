@@ -76,6 +76,7 @@ casper.notebook_test(function() {
                 ],
                 "date": "2016-11-14",
                 "title": "BUNDLE TO BE DELETED",
+                "department": "12",
                 "repository": "edata/8",
                 "publisher":"Publisheroni",
                 "citations":[

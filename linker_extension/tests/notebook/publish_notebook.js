@@ -244,20 +244,30 @@ casper.notebook_test(function() {
         this.test.assertVisible("#fields2","Valid data has been accepted");
     });
 
-    this.waitForSelector("#collections_loaded"); //feels dirty...
+    this.waitForSelector("#communities_loaded"); //feels dirty...
 
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertExists("#repository-missing-error",
-                               "Repository missing error exists");
         this.test.assertExists("#licence-dropdown-error",
                                "Licence dropdown invalid error exists");
+        this.test.assertExists("#department-missing-error",
+                               "Department missing error exists");
+        this.test.assertExists("#repository-missing-error",
+                               "Repository missing error exists");
     });
 
     this.then(function(){
         this.fillSelectors("form#publish_form > fieldset#fields2", {
-            "#repository": "edata/8", //the handle for SCD
+            "#department": "12",
             "#nb-licence-dropdown": "Other"
+        });
+    });
+
+    this.waitForSelector("#collections_loaded");
+
+    this.then(function() {
+        this.fill("form#publish_form > fieldset#fields2", {
+            "repository": "edata/8",
         });
     });
 
@@ -336,9 +346,10 @@ casper.notebook_test(function() {
                     publisher: "",
                     citations: "",
                     referencedBy: [],
+                    department: "",
                     repository: "",
                     licence_preset: "",
-                    licence_url: ""
+                    licence_url: "",
                 };
             } else {
                 return {
@@ -351,9 +362,10 @@ casper.notebook_test(function() {
                     publisher: md.reportmetadata.publisher,
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
+                    department: md.reportmetadata.department,
                     repository: md.reportmetadata.repository,
                     licence_preset: md.reportmetadata.licence_preset,
-                    licence_url: md.reportmetadata.licence_url
+                    licence_url: md.reportmetadata.licence_url,
                 };
             }
             
@@ -404,6 +416,11 @@ casper.notebook_test(function() {
             "ReferencedBy had been set correctly"
         );
         this.test.assertEquals(
+            metadata.department,
+            "12",
+            "Department has been set correctly"
+        );
+        this.test.assertEquals(
             metadata.repository,
             "edata/8",
             "Repository has been set correctly"
@@ -411,7 +428,7 @@ casper.notebook_test(function() {
         this.test.assertEquals(
             metadata.licence_preset,
             "Other",
-            "licence_preset has been set correctly"
+            "Licence has been set correctly"
         );
         this.test.assertEquals(
             metadata.licence_url,
