@@ -10,7 +10,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //get the DSpace collections. Used by add_metadata to populate the repository
     //dropdown
-    var get_collections = function() {
+    var get_collections = function(community) {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
                                                   "/dspace"]);
         var settings = {
@@ -18,7 +18,11 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
             processData : false,
             cache : false,
         };
-        return utils.promising_ajax(url, settings);
+        if(community) {
+            return utils.promising_ajax(url + "?" + $.param(community), settings);
+        } else {
+            return utils.promising_ajax(url, settings);
+        }
     };
 
     //used to upload a notebook

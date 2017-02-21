@@ -223,6 +223,7 @@ define(["base/js/namespace",
                     response: function() {
                         //called when search is completed - hide the spinner
                         $("#author-autocomplete-spinner").hide();
+                        $("accessibility-spinner").hide();
                     },
                     appendTo: "#author-" + id,
                     minLength:1,
@@ -250,7 +251,7 @@ define(["base/js/namespace",
                          *  departments in LDAP have different names to DSpace
                          *  repositories, so convert them using a "map"
                          */ 
-                        var deps_to_reps = {
+                        var deps_to_coms = {
                             "SC": "SCD",
                             "RALSP": "RAL Space",
                             "DIA": "DLS",
@@ -261,10 +262,12 @@ define(["base/js/namespace",
                             "AST":"ASTeC",
                             "UKATC":"UKATC"
                         };
-                        var repository = deps_to_reps[department];
-                        $("#repository").val($("#repository option").filter(function() {
-                            return $(this).text() === repository;
-                        }).val());
+                        var community = deps_to_coms[department];
+                        communities_promise.then(function() {
+                            $("#department").val($("#department option").filter(function() {
+                                return $(this).text() === community;
+                            }).val());
+                        });
 
                         return false;
                     }
@@ -301,14 +304,12 @@ define(["base/js/namespace",
         var spinner = $("<i/>")
             .addClass("fa fa-spinner fa-spin fa-fw fa-lg")
             .attr("id","author-autocomplete-spinner")
-            .attr("aria-label","Searching for authors...")
-            .hide();
+            .attr("aria-label","Searching for authors...");
 
         var accessibility_spinner = $("<span/>")
             .addClass("sr-only")
             .attr("id","accessibility-spinner")
-            .text("Searching for authors...")
-            .hide();
+            .text("Searching for authors...");
 
         var authorLabel = $("<label/>")
             .attr("for","author")
@@ -335,6 +336,8 @@ define(["base/js/namespace",
             .append(authorsLastNameLabel)
             .append(authorsFirstNameLabel)
             .append(defaultAuthor);
+
+        defaultAuthorLastName.after(spinner).after(accessibility_spinner);
 
         var additionalAuthorsLabel = $("<label/>")
             .attr("for","additional-authors")
@@ -571,9 +574,6 @@ define(["base/js/namespace",
              .append(abstract)
              .append(expand_button_1)
              .append(extra_nb_metadata_1);
-        
-        author.append(spinner);
-        author.append(accessibility_spinner);
 
         var publisherLabel = $("<label/>")
             .attr("for","publisher")
@@ -908,10 +908,21 @@ define(["base/js/namespace",
                .append(licenceURLLabel)
                .append(licenceURL);
 
+        var departmentLabel = $("<label/>")
+            .attr("for","department")
+            .addClass("required")
+            .text("Department: ");
+
+        var department = $("<select/>")
+            .attr("name","department")
+            .attr("required","required")
+            .attr("id","department")
+            .append($("<option/>").attr("value","").text(""));
+
         var repositoryLabel = $("<label/>")
             .attr("for","repository")
             .addClass("required")
-            .text("Department: ");
+            .text("Repository: ");
 
         var repository = $("<select/>")
             .attr("name","repository")
@@ -919,69 +930,11 @@ define(["base/js/namespace",
             .attr("id","repository")
             .append($("<option/>").attr("value","").text(""));
 
-        //use a promise to do the repository fetch request
-        var collections_promise = custom_contents.get_collections();
-
-        /*  
-         *  fill the repository/department selector once we've fetched from
-         *  DSpace, or add an error to the repository field.
-         */ 
-        collections_promise.then(function(response) {
-            var collections = JSON.parse(response);
-            collections.forEach(function(collection) {
-                var collection_option = $("<option/>");
-                collection_option.attr("value",collection.handle);
-                collection_option.text(collection.name);
-                repository.append(collection_option);
-            });
-            $(document.body).append($("<div/>").attr("id","collections_loaded"));
-        },function(reason) { //error
-            console.log("Error fetching collections from eData: ");
-            console.log(reason.xhr);
-            var repository_fetch_error = $("<div/>")
-                .addClass("repository-fetch-error")
-                .text("Couldn't download the repository information from eData." +
-                      " Please reload and if the error persists contact the developers.")
-                .css("color","red");
-            $("label[for=\"repository\"]").after(repository_fetch_error);
-        });
 
 
-        /*  
-         *  Users get scared by lots fo scary form fields, so hide the
-         *  non-essential ones in collapsible divs and have a button to expand
-         *  and collapse them.
-         */ 
-        var expand_button_2 = $("<button/>")
-            .addClass("btn btn-info btn-sm btn-collapse")
-            .attr("type","button")
-            .attr("data-toggle","collapse")
-            .attr("data-target","#extra_nb_metadata_2")
-            .attr("aria-expanded","false")
-            .attr("aria-controls","extra_nb_metadata_2")
-            .text("Additional Metadata (click to expand)");
-
-        var extra_nb_metadata_2 = $("<div/>")
-            .addClass("collapse")
-            .attr("id","extra_nb_metadata_2")
-            .append(publisherLabel)
-            .append(publisher)
-            .append(citationsLabel)
-            .append(citations)
-            .append(referencedByLabel)
-            .append(referencedBy_divs)
-            .append(fundersLabel)
-            .append(funders);
-            //.append(sponsorsLabel)
-            //.append(sponsors)
-
-        
-        form2.append(licenceLabel)
-             .append(licence)
-             .append(repositoryLabel)
-             .append(repository)
-             .append(expand_button_2)
-             .append(extra_nb_metadata_2);
+        //peform autofill before community/collection fetch since the repository
+        //field is only on the second page and so is a lower priority speed
+        //wise. also it makes a lot of requests...
 
         /*  
          *  Autofilling author and department from Jupyterhub
@@ -1028,7 +981,7 @@ define(["base/js/namespace",
                         "UKATC":"UKATC"
                     };
                     var repository = deps_to_reps[department];
-                    collections_promise.then(function() {
+                    communities_promise.then(function() {
                         $("#repository").val(repository);
                     });
                 }
@@ -1063,9 +1016,11 @@ define(["base/js/namespace",
                 var parsed = JSON.parse(response);
                 $("#author-first-name-0").val(parsed.attributes.givenName);
                 $("#author-last-name-0").val(parsed.attributes.sn);
+                spinner.hide();
+                accessibility_spinner.hide();
                 var department = parsed.attributes.department[0];
                 department = department.toUpperCase();
-                var deps_to_reps = {
+                var deps_to_coms = {
                     "SC": "SCD",
                     "RALSP": "RAL Space",
                     "DIA": "DLS",
@@ -1076,10 +1031,13 @@ define(["base/js/namespace",
                     "AST":"ASTeC",
                     "UKATC":"UKATC"
                 };
-                var repository = deps_to_reps[department];
-                $("#repository").val($("#repository option").filter(function() {
-                    return $(this).text() === repository;
-                }).val());
+                var community = deps_to_coms[department];
+                communities_promise.then(function() {
+                    $("#department").val($("#department option").filter(function() {
+                        return $(this).text() === community;
+                    }).val());
+                    populate_repositories($("#department").val());
+                });                
             }).catch(function(reason) {
                 var error = $("<div/>")
                     .addClass("ldap-error")
@@ -1089,6 +1047,107 @@ define(["base/js/namespace",
                 form2.prepend(error);
             });
         }
+
+        //use a promise to do the repository fetch request
+        var communities_promise = custom_contents.get_collections();
+
+        /*  
+         *  fill the repository/department selector once we've fetched from
+         *  DSpace, or add an error to the repository field.
+         */ 
+        communities_promise.then(function(response) {
+            var communities = response.children;
+            communities.forEach(function(community) {
+                var communities_option = $("<option/>");
+                communities_option.attr("value",community.id);
+                communities_option.text(community.name);
+                department.append(communities_option);
+            });
+            $(document.body).append($("<div/>").attr("id","communities_loaded"));
+        }).catch(function(reason) { //error
+            var department_fetch_error = $("<div/>")
+                .addClass("department-fetch-error")
+                .text("Couldn't download the department information from eData." +
+                      " Please reload and if the error persists contact the developers.")
+                .css("color","red");
+            $("label[for=\"department\"]").after(department_fetch_error);
+        });
+
+        var populate_repositories = function(community) {
+            return custom_contents.get_collections({"community": community}).then(function(response) {
+                $("#communities_loaded").remove();
+                var collections = response.children;
+                collections.forEach(function(collection) {
+                    var collection_option = $("<option/>");
+                    collection_option.attr("value",collection.handle);
+                    collection_option.text(collection.name);
+                    repository.append(collection_option);
+                });
+                $(document.body).append($("<div/>").attr("id","collections_loaded"));
+            }).catch(function(reason) {
+                var repository_fetch_error = $("<div/>")
+                    .addClass("repository-fetch-error")
+                    .text("Couldn't download the collection information from eData." +
+                          " Please reload and if the error persists contact the developers.")
+                    .css("color","red");
+                $("label[for=\"repository\"]").after(repository_fetch_error);
+            });
+        };
+
+        department.change(function() {
+            $("#repository").prop("disabled",false);
+            repository.children().remove();
+            //only search if we're not on the default blank option as otherwise
+            //this displays the communities
+            if($(this).val()) {
+                populate_repositories($(this).val()).then(function() {
+                    if($("#repository").children().length === 0) {
+                        $("#repository").prop("disabled",true);
+                    }
+                });
+            } else {
+                $("#repository").prop("disabled",true);
+            }
+        });   
+
+
+        /*  
+         *  Users get scared by lots fo scary form fields, so hide the
+         *  non-essential ones in collapsible divs and have a button to expand
+         *  and collapse them.
+         */ 
+        var expand_button_2 = $("<button/>")
+            .addClass("btn btn-info btn-sm btn-collapse")
+            .attr("type","button")
+            .attr("data-toggle","collapse")
+            .attr("data-target","#extra_nb_metadata_2")
+            .attr("aria-expanded","false")
+            .attr("aria-controls","extra_nb_metadata_2")
+            .text("Additional Metadata (click to expand)");
+
+        var extra_nb_metadata_2 = $("<div/>")
+            .addClass("collapse")
+            .attr("id","extra_nb_metadata_2")
+            .append(publisherLabel)
+            .append(publisher)
+            .append(citationsLabel)
+            .append(citations)
+            .append(referencedByLabel)
+            .append(referencedBy_divs)
+            .append(fundersLabel)
+            .append(funders);
+            //.append(sponsorsLabel)
+            //.append(sponsors)
+
+        
+        form2.append(licenceLabel)
+             .append(licence)
+             .append(departmentLabel)
+             .append(department)
+             .append(repositoryLabel)
+             .append(repository)
+             .append(expand_button_2)
+             .append(extra_nb_metadata_2);
         
 
         /*  
@@ -1099,6 +1158,9 @@ define(["base/js/namespace",
          *  buttons is here :(
          */ 
         if(md_set) {
+            spinner.hide();
+            accessibility_spinner.hide();
+
             title.val(md.reportmetadata.title);
             var authorsarr = md.reportmetadata.authors;
             var deleteAuthor;
@@ -1259,7 +1321,10 @@ define(["base/js/namespace",
             funders.val(md.reportmetadata.funders);
             sponsors.val(md.reportmetadata.sponsors);
 
-            collections_promise.then(function() {
+            communities_promise.then(function() {
+                department.val(md.reportmetadata.department);
+                return populate_repositories(md.reportmetadata.department);
+            }).then(function() {
                 repository.val(md.reportmetadata.repository);
             });
 
@@ -1443,7 +1508,7 @@ define(["base/js/namespace",
         return_data.licence_preset = $("#nb-licence-dropdown").val();
         return_data.licence_url = $("#licence-url").val();
         
-
+        return_data.department = $("#department").val();
         return_data.repository = $("#repository").val();
 
         /* 
@@ -1497,6 +1562,7 @@ define(["base/js/namespace",
             "referencedBy":Jupyter.notebook.metadata.reportmetadata.referencedBy,
             "funders":Jupyter.notebook.metadata.reportmetadata.funders,
             "sponsors":Jupyter.notebook.metadata.reportmetadata.sponsors,
+            "department":Jupyter.notebook.metadata.reportmetadata.department,
             "repository":Jupyter.notebook.metadata.reportmetadata.repository,
             "licence_preset":Jupyter.notebook.metadata.reportmetadata.licence_preset,
             "licence_url": Jupyter.notebook.metadata.reportmetadata.licence_url
@@ -1513,11 +1579,19 @@ define(["base/js/namespace",
      */ 
     var validate_fields2 = function() {
         $(".metadata-form-error").remove(); //clear errors
+        if(!$("#department").val()) {
+            var department_error = $("<div/>")
+                .attr("id","department-missing-error")
+                .addClass("metadata-form-error")
+                .text("Please select a department to deposit to");
+
+            $("label[for=\"department\"]").after(department_error);
+        }
         if(!$("#repository").val()) {
             var repository_error = $("<div/>")
                 .attr("id","repository-missing-error")
                 .addClass("metadata-form-error")
-                .text("Please select a repository to deposit to");
+                .text("Please select a collection to deposit to");
 
             $("label[for=\"repository\"]").after(repository_error);
         }

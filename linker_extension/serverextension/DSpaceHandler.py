@@ -27,10 +27,21 @@ class DSpaceHandler(IPythonHandler):
     def get(self):
         config = LinkerExtensionConfig()
         dspace_url = config.dspace_url
-        url = urljoin(dspace_url, "/rest/collections")
+
+        community = self.get_query_argument("community", default="")
+        if community:
+            url = urljoin(dspace_url, "/rest/communities/" + community + "/collections")
+        else:
+            url = urljoin(dspace_url, "/rest/communities")
 
         r = requests.request('GET', url, verify=False)
-        self.finish(r.text)
+
+        # create a new object so that we can specify the parent community.
+        children = json.loads(r.text)
+        return_obj = {}
+        return_obj["children"] = children
+        return_obj["parent"] = community
+        self.finish(return_obj)
 
     # unused? here as an example of how to do submit via dspace api
     @web.authenticated
