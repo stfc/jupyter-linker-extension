@@ -132,6 +132,8 @@ span#login_widget {
 
 #fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input {
   margin-bottom: 8px;
+  outline: none;
+  box-shadow: none; 
   width: 600px;
 }
 
@@ -168,6 +170,8 @@ span#login_widget {
 .author{
   display: inline-block;
   margin-right: 10px;
+  outline: none;
+  box-shadow: none; 
 }
 
 .btn-add, .btn-remove {
@@ -188,6 +192,8 @@ textarea {
   width: 600px;
   max-width: 600px;
   height: 80px;
+  outline: none;
+  box-shadow: none; 
 }
 
 .hide-me {
@@ -254,6 +260,8 @@ input.fileinput {
   height: 31px;
   margin-right: 10px;
   width: 100px;
+  outline: none;
+  box-shadow: none; 
 }
 
 #username, #password {
