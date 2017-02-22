@@ -36,7 +36,7 @@ class LDAPHandler(IPythonHandler):
         lastname = self.get_query_argument('lastname', default="")
         fedID = self.get_query_argument('fedID', default="")
 
-        server = ldap3.Server(server_url, get_info=ldap3.ALL)
+        server = ldap3.Server(server_url, port=636, use_ssl=True)
 
         # test if server url is valid
         try:
@@ -137,7 +137,7 @@ class LDAPHandler(IPythonHandler):
                                      "persists, please contact the developers")
 
         def getConnection(userdn, username, password):
-            server = ldap3.Server(server_url, get_info=ldap3.ALL)
+            server = ldap3.Server(server_url, port=636, use_ssl=True)
 
             conn = ldap3.Connection(server, user=userdn, password=password)
             return conn
