@@ -74,7 +74,7 @@ class LinkerExtensionConfig():
             config.set("LINKER EXTENSION CONFIG", "Username", "")
             self.username = ""
             config.set("LINKER EXTENSION CONFIG", "LDAP Server Help", "specify the ldap server to authenticate against")
-            config.set("LINKER EXTENSION CONFIG", "LDAP Server", "ralfed.cclrc.ac.uk")
+            config.set("LINKER EXTENSION CONFIG", "LDAP Server", "logon10.fed.cclrc.ac.uk")
             self.ldap_server = "logon10.fed.cclrc.ac.uk"
             config.set("LINKER EXTENSION CONFIG", "DSpace URL Help", "specify the dspace url to upload to")
             config.set("LINKER EXTENSION CONFIG", "DSpace URL", "https://epublicns05.esc.rl.ac.uk/")
