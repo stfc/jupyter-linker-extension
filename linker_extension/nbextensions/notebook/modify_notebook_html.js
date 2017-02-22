@@ -9,7 +9,7 @@ define([
     var load = function() {
         var Promise = require("es6-promise").Promise;
         //make publish menu
-        var dropdown = $("<li/>").addClass("dropdown publish-dropdown")
+        /*var dropdown = $("<li/>").addClass("dropdown publish-dropdown")
             .append($("<a/>")
                     .attr("href","#")
                     .addClass("dropdown-toggle")
@@ -21,13 +21,25 @@ define([
             // re-select it upon selection.
             var i = Jupyter.notebook.get_selected_index();
             Jupyter.notebook.select(i, false);
-        });
+        });*/
+
+        var dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","publish-menu");
+        var button  = $("<button/>")
+                      .addClass("btn btn-default dropdown-toggle")
+                      .attr("type","button")
+                      .attr("data-toggle","dropdown")
+                      .attr("title", "Publish")
+                      .text("Publish ");
+        var caret = $("<span>").addClass("caret");
+        button.append(caret);
+
         var dropdown_ul = $("<ul/>")
             .attr("id","publish_menu")
             .addClass("dropdown-menu");
 
-        dropdown.append(dropdown_ul);
-        $("ul.navbar-nav").append(dropdown);
+        dropdown.append(button).append(dropdown_ul);
+
+        $(Jupyter.toolbar.selector).append(dropdown);
         
         dropdown_ul.append($("<li/>").attr("id","add_metadata")
                                      .append($("<a/>")
