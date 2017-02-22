@@ -917,7 +917,7 @@ define(["base/js/namespace",
             .attr("name","department")
             .attr("required","required")
             .attr("id","department")
-            .append($("<option/>").attr("value","").text(""));
+            .append($("<option/>").attr("value","").text("None Selected"));
 
         var repositoryLabel = $("<label/>")
             .attr("for","repository")
@@ -928,7 +928,7 @@ define(["base/js/namespace",
             .attr("name","repository")
             .attr("required","required")
             .attr("id","repository")
-            .append($("<option/>").attr("value","").text(""));
+            .append($("<option/>").attr("value","").text("None Selected"));
 
 
 
@@ -1097,6 +1097,7 @@ define(["base/js/namespace",
         department.change(function() {
             $("#repository").prop("disabled",false);
             repository.children().remove();
+            repository.append($("<option/>").attr("value","").text("None Selected"));
             //only search if we're not on the default blank option as otherwise
             //this displays the communities
             if($(this).val()) {
