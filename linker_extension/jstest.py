@@ -31,7 +31,7 @@ except ImportError:
 from jupyter_core.paths import jupyter_runtime_dir
 from ipython_genutils.py3compat import bytes_to_str, which
 from notebook._sysinfo import get_sys_info
-from ipython_genutils.tempdir import TemporaryDirectory
+from tempfile import TemporaryDirectory
 
 try:
     # Python >= 3.3
