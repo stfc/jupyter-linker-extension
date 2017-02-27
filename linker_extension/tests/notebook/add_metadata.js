@@ -8,6 +8,11 @@ casper.notebook_test(function() {
 
     this.viewport(1024, 768);
 
+    var nbname = "add_metadata_test.ipynb";
+    this.thenEvaluate(function(nbname) {
+        Jupyter.notebook.set_notebook_name(nbname);
+    }, {nbname:nbname});
+
     var path_parts = fs.absolute(this.test.currentTestFile).split("/");
     path_parts.pop();
     path_parts.pop();
@@ -79,7 +84,6 @@ casper.notebook_test(function() {
             return date_arr;
         });
         this.test.assertEquals(date,test_date,"Current date has been inserted right");
-
     });
 
     this.waitForSelector("#collections_loaded"); //feels dirty...
@@ -311,15 +315,23 @@ casper.notebook_test(function() {
     //repository
 
     this.then(function(){
-        var repository = this.evaluate(function() {
-            return $("repository").children().eq(0).val(); //get first option
-        });
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
             "#nb-licence-dropdown": "CC0",
             "#department": department,
+        });
+    });
+
+    this.waitForSelector("#collections_loaded");
+
+    this.then(function(){
+        var repository = this.evaluate(function() {
+            return $("#repository").children().eq(1).val(); //get first non-empty option
+        });
+        this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
             "#repository": repository,
         });
     });
+
 
     this.waitForSelector("#add-nb-referencedBy-button");
     //again, create two extra boxes but we'll only use one
@@ -344,8 +356,27 @@ casper.notebook_test(function() {
 
     this.thenClick("#next");
     this.waitWhileVisible(".modal");
-    //wait until save notification pops up
-    this.waitUntilVisible("#notification_notebook");
+
+    //hook into the notebook saved event
+    this.evaluate(function() {
+        require(['base/js/events'], function (events) {
+            events.on("notebook_saved.Notebook",function() {
+                Jupyter._save_success = true;
+            });
+        });
+    });
+
+    //wait for the notebook saved event to be triggered
+    //and thus set _save_success to true
+    this.waitFor(function() {
+        return this.evaluate(function() {
+            return Jupyter._save_success;
+        });
+    }, function success() {
+        this.test.assert(true,"Notebook saved event triggered");
+    }, function fail() {
+        this.test.assert(false,"Notebook saved event not triggered");
+    });
 
     //Should be within notebook metadata now.     
     this.then(function() {
@@ -466,7 +497,6 @@ casper.notebook_test(function() {
 
     //go back into notebook - we're doing this to check
     //that the notebook was saved automatically
-    var nbname = "Untitled.ipynb";
     this.then(function(){
         var notebook_url = this.evaluate(function(nbname){
             var escaped_name = encodeURIComponent(nbname);
@@ -504,7 +534,7 @@ casper.notebook_test(function() {
         });
         this.test.assertEquals(
             name,
-            "Untitled.ipynb",
+            nbname,
             "Re-opened notebook successfully"
         );
     });
