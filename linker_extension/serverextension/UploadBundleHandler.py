@@ -5,8 +5,7 @@ import requests
 import os
 import xml.etree.ElementTree as ET
 import zipfile
-import tempfile
-import shutil
+from tempfile import TemporaryDirectory
 import base64
 
 from tornado import web, gen, escape
@@ -178,12 +177,9 @@ class UploadBundleHandler(IPythonHandler):
         # make a temporary directory for us to play around in since we're
         # creating files
         try:
-            tempdir = tempfile.mkdtemp()
+            tempdir = TemporaryDirectory()
             os.chdir(tempdir)
         except OSError:
-            # on error remember to delete our temp directory. this happens in
-            # all future error handling
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "OSError when opening temp dir")
 
         # for each TOS file, write to a file. They're names TOD [ID].txt
@@ -198,7 +194,6 @@ class UploadBundleHandler(IPythonHandler):
                 with open("TOS " + str(index), "wb") as f:
                     f.write(base64.decodestring(base64_data.encode("utf-8")))
         except OSError:
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "OSError when writing the TOS files")
 
         # set licence file path to the relevant licence preset
@@ -262,7 +257,6 @@ class UploadBundleHandler(IPythonHandler):
             files.append(licence_xml)
 
         except IndexError:
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IndexError when getting"
                                      "'files' root node")
 
@@ -318,7 +312,6 @@ class UploadBundleHandler(IPythonHandler):
             struct.append(licence_struct_xml)
 
         except IndexError:
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "IndexError when getting "
                                      "'struct' root node")
 
@@ -326,7 +319,6 @@ class UploadBundleHandler(IPythonHandler):
             # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except OSError:
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "OSError when writing tree to mets.xml")
 
         # create a zip file for our sword submission. Write mets.xml,
@@ -346,7 +338,6 @@ class UploadBundleHandler(IPythonHandler):
             created_zip_file.write(licence_file_path, "LICENSE.txt")
 
         except:  # dunno what exceptions we might encounter here
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
             # close the zip either way
@@ -358,7 +349,6 @@ class UploadBundleHandler(IPythonHandler):
             with open("data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
         except OSError:
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "OSError when reading zip file"
                                      "as binary data")
 
@@ -387,7 +377,6 @@ class UploadBundleHandler(IPythonHandler):
                                  auth=(un, pw))
             # TODO: add authenication to the request
         except requests.exceptions.RequestException:
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Requests made an error")
 
         print(r.status_code)  # TODO: remove later
@@ -407,7 +396,6 @@ class UploadBundleHandler(IPythonHandler):
                                      auth=(un, pw))
 
             except requests.exceptions.RequestException:
-                shutil.rmtree(tempdir)
                 raise web.HTTPError(500, "Requests made an error")
 
             print(r.status_code)
@@ -415,19 +403,16 @@ class UploadBundleHandler(IPythonHandler):
 
         # Delete temp directory and pass along the status code and request text
         if(r.status_code == 201):  # created
-            shutil.rmtree(tempdir)
             self.clear()
             self.set_status(201)
             print(r.text)
             self.finish(r.text)
         elif (r.status_code == 202):  # accepted (waiting for approval)
-            shutil.rmtree(tempdir)
             self.clear()
             self.set_status(202)
             print(r.text)
             self.finish(r.text)
         else:  # Still failed even after the retries
-            shutil.rmtree(tempdir)
             raise web.HTTPError(500, "Requests failed after 5 retries")
 
 
