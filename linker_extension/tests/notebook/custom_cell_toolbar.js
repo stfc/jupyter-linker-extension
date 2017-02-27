@@ -370,7 +370,7 @@ casper.notebook_test(function() {
         );
     });
 
-    var nbname = "Untitled.ipynb";
+    var nbname = "custom_cell_toolbar.ipynb";
     this.thenEvaluate(function (nbname) {
         require(["base/js/events"], function (events) {
             Jupyter.notebook.set_notebook_name(nbname);
@@ -419,7 +419,6 @@ casper.notebook_test(function() {
 
     //go back into notebook - we're doing this to check
     //that the notebook was saved automatically
-    var nbname = "Untitled.ipynb";
     this.then(function(){
         var notebook_url = this.evaluate(function(nbname){
             var escaped_name = encodeURIComponent(nbname);
@@ -457,7 +456,7 @@ casper.notebook_test(function() {
         });
         this.test.assertEquals(
             name,
-            "Untitled.ipynb",
+            nbname,
             "Re-opened notebook successfully"
         );
     });

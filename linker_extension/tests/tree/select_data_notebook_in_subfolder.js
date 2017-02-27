@@ -5,7 +5,7 @@ casper.notebook_test_at_location(function() {
 
     this.viewport(1024, 768);
 
-    var nbname = "Untitled.ipynb";
+    var nbname = "";
     this.then( function () {
         var name = this.evaluate(function() {
             return Jupyter.notebook.notebook_name;

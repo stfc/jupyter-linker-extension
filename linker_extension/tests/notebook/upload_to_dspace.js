@@ -59,7 +59,7 @@ casper.notebook_test(function() {
         });
     });
 
-    var nbname = "Untitled.ipynb";
+    var nbname = "upload_to_dspace.ipynb";
 
     this.thenEvaluate(function (nbname) {
         require(["base/js/events"], function (events) {
