@@ -8,13 +8,30 @@ casper.get_notebook_server = function () {
     return casper.cli.get("url") || ('http://127.0.0.1:' + port);
 };
 
+// casper.thenClick doesn't seem to trigger click events properly
+casper.thenClick = function (selector) {
+    return this.thenEvaluate(function(selector) {
+        var el = $(selector);
+        if (el.length === 0) {
+            console.error("Missing element!", selector)
+        }
+        el.click();
+    }, {selector: selector})
+}
+
 casper.open_new_notebook = function () {
     // Create and open a new notebook.
+    var that = this;
     var baseUrl = this.get_notebook_server();
     this.start(baseUrl);
     this.waitFor(this.page_loaded);
-    this.waitForSelector('#kernel-python2 a, #kernel-python3 a');
-    this.thenClick('#kernel-python2 a, #kernel-python3 a');
+    this.waitForSelector("#kernel-python3 a", function success() {
+        that.thenClick("#kernel-python3 a");
+    }, function fail() {
+        that.waitForSelector("#kernel-python2 a", function success() {
+            that.thenClick("#kernel-python2 a");
+        });
+    });
     
     this.waitForPopup('');
 
@@ -833,16 +850,23 @@ casper.wait_for_dashboard = function () {
  *      casper.start() multiple times causes casper to skip subsequent then()
  */
 casper.open_dashboard = function (use_start) {
+    if (use_start === undefined) {
+        use_start = false;
+    }
     // Start casper by opening the dashboard page.
     var baseUrl = this.get_notebook_server();
-    this.start(baseUrl);
+    if (use_start) {
+        this.start(baseUrl);
+    } else {
+        this.open(baseUrl);
+    }
     this.waitFor(this.page_loaded);
     this.wait_for_dashboard();
 };
 
 casper.dashboard_test = function (test) {
     // Open the dashboard page and run a test.
-    this.open_dashboard();
+    this.open_dashboard(true); 
     this.then(test);
 
     this.then(function () {
