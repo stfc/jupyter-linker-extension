@@ -9,6 +9,16 @@ def _jupyter_server_extension_paths():
     ]
 
 
+def _jupyter_bundlerextension_paths():
+    """Example "hello world" bundler extension"""
+    return [{
+        'name': 'linker_bundler',                    # unique bundler name
+        'label': '(Linker) PDF with references via LaTeX (.pdf)',                   # human-redable menu item label
+        'module_name': 'linker_extension.bundlerextension',   # module containing bundle()
+        'group': 'download'                           # group under 'deploy' or 'download' menu
+    }]
+
+
 # define the sections and paths of our js extensions
 def _jupyter_nbextension_paths():
     return [
