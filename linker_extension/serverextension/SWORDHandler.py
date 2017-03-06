@@ -180,7 +180,8 @@ class SWORDHandler(IPythonHandler):
         # make a temporary directory for us to play around in since we're
         # creating files
         try:
-            tempdir = TemporaryDirectory()
+            t = TemporaryDirectory()
+            tempdir = t.name
             os.chdir(tempdir)
         except OSError:
             raise web.HTTPError(500, "OSError when opening temp dir")
