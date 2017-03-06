@@ -249,23 +249,38 @@ define(["base/js/namespace",
                         
                         /*  
                          *  departments in LDAP have different names to DSpace
-                         *  repositories, so convert them using a "map"
+                         *  repositories, so to convert we try and match the start
+                         *  of the string (no whitespace) with the dropdown value
+                         *  if this doesn't work - we cut down on the letters
+                         *  mostly based on when we had DIA in there as DLS.
+                         *  TODO: can we just match on start of string?
                          */ 
-                        var deps_to_coms = {
-                            "SC": "SCD",
-                            "RALSP": "RAL Space",
-                            "DIA": "DLS",
-                            "TECH":"Technology",
-                            "CLF":"CLF",
-                            "ISIS":"ISIS",
-                            "PPD":"PPD",
-                            "AST":"ASTeC",
-                            "UKATC":"UKATC"
-                        };
-                        var community = deps_to_coms[department];
                         communities_promise.then(function() {
+                            var deps = []; 
+                            $("#department option").each(function () {
+                                deps.push($(this).text());
+                            });
+                            department = department.replace(/\s/g,""); //remove whitespace
+                            var len = department.length;
+                            while(len > 0) {
+                                var break_loop = false;
+                                var short_dep = department.slice(0,len);
+                                for(var i = 0; i < deps.length; i++) {
+                                    var re = new RegExp("^" + short_dep,"i");
+                                    if(deps[i].search(re) !== -1) {
+                                        department = deps[i];
+                                        break_loop = true;
+                                        break;
+                                    } 
+                                }
+                                if (break_loop) {
+                                    break;
+                                } else {
+                                    len -= 1;
+                                }
+                            }
                             $("#department").val($("#department option").filter(function() {
-                                return $(this).text() === community;
+                                return $(this).text() === department;
                             }).val());
                             populate_repositories($("#department").val());
                         });
@@ -1021,21 +1036,41 @@ define(["base/js/namespace",
                 accessibility_spinner.hide();
                 var department = parsed.attributes.department[0];
                 department = department.toUpperCase();
-                var deps_to_coms = {
-                    "SC": "SCD",
-                    "RALSP": "RAL Space",
-                    "DIA": "DLS",
-                    "TECH":"Technology",
-                    "CLF":"CLF",
-                    "ISIS":"ISIS",
-                    "PPD":"PPD",
-                    "AST":"ASTeC",
-                    "UKATC":"UKATC"
-                };
-                var community = deps_to_coms[department];
+
+                /*  
+                 *  departments in LDAP have different names to DSpace
+                 *  repositories, so to convert we try and match the start
+                 *  of the string (no whitespace) with the dropdown value
+                 *  if this doesn't work - we cut down on the letters
+                 *  mostly based on when we had DIA in there as DLS.
+                 *  TODO: can we just match on start of string?
+                 */ 
                 communities_promise.then(function() {
+                    var deps = []; 
+                    $("#department option").each(function () {
+                        deps.push($(this).text());
+                    });
+                    department = department.replace(/\s/g,""); //remove whitespace
+                    var len = department.length;
+                    while(len > 0) {
+                        var break_loop = false;
+                        var short_dep = department.slice(0,len);
+                        for(var i = 0; i < deps.length; i++) {
+                            var re = new RegExp("^" + short_dep,"i");
+                            if(deps[i].search(re) !== -1) {
+                                department = deps[i];
+                                break_loop = true;
+                                break;
+                            } 
+                        }
+                        if (break_loop) {
+                            break;
+                        } else {
+                            len -= 1;
+                        }
+                    }
                     $("#department").val($("#department option").filter(function() {
-                        return $(this).text() === community;
+                        return $(this).text() === department;
                     }).val());
                     populate_repositories($("#department").val());
                 });                
