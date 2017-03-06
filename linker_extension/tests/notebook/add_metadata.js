@@ -113,6 +113,53 @@ casper.notebook_test(function() {
         this.test.assertExists("#author-missing-error",
                                "Author missing error exists");
     });
+
+    //test autocomplete
+    this.then(function() {
+        this.sendKeys("#author-first-name-0","Lou");
+        this.sendKeys("#author-last-name-0","Davie",{keepFocus: true});
+    });
+    this.waitUntilVisible(".ui-autocomplete");
+
+    this.thenClick(".ui-autocomplete li.ui-menu-item:first-child a");
+
+    this.then(function() {
+        var first = this.evaluate(function() {
+            return $("#author-first-name-0").val();
+        });
+        var last = this.evaluate(function() {
+            return $("#author-last-name-0").val();
+        });
+        this.test.assertEquals(first,"Louise","Autocomplete first name using last name field working");
+        this.test.assertEquals(last,"Davies","Autocomplete last name using last name field working");
+    });
+
+    this.then(function() {
+        this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
+            "#author-last-name-0": "",
+            "#author-first-name-0": "",
+        });
+    });
+
+    this.then(function() {
+        this.sendKeys("#author-last-name-0","Davie");
+        this.sendKeys("#author-first-name-0","Lou",{keepFocus: true});
+    });
+    this.waitUntilVisible(".ui-autocomplete");
+
+    this.thenClick(".ui-autocomplete li.ui-menu-item:first-child a");
+
+    this.then(function() {
+        var first = this.evaluate(function() {
+            return $("#author-first-name-0").val();
+        });
+        var last = this.evaluate(function() {
+            return $("#author-last-name-0").val();
+        });
+        this.test.assertEquals(first,"Louise","Autocomplete first name using first name field working");
+        this.test.assertEquals(last,"Davies","Autocomplete last name using first name field working");
+    });
+
     this.thenClick("#current-date");
     this.then(function () {
         var date = [];
@@ -137,12 +184,12 @@ casper.notebook_test(function() {
     this.then(function() {
         this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
             "#title": "My Title",
-            "#author-last-name-0": "Davies",
-            "#author-first-name-0": "Louise",
             "#nb-abstract": "My abstract",
             "#year": "4000",
         });
     });
+    
+
     this.thenClick("#next");
     this.then(function() {
         this.test.assertExists(
