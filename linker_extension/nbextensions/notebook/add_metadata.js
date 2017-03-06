@@ -241,10 +241,10 @@ define(["base/js/namespace",
 
                         if(first_or_last === "last") {
                             $(this).val(sn);
-                            $(this).parent().children().eq(1).val(fn);
+                            $(this).siblings(".author-first-name").val(fn);
                         } else {
                             $(this).val(fn);
-                            $(this).parent().children().eq(0).val(sn);
+                            $(this).siblings(".author-last-name").val(sn);
                         }
                         
                         /*  
@@ -267,6 +267,7 @@ define(["base/js/namespace",
                             $("#department").val($("#department option").filter(function() {
                                 return $(this).text() === community;
                             }).val());
+                            populate_repositories($("#department").val());
                         });
 
                         return false;
@@ -281,10 +282,10 @@ define(["base/js/namespace",
                         var fn = person_split[1];
                         if(first_or_last === "last") {
                             $(this).val(sn);
-                            $(this).parent().children().eq(1).val(fn);
+                            $(this).siblings(".author-first-name").val(fn);
                         } else {
                             $(this).val(fn);
-                            $(this).parent().children().eq(0).val(sn);
+                            $(this).siblings(".author-last-name").val(sn);
                         }
                         return false;
                     }
