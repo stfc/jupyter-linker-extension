@@ -169,30 +169,5 @@ define([
         });
     };
 
-    /*  
-     *  The below adds an action to the notebook and assigns the add_metadata
-     *  function to the New Sword Item function, and handles exporting the
-     *  functions we use in other modules/files.
-     *  TODO: remove the new sword item button. Have this module exist to
-     *  support Publish Notebook
-     */ 
-    
-    var action = {
-        help: "Upload notebook",
-        help_index: "e",
-        icon: "fa-upload",
-        handler : upload_notebook,
-    };
-
-    var prefix = "linker_extension";
-    var action_name = "upload-notebook-data";
-
-    var load = function () {
-        Jupyter.actions.register(action,action_name,prefix);
-        $("#sword_new_item").click(function () {
-            upload_notebook_dialog();
-        });
-    };
-
-    module.exports = {load: load, upload_notebook: upload_notebook};
+    module.exports = {upload_notebook: upload_notebook};
 });

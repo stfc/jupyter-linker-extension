@@ -599,27 +599,7 @@ define([
                 file_types: file_types};
     };
 
-    //setting up actions and btutons and exports
-
-    var action = {
-        help: "Upload associated data",
-        help_index: "b",
-        icon: "fa-upload",
-        handler : upload_data_dialog,
-    };
-
-    var prefix = "linker_extension";
-    var action_name = "upload-associated-data";
-
-    var load = function () {
-        Jupyter.actions.register(action,action_name,prefix);
-        $("#upload_data").click(function () {
-            upload_data_dialog();
-        });
-    };
-
     module.exports = {
-        load: load, 
         upload_data_form: upload_data_form,
         upload_data: upload_data,
         validate_upload_data: validate_upload_data,

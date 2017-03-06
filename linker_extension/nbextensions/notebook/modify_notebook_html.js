@@ -46,11 +46,6 @@ define([
                                              .attr("href","#")
                                              .text("Add Metadata")))
 
-                   .append($("<li/>").attr("id","sword_new_item")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("New SWORD item")))
-
                    .append($("<li/>").addClass("divider"))
 
                    .append($("<li/>").attr("id","select_data")
@@ -62,11 +57,6 @@ define([
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("View associated data")))
-
-                   .append($("<li/>").attr("id","upload_data")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Upload associated data")))
  
                    .append($("<li/>").addClass("divider"))
 
