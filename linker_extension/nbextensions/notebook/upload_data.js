@@ -16,8 +16,6 @@ define([
     view_data,
     add_metadata) {
 
-    var Promise = require("es6-promise").Promise;
-
     //TODO: do required fields stuff
 
     /*  

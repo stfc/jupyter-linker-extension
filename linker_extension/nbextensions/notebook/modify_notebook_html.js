@@ -7,7 +7,6 @@ define([
      *  Makes all the hacky changes to the notebook page.
      */ 
     var load = function() {
-        var Promise = require("es6-promise").Promise;
         //make publish menu
         /*var dropdown = $("<li/>").addClass("dropdown publish-dropdown")
             .append($("<a/>")
