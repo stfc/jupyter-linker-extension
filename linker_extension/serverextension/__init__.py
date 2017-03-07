@@ -23,7 +23,7 @@ from .CustomNbconvertHandler import CustomNbconvertHandler
 
 _format_regex = r"(?P<format>\w+)"
 
-_template_regex = r"(?P<template_file>\w+)"
+_template_regex = r"/(?P<template_file>\w+)"
 
 
 def load_jupyter_server_extension(nbapp):
@@ -81,7 +81,7 @@ def load_jupyter_server_extension(nbapp):
     web_app.add_handlers(host_pattern, [(route_pattern_ldap, ConfigHandler)])
 
     route_pattern_nbconvert = url_path_join(web_app.settings['base_url'],
-                                            r"/nbconvert/%s/%s%s"
+                                            r"/customnbconvert/%s%s%s"
                                             % (_format_regex,
                                                _template_regex,
                                                path_regex))

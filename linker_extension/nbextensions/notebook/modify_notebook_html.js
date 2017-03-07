@@ -129,7 +129,7 @@ define([
             var notebook_path = utils.encode_uri_components(Jupyter.notebook.notebook_path);
             var url = utils.url_path_join(
                 Jupyter.notebook.base_url,
-                "nbconvert",
+                "customnbconvert",
                 "pdf",
                 "custom_article",
                 notebook_path
