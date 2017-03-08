@@ -1249,7 +1249,7 @@ define(["base/js/namespace",
             citationarr.forEach(function(item,index) {
                 if(index === 0) {
                     citation.val(item);
-                    previousCitation = citation;
+                    previousCitation = citation_div;
                 } else {
                     var newCitation = addCitation(previousCitation);
                     newCitation[0].val(item);
@@ -1262,7 +1262,7 @@ define(["base/js/namespace",
             referencedByarr.forEach(function(item,index) {
                 if(index === 0) {
                     referencedBy.val(item);
-                    previousReferencedBy = referencedBy;
+                    previousReferencedBy = referencedBy_div;
                 } else {
                     var newReferencedBy = addReferencedBy(previousReferencedBy);
                     newReferencedBy[0].val(item);
