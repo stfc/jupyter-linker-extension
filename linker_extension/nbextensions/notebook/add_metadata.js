@@ -136,6 +136,11 @@ define(["base/js/namespace",
         var md = Jupyter.notebook.metadata;
         var md_set = false;
 
+        //event delegation for remove buttons - remove the parent container
+        $("body").on("click",".btn-remove", function() {
+            $(this).parent().remove();
+        });
+
         //check to see if metadata has previously been set and whether we need
         //to repopulate the form fields
         if(md.hasOwnProperty("reportmetadata")) { 
@@ -381,7 +386,9 @@ define(["base/js/namespace",
             .attr("id","add-author-button")
             .attr("type","button")
             .attr("aria-label","Add author")
-            .bind("click",addAuthor);
+            .click(function() {
+                addAuthor();
+            });
 
         addAuthorButton.append($("<i>")
                        .addClass("fa fa-plus")
@@ -397,11 +404,16 @@ define(["base/js/namespace",
         /*  
          *  Creates a new additional author, adds the add button to the new
          *  author and adds a remove button to the previous author.
+         *
+         *  previousAuthor is an optional argument - used by md_set logic as
+         *  when the dialog is being created we can't use jquery selectors since
+         *  the items aren't in the DOM yet.
+         *
          *  Returns an array containing the  last name field, the first name field 
          *  and the container that contains the entire author (both fields and the button)
          */ 
         var authorcount = 2;
-        function addAuthor() {
+        function addAuthor(previousAuthor) {
             var newAuthor = ($("<div/>"));
             
             var firstName = generate_author(authorcount,"first");
@@ -411,7 +423,9 @@ define(["base/js/namespace",
                 .attr("id","author-" + authorcount)
                 .append(lastName)
                 .append(firstName);
-            var previousAuthor = $(".additional-author").last();
+            if(previousAuthor === undefined) {
+                previousAuthor = $(".additional-author").last();
+            } 
 
             //detach from the previously last author input
             //so we can put it back on the new one
@@ -419,11 +433,7 @@ define(["base/js/namespace",
             var deleteAuthor = $("<button/>")
                 .addClass("btn btn-xs btn-default btn-remove remove-author-button")
                 .attr("type","button")
-                .attr("aria-label","Remove author")
-                    .click(function() {
-                        previousAuthor.remove();
-                        $(this).remove();
-                    }); //add a remove button to the previously last author
+                .attr("aria-label","Remove author");
 
             deleteAuthor.append($("<i>")
                         .addClass("fa fa-trash")
@@ -616,8 +626,10 @@ define(["base/js/namespace",
             .addClass("btn btn-xs btn-default btn-add add-citation-button")
             .attr("id","add-nb-citation-button")
             .attr("type","button")
-            .bind("click",addCitation)
-            .attr("aria-label","Add citation");
+            .attr("aria-label","Add citation")
+            .click(function() {
+                addCitation();
+            });
 
         addCitationButton.append($("<i>").addClass("fa fa-plus"));
 
@@ -643,8 +655,10 @@ define(["base/js/namespace",
             .addClass("btn btn-xs btn-default btn-add add-ReferencedBy-button")
             .attr("id","add-nb-referencedBy-button")
             .attr("type","button")
-            .bind("click",addReferencedBy)
-            .attr("aria-label","Add referenced by URL");
+            .attr("aria-label","Add referenced by URL")
+            .click(function() {
+                addReferencedBy();
+            });
 
         addReferencedByButton.append($("<i>").addClass("fa fa-plus"));
 
@@ -660,14 +674,16 @@ define(["base/js/namespace",
          *  Similar to addAuthor, but for referencedBy. Again, returns the
          *  actual new field and the container that hold both it and the button 
          */ 
-        function addReferencedBy() {
+        function addReferencedBy(previousReferencedBy) {
             var newReferencedBy_div = ($("<div/>")).addClass("nb-referencedBy_div");
             var newReferencedBy = $("<input/>")
                 .attr("class","nb-referencedBy referencedBy")
                 .attr("type","text")
                 .attr("id","nb-referencedBy-" + referencedByCount);
 
-            var previousReferencedBy = $(".nb-referencedBy_div").last();
+            if(previousReferencedBy === undefined) {
+                previousReferencedBy = $(".nb-referencedBy_div").last();
+            }
 
             //detach from the previously last url input
             //so we can put it back on the new one
@@ -675,11 +691,7 @@ define(["base/js/namespace",
             var deleteReferencedBy = $("<button/>")
                 .addClass("btn btn-xs btn-default btn-remove remove-nb-referencedBy-button remove-referencedBy-button")
                 .attr("type","button")
-                .attr("aria-label","Remove referenced By URL")
-                    .click(function() {
-                        previousReferencedBy.remove();
-                        $(this).remove();
-                    }); //add a remove button to the previously last url
+                .attr("aria-label","Remove referenced By URL");
 
             deleteReferencedBy.append($("<i>")
                              .addClass("fa fa-trash")
@@ -696,14 +708,16 @@ define(["base/js/namespace",
          *  Returns the actual new field and the container that hold both it 
          *  and the button.
          */ 
-        function addCitation() {
+        function addCitation(previousCitation) {
             var newCitation_div = ($("<div/>")).addClass("nb-citation_div");
             var newCitation = $("<input/>")
                 .attr("class","nb-citation citation")
                 .attr("type","text")
                 .attr("id","nb-citation-" + citationCount);
 
-            var previousCitation = $(".nb-citation_div").last();
+            if(previousCitation === undefined) {
+                previousCitation = $(".nb-citation_div").last();
+            }
 
             //detach from the previously last url input
             //so we can put it back on the new one
@@ -711,11 +725,7 @@ define(["base/js/namespace",
             var deleteCitation = $("<button/>")
                 .addClass("btn btn-xs btn-default btn-remove remove-nb-citation-button remove-citation-button")
                 .attr("type","button")
-                .attr("aria-label","Remove citation")
-                    .click(function() {
-                        previousCitation.remove();
-                        $(this).remove();
-                    }); //add a remove button to the previously last url
+                .attr("aria-label","Remove citation");
 
             deleteCitation.append($("<i>")
                              .addClass("fa fa-trash")
@@ -1185,14 +1195,10 @@ define(["base/js/namespace",
              .append(repository)
              .append(expand_button_2)
              .append(extra_nb_metadata_2);
-        
 
         /*  
          *  Repopulate the form fields with previously saved data. Most is pretty
          *  simple, but need to add extra authors, citation and referencedBy fields.
-         *  Sadly, it can't add remove buttons on it's own because it requires the
-         *  fields already existing or something, so ugly code to add some remove
-         *  buttons is here :(
          */ 
         if(md_set) {
             spinner.hide();
@@ -1200,7 +1206,7 @@ define(["base/js/namespace",
 
             title.val(md.reportmetadata.title);
             var authorsarr = md.reportmetadata.authors;
-            var deleteAuthor;
+            var previousAuthor;
             authorsarr.forEach(function(item,index) {
                 if(index === 0) {
                     defaultAuthorLastName.val(item[0]);
@@ -1208,41 +1214,12 @@ define(["base/js/namespace",
                 } else if(index === 1) {
                     additionalLastName.val(item[0]);
                     additionalFirstName.val(item[1]);
-                    if(authorsarr.length > 2) {
-                        deleteAuthor = $("<button/>")
-                            .addClass("btn btn-xs btn-default btn-remove remove-author-button")
-                            .attr("type","button")
-                            .attr("aria-label","Remove author")
-                                .click(function() {
-                                    additionalAuthor.remove();
-                                    $(this).remove();
-                                }); //add a remove button to the previously last author
-
-                        deleteAuthor.append($("<i>")
-                                            .addClass("fa fa-trash")
-                                            .attr("aria-hidden","true"));
-                        additionalAuthor.append(deleteAuthor);
-                    }
+                    previousAuthor = additionalAuthor;
                 } else {
-                    var auth = addAuthor();
+                    var auth = addAuthor(previousAuthor);
                     auth[0].val(item[0]);
                     auth[1].val(item[1]);
-                    if(index !== authorsarr.length - 1) { //if not last element
-                        deleteAuthor = $("<button/>")
-                            .addClass("btn btn-xs btn-default btn-remove remove-author-button")
-                            .attr("type","button")
-                            .attr("aria-label","Remove author")
-                                .click(function() {
-                                    auth[2].remove();
-                                    $(this).remove();
-                                }); //add a remove button to the previously last author
-
-                        deleteAuthor.append($("<i>")
-                                            .addClass("fa fa-trash")
-                                            .attr("aria-hidden","true"));
-                        auth[2].append(deleteAuthor);
-                    }
-                    //TODO: make this nicer? make it so I don"t have to manually add the delete?
+                    previousAuthor = auth[2];
                 }
             });
 
@@ -1268,90 +1245,28 @@ define(["base/js/namespace",
             publisher.val(md.reportmetadata.publisher);
 
             var citationarr = md.reportmetadata.citations;
-            var deleteCitation;
+            var previousCitation;
             citationarr.forEach(function(item,index) {
                 if(index === 0) {
                     citation.val(item);
-                    if(citationarr.length > 1) {
-                        //need to manually add delete button since addAuthor
-                        //relies on finding the previous author using selectors,
-                        //which don"t work here since the modal
-                        //is still being created I think...
-                        deleteCitation = $("<button/>") 
-                            .addClass("btn btn-xs btn-default btn-remove remove-citation-button remove-nb-citation-button") 
-                            .attr("type","button")
-                            .attr("aria-label","Remove citation")
-                                .click(function() {
-                                    citation.remove();
-                                    $(this).remove();
-                                });
-                        deleteCitation.append($("<i>")
-                                         .addClass("fa fa-trash")
-                                         .attr("aria-hidden","true"));
-                        citation_div.append(deleteCitation);
-                    }
-                    
+                    previousCitation = citation;
                 } else {
-                    var newCitation = addCitation();
+                    var newCitation = addCitation(previousCitation);
                     newCitation[0].val(item);
-                    if(index !== citationarr.length - 1) { //if not last element
-                        deleteCitation = $("<button/>")
-                            .addClass("btn btn-xs btn-default btn-remove remove-citation-button remove-nb-citation-button")
-                            .attr("type","button")
-                            .attr("aria-label","Remove citaiton")
-                                .click(function() {
-                                    newCitation[1].remove();
-                                    $(this).remove();
-                                });
-                        deleteCitation.append($("<i>")
-                                         .addClass("fa fa-trash")
-                                         .attr("aria-hidden","true"));
-                        newCitation[1].append(deleteCitation);
-                    }
+                    previousCitation = newCitation[1];
                 }
             });
 
             var referencedByarr = md.reportmetadata.referencedBy;
-            var deleteReferencedBy;
+            var previousReferencedBy;
             referencedByarr.forEach(function(item,index) {
                 if(index === 0) {
                     referencedBy.val(item);
-                    if(referencedByarr.length > 1) {
-                        //need to manually add delete button since addAuthor
-                        //relies on finding the previous author using selectors,
-                        //which don"t work here since the modal
-                        //is still being created I think...
-                        deleteReferencedBy = $("<button/>") 
-                            .addClass("btn btn-xs btn-default btn-remove remove-referencedBy-button remove-nb-referencedBy-button") 
-                            .attr("type","button")
-                            .attr("aria-label","Remove referenced By URL")
-                                .click(function() {
-                                    referencedBy.remove();
-                                    $(this).remove();
-                                });
-                        deleteReferencedBy.append($("<i>")
-                                         .addClass("fa fa-trash")
-                                         .attr("aria-hidden","true"));
-                        referencedBy_div.append(deleteReferencedBy);
-                    }
-                    
+                    previousReferencedBy = referencedBy;
                 } else {
-                    var newReferencedBy = addReferencedBy();
+                    var newReferencedBy = addReferencedBy(previousReferencedBy);
                     newReferencedBy[0].val(item);
-                    if(index !== referencedByarr.length - 1) { //if not last element
-                        deleteReferencedBy = $("<button/>")
-                            .addClass("btn btn-xs btn-default btn-remove remove-referencedBy-button remove-nb-referencedBy-button")
-                            .attr("type","button")
-                            .attr("aria-label","Remove referenced By URL")
-                                .click(function() {
-                                    newReferencedBy[1].remove();
-                                    $(this).remove();
-                                });
-                        deleteReferencedBy.append($("<i>")
-                                         .addClass("fa fa-trash")
-                                         .attr("aria-hidden","true"));
-                        newReferencedBy[1].append(deleteReferencedBy);
-                    }
+                    previousReferencedBy = newReferencedBy[1];
                 }
             });
 
