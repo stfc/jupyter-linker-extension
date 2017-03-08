@@ -60,6 +60,22 @@ casper.notebook_test(function() {
     this.waitUntilVisible(".modal-body");
     this.wait(200);
 
+    this.then(function() {
+        var title = this.evaluate(function() {
+            return $(".modal-title").text();
+        });
+
+        this.test.assertEquals(title,
+                               "Confirm uploading notebook without data",
+                               "Confirmation dialog shows before pushlish dialog");
+    });
+
+    this.thenClick(".btn-primary");
+
+    // Wait for the dialog to be shown
+    this.waitUntilVisible(".modal-body");
+    this.wait(200);
+
     //check that certain fields are required 
     this.waitForSelector("#next");
     this.thenClick("#next");
@@ -712,7 +728,12 @@ casper.notebook_test(function() {
     this.thenClick(selector);
 
     this.waitForSelector(".modal");
-    this.wait(1000); //need to wait for modal to be fully visible
+    this.wait(200); //need to wait for modal to be fully visible
+
+    this.thenClick(".btn-primary");
+
+    this.waitForSelector(".modal");
+    this.wait(200); //need to wait for modal to be fully visible
 
     this.then(function() {
         var config_username = this.evaluate(function() {

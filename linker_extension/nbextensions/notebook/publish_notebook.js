@@ -295,7 +295,64 @@ define(["base/js/namespace",
     };
 
     /*  
-     *  Only publish the notebook
+     *  
+     */ 
+    var publish_notebook_warning = function() {
+        var warning = $("<p/>");
+        var confirm = $("<p/>");
+        confirm.text("Please confirm that you'd like to go ahead and upload " +
+                         "the notebook anyway.");
+        if("databundle_url" in Jupyter.notebook.metadata) {
+            publish_notebook();
+        } else if (!("databundle_url" in Jupyter.notebook.metadata) && 
+                   "databundle" in Jupyter.notebook.metadata)
+        {
+            var not_uploaded_body = $("<div/>");
+            warning.append("Warning! You have data that you have associated with " +
+                         "this notebook that you have not published to eData " +
+                         "yet. We recommend uploading your data first so that " +
+                         "the notebook can reference the data record in eData.");
+            not_uploaded_body.append(warning).append("<br/>").append(confirm);
+            dialog.modal({
+                title: "Confirm uploading notebook without data",
+                body: not_uploaded_body,
+                buttons: {
+                    Cancel: {},
+                    Confirm: { 
+                        class : "btn-primary",
+                        click: function() {
+                            publish_notebook();
+                        },
+                    }
+                },
+                notebook: Jupyter.notebook,
+                keyboard_manager: Jupyter.notebook.keyboard_manager,
+            });
+        } else {
+            var no_data_body = $("<div/>");
+            warning.text("Warning! You have not associated any data with this " +
+                         "notebook.");
+            no_data_body.append(warning).append("<br/>").append(confirm);
+            dialog.modal({
+                title: "Confirm uploading notebook without data",
+                body: no_data_body,
+                buttons: {
+                    Cancel: {},
+                    Confirm: { 
+                        class : "btn-primary",
+                        click: function() {
+                            publish_notebook();
+                        },
+                    }
+                },
+                notebook: Jupyter.notebook,
+                keyboard_manager: Jupyter.notebook.keyboard_manager,
+            });
+        }
+    };
+
+    /*  
+     *  Only publish the notebook.
      */ 
     var publish_notebook = function() {
         var add_metadata_form_fields = add_metadata.create_fields();
@@ -716,7 +773,7 @@ define(["base/js/namespace",
         help: "Publish notebook",
         help_index: "a",
         icon: "fa-upload",
-        handler : publish_notebook,
+        handler : publish_notebook_warning,
     };
 
     var publish_notebook_prefix = "linker_extension";
@@ -750,7 +807,7 @@ define(["base/js/namespace",
             publish_notebook_prefix
         );
         $("#publish_notebook").click(function () {
-            publish_notebook();
+            publish_notebook_warning();
         });
         Jupyter.actions.register(
             publish_bundle_action,
