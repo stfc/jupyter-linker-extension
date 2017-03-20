@@ -220,6 +220,21 @@ define(["base/js/namespace",
                                             download_data(failed_urls);
                                         });
                                     }
+
+                                    if(username_field_val !== config_username) {
+                                        var config = JSON.stringify({username: username_field_val});
+                                        custom_contents.update_config(config).catch(
+                                            function(reason){
+                                                custom_utils.create_alert(
+                                                    "alert-danger",
+                                                    "Error! " + reason.message + 
+                                                    "when trying to save username " +
+                                                    "to config. If it " +
+                                                    "continues to fail please " + 
+                                                    "contact the developers.");
+                                            }
+                                        );
+                                    }
                                 });
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //fail function
