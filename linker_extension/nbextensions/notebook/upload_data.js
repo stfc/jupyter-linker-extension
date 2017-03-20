@@ -104,6 +104,7 @@ define([
                                     data_metadata.file_names = upload_data_info.file_names;
                                     data_metadata.file_paths = upload_data_info.file_paths;
                                     data_metadata.file_types =  upload_data_info.file_types;
+                                    data_metadata.file_mimetypes =  upload_data_info.file_mimetypes;
                                     data_metadata.notebookpath = Jupyter.notebook.notebook_path;
                                     var metadata = add_metadata.get_values_from_metadata();
 
@@ -351,6 +352,7 @@ define([
         var file_names = view_data_info.file_names;
         var file_paths = view_data_info.file_paths;
         var file_types = view_data_info.file_types;
+        var file_mimetypes = view_data_info.file_mimetypes;
 
         var abstract_label = $("<label/>")
             .attr("for","data-abstract")
@@ -594,7 +596,8 @@ define([
         return {dialog_body: dialog_body,
                 file_names: file_names,
                 file_paths: file_paths, 
-                file_types: file_types};
+                file_types: file_types,
+                file_mimetypes: file_mimetypes};
     };
 
     module.exports = {

@@ -63,26 +63,31 @@ casper.notebook_test(function() {
                   "type": "directory",
                   "path": "sub ∂ir1",
                   "name": "sub ∂ir1",
+                  "mimetype": null,
                 },
                 {
                   "type": "file",
                   "path": "file_in_nbdir.txt",
                   "name": "file_in_nbdir.txt",
+                  "mimetype": "text/plain",
                 },
                 {
                   "type": "directory",
                   "path": "sub ∂ir1/sub ∂ir 1a",
                   "name": "sub ∂ir 1a",
+                  "mimetype": null,
                 },
                 {
                   "type": "file",
                   "path": "sub ∂ir1/file_in_sub_∂ir1.txt",
                   "name": "file_in_sub_∂ir1.txt",
+                  "mimetype": "text/plain",
                 },
                 {
                   "type": "file",
                   "path": "sub ∂ir1/sub ∂ir 1a/file_in_sub_∂ir1a.txt",
                   "name": "file_in_sub_∂ir1a.txt",
+                  "mimetype": "text/plain",
                 }
             ];
             Jupyter._save_success = Jupyter._save_failed = false;

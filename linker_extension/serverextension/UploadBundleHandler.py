@@ -170,6 +170,7 @@ class UploadBundleHandler(IPythonHandler):
         file_names = arguments['file_names']
         file_paths = arguments['file_paths']
         file_types = arguments['file_types']
+        file_mimetypes = arguments['file_mimetypes']
 
         TOS_files = arguments["TOS"]
         licence = arguments["licence"]
@@ -183,7 +184,7 @@ class UploadBundleHandler(IPythonHandler):
         except OSError:
             raise web.HTTPError(500, "OSError when opening temp dir")
 
-        # for each TOS file, write to a file. They're names TOD [ID].txt
+        # for each TOS file, write to a file. They're names TOS [ID].txt
         try:
             for index, file in enumerate(TOS_files):
                 base64_data = file.split(",")[1]
@@ -221,7 +222,7 @@ class UploadBundleHandler(IPythonHandler):
                         if(file_types[index] == 'file'):
                             file_attr = {"GROUPID": "sword-mets-fgid-" + str(i),
                                          "ID": file_path,
-                                         "MIMETYPE": "application/octet-stream"}
+                                         "MIMETYPE": file_mimetypes[index]}
                             files_xml = ET.Element('file', file_attr)
 
                             FLocat_attr = {"LOCTYPE": "URL",

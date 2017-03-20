@@ -167,6 +167,7 @@ define(["base/js/namespace",
                                     data_metadata.file_names = upload_data_info.file_names;
                                     data_metadata.file_paths = upload_data_info.file_paths;
                                     data_metadata.file_types =  upload_data_info.file_types;
+                                    data_metadata.file_mimetypes =  upload_data_info.file_mimetypes;
 
                                     $("#upload-data-container").addClass("hide-me");
                                     $("#fields1").removeClass("hide-me");
@@ -260,7 +261,8 @@ define(["base/js/namespace",
                                             custom_utils.create_alert(
                                                 "alert-danger",
                                                 "Error! " + reason.message + 
-                                                ", please try again. If it " +
+                                                "when trying to save username " +
+                                                "to config. If it " +
                                                 "continues to fail please " + 
                                                 "contact the developers.");
                                         }
@@ -518,7 +520,8 @@ define(["base/js/namespace",
                                             custom_utils.create_alert(
                                                 "alert-danger",
                                                 "Error! " + reason.message + 
-                                                ", please try again. If it " +
+                                                "when trying to save username " +
+                                                "to config. If it " +
                                                 "continues to fail please " + 
                                                 "contact the developers.");
                                         }
@@ -677,6 +680,7 @@ define(["base/js/namespace",
                                     data_metadata.file_names = upload_data_info.file_names;
                                     data_metadata.file_paths = upload_data_info.file_paths;
                                     data_metadata.file_types =  upload_data_info.file_types;
+                                    data_metadata.file_mimetypes =  upload_data_info.file_mimetypes;
                                     data_metadata.notebookpath = Jupyter.notebook.notebook_path;
 
                                     $("#upload-data-container").addClass("hide-me");
@@ -732,7 +736,8 @@ define(["base/js/namespace",
                                             custom_utils.create_alert(
                                                 "alert-danger",
                                                 "Error! " + reason.message + 
-                                                ", please try again. If it " +
+                                                "when trying to save username " +
+                                                "to config. If it " +
                                                 "continues to fail please " + 
                                                 "contact the developers.");
                                         }

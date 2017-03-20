@@ -44,6 +44,7 @@ define([
         var file_names = [];
         var file_paths = [];
         var file_types = [];
+        var file_mimetypes = [];
 
         var select_data_button = $("<button/>")
             .addClass("btn btn-xs btn-default select-data-button")
@@ -103,6 +104,7 @@ define([
                     file_names.push(item.name);
                     file_paths.push(item.path);
                     file_types.push(item.type);
+                    file_mimetypes.push(item.mimetype);
                 });
                 view_data_div.append(associated_files);
             } else {
@@ -135,7 +137,8 @@ define([
         return {view_data_div: view_data_div,
                 file_names: file_names,
                 file_paths: file_paths,
-                file_types: file_types};
+                file_types: file_types,
+                file_mimetypes: file_mimetypes};
     };
     
     //actions, buttons and exports...

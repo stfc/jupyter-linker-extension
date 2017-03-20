@@ -396,7 +396,8 @@ define([
                             var file_info = {
                                 "name": model.name,
                                 "path": model.path,
-                                "type": model.type
+                                "type": model.type,
+                                "mimetype": model.mimetype,
                             };
                             data_bundle.push(file_info);
                             //content contains all the sub files, so recursively
@@ -418,7 +419,8 @@ define([
                                             var child_file_info = {
                                                 "name": model.name,
                                                 "path": model.path,
-                                                "type": model.type
+                                                "type": model.type,
+                                                "mimetype": model.mimetype,
                                             };
                                             data_bundle.push(child_file_info);
                                         }
@@ -438,7 +440,8 @@ define([
                             var file_info = {
                                 "name": model.name,
                                 "path": model.path,
-                                "type": model.type
+                                "type": model.type,
+                                "mimetype": model.mimetype,
                             };
                             data_bundle.push(file_info);
                         }
