@@ -228,7 +228,14 @@ class DownloadHandler(IPythonHandler):
                     for bitstream in get_content[url]:
                         os.chdir(path)
                         try:
-                            with open(bitstream["bitstream_name"],"w+b") as f:
+                            filename = bitstream["bitstream_name"]
+
+                            # create subfolders if we need to
+                            if os.path.dirname(filename):
+                                os.makedirs(os.path.dirname(filename),exist_ok=True)
+                                os.chdir(os.path.dirname(filename))
+
+                            with open(os.path.basename(filename),"w+b") as f:
                                 f.write(bitstream["bitstream_data_request"].result().content)
                             os.chdir(cwd)
                         except OSError:
