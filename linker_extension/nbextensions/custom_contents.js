@@ -104,7 +104,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
-    //updates the config file with user defined options during a notebook session
+    //retrieves data stored in the config file
     var get_config = function() {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
                                                   "/linker_config"]);
@@ -112,6 +112,20 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
             processData : false,
             cache : false,
             type : "GET",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    //downloads data from dspace. 
+    var download_data = function(data) {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspace_download"]);
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json",
         };
         return utils.promising_ajax(url, settings);
     };
@@ -126,5 +140,6 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         ldap_search: ldap_search,
         update_config: update_config,
         get_config: get_config,
+        download_data: download_data,
     };
 });

@@ -2,6 +2,7 @@
 
 import requests
 import os
+import json
 
 from tornado import web, gen, escape
 
@@ -11,6 +12,41 @@ from notebook.base.handlers import (
 from linker_extension.serverextension.ConfigHandler import LinkerExtensionConfig
 from urllib.parse import urljoin
 
+class ListAllItems(IPythonHandler):
+
+    # return all dspace items
+    @web.authenticated
+    @json_errors
+    @gen.coroutine
+    def post(self):
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
+        arguments = escape.json_decode(self.request.body)
+
+        un = arguments['username']
+        pw = arguments['password']
+
+        url = urljoin(dspace_url, "/rest/login")
+        headers = {'Content-Type': 'application/json',
+                   'Accept': 'application/json'}
+
+        login = requests.request('POST',
+                                 url,
+                                 headers=headers,
+                                 json={"email": un, "password": pw},
+                                 verify=False)
+        token = login.text
+
+        url = urljoin(dspace_url, "/rest/items")
+        headers = {'Content-Type': 'application/json',
+                   'rest-dspace-token': token}
+
+        get_item_by_url = requests.request('GET',
+                                           url,
+                                           headers=headers,
+                                           verify=False)
+        self.finish(json.dumps(get_item_by_url.json()))
 
 class FindIDViaMetadata(IPythonHandler):
 

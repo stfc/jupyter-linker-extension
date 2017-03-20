@@ -130,7 +130,7 @@ span#login_widget {
   margin-left: 4px; 
 }
 
-#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input {
+#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input, .download-url{
   margin-bottom: 8px;
   outline: none;
   box-shadow: none; 

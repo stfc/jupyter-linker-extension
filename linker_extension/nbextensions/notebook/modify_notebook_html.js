@@ -22,25 +22,25 @@ define([
             Jupyter.notebook.select(i, false);
         });*/
 
-        var dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","publish-menu");
-        var button  = $("<button/>")
+        var publish_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","publish-menu");
+        var publish_button  = $("<button/>")
                       .addClass("btn btn-default dropdown-toggle")
                       .attr("type","button")
                       .attr("data-toggle","dropdown")
                       .attr("title", "Publish")
                       .text("Publish ");
-        var caret = $("<span>").addClass("caret");
-        button.append(caret);
+        var publish_caret = $("<span>").addClass("caret");
+        publish_button.append(publish_caret);
 
-        var dropdown_ul = $("<ul/>")
+        var publish_dropdown_ul = $("<ul/>")
             .attr("id","publish_menu")
             .addClass("dropdown-menu");
 
-        dropdown.append(button).append(dropdown_ul);
+        publish_dropdown.append(publish_button).append(publish_dropdown_ul);
 
-        $(Jupyter.toolbar.selector).append(dropdown);
+        $(Jupyter.toolbar.selector).append(publish_dropdown);
         
-        dropdown_ul.append($("<li/>").attr("id","add_metadata")
+        publish_dropdown_ul.append($("<li/>").attr("id","add_metadata")
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Add Metadata")))
@@ -85,6 +85,29 @@ define([
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Publish Notebook and associated data")));
+
+        var data_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","data-menu");
+        var data_button  = $("<button/>")
+                      .addClass("btn btn-default dropdown-toggle")
+                      .attr("type","button")
+                      .attr("data-toggle","dropdown")
+                      .attr("title", "Data")
+                      .text("Data ");
+        var data_caret = $("<span>").addClass("caret");
+        data_button.append(data_caret);
+
+        var data_dropdown_ul = $("<ul/>")
+            .attr("id","data_menu")
+            .addClass("dropdown-menu");
+
+        data_dropdown.append(data_button).append(data_dropdown_ul);
+
+        $(Jupyter.toolbar.selector).append(data_dropdown);
+        
+        data_dropdown_ul.append($("<li/>").attr("id","download_data")
+                                     .append($("<a/>")
+                                             .attr("href","#")
+                                             .text("Download data")));
 
         /*  
          *  The notebook metadata doesn't exist immediately and we need it to

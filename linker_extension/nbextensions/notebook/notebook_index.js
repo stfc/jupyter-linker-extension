@@ -10,6 +10,7 @@ require("./upload_notebook.js");
 var view_data_dialog = require("./view_data_dialog.js");
 var publish_notebook = require("./publish_notebook.js");
 var generate_references = require("./generate_references.js");
+var download_data = require("./download_data.js");
 
 /*  
  *  This is the main entry point that is used by webpack to bundle everything
@@ -27,6 +28,7 @@ function load_ipython_extension(){
     custom_cell_toolbar.load();
     publish_notebook.load();
     generate_references.load();
+    download_data.load();
 }
 
 module.exports = {load_ipython_extension: load_ipython_extension};

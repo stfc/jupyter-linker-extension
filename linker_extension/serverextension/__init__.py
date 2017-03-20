@@ -11,11 +11,12 @@ from .ConfigHandler import LinkerExtensionConfig, ConfigHandler
 from .DSpaceHandler import DSpaceHandler
 from .SWORDHandler import SWORDHandler
 from .TestDSpaceHandlers import (
-    FindIDViaMetadata, DeleteItem, GetBitstreams, GetBitstreamData
+    FindIDViaMetadata, DeleteItem, GetBitstreams, GetBitstreamData, ListAllItems
 )
 from .UploadBundleHandler import UploadBundleHandler
 from .LDAPHandler import LDAPHandler
 from .CustomNbconvertHandler import CustomNbconvertHandler
+from .DownloadHandler import DownloadHandler
 
 # ----------------------------------------------------------------------------
 # URL to handler mappings
@@ -68,6 +69,11 @@ def load_jupyter_server_extension(nbapp):
     web_app.add_handlers(host_pattern, [(route_pattern_get_bistream_data,
                                          GetBitstreamData)])
 
+    route_pattern_find_id = url_path_join(web_app.settings['base_url'],
+                                          '/dspace/listitems')
+    web_app.add_handlers(host_pattern, [(route_pattern_find_id,
+                                         ListAllItems)])
+
     route_pattern_dspace = url_path_join(web_app.settings['base_url'],
                                          '/dspace')
     web_app.add_handlers(host_pattern, [(route_pattern_dspace, DSpaceHandler)])
@@ -79,6 +85,10 @@ def load_jupyter_server_extension(nbapp):
     route_pattern_ldap = url_path_join(web_app.settings['base_url'],
                                        '/linker_config')
     web_app.add_handlers(host_pattern, [(route_pattern_ldap, ConfigHandler)])
+
+    route_pattern_ldap = url_path_join(web_app.settings['base_url'],
+                                       '/dspace_download')
+    web_app.add_handlers(host_pattern, [(route_pattern_ldap, DownloadHandler)])
 
     route_pattern_nbconvert = url_path_join(web_app.settings['base_url'],
                                             r"/customnbconvert/%s%s%s"
