@@ -1094,14 +1094,11 @@ define(["base/js/namespace",
             });
         }
 
-        //use a promise to do the repository fetch request
-        var communities_promise = custom_contents.get_collections();
-
         /*  
          *  fill the repository/department selector once we've fetched from
          *  DSpace, or add an error to the repository field.
          */ 
-        communities_promise.then(function(response) {
+        var communities_promise = custom_contents.get_collections().then(function(response) {
             var communities = response.children;
             communities.forEach(function(community) {
                 var communities_option = $("<option/>");
