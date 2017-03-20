@@ -268,7 +268,7 @@ casper.notebook_test(function() {
             return $(".download-success-alert").length;
         });
         var failures = this.evaluate(function() {
-            return $("download-failure-alert").length;
+            return $(".download-failure-alert").length;
         });
         this.test.assertEquals(successes, 5, "5 success alerts seen");
         this.test.assertEquals(failures, 1 , "1 failure alert seen");
@@ -286,7 +286,7 @@ casper.notebook_test(function() {
         });
         this.test.assertEquals(
             redownload,
-            "https://epublicns05.esc.rl.ac.uk/handle/edata/3210",
+            "https://epublicns05.esc.rl.ac.uk/handle/edata/99999999999",
             "Re-download dialog refilled correctly");
     });
 
