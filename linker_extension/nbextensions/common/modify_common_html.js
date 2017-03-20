@@ -35,10 +35,6 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
         logo.attr("src", utils.get_body_data("baseUrl") + 
                          "nbextensions/linker_extension/common/logo.png");
 
-        var favicon = document.querySelector("link[rel=\"shortcut icon\"]");
-        favicon.setAttribute("href", utils.get_body_data("baseUrl") + 
-                             "nbextensions/linker_extension/common/favicon.ico");
-
         //add our custom css
         $("head").append(
             $("<link>")
@@ -48,6 +44,18 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
                           + "nbextensions/linker_extension/common/common_style.css")
         );
 
+        document.head = document.head || document.getElementsByTagName("head")[0];
+
+        var src = utils.get_body_data("baseUrl") +  "nbextensions/linker_extension/common/favicon.ico";
+        var link = document.createElement("link");
+        var oldLink = document.querySelector("link[rel=\"shortcut icon\"]");
+        link.rel = "shortcut icon";
+        link.type = "image/x-icon";
+        link.href = src;
+        if (oldLink) {
+            document.head.removeChild(oldLink);
+        }
+        document.head.appendChild(link);
 
         //applies to both notebook and edit - put it here so we don't have
         //to add additional code just for the edit page
