@@ -17,9 +17,9 @@ class CustomsdistCommandProd(sdist):
         # insert custom code here
         try:
             import subprocess
-            webpack = subprocess.call('npm list -g webpack', shell=True)
-            es6_promise = subprocess.call('npm list -g es6-promise', shell=True)
-            install_cmd = "npm install -g"
+            webpack = subprocess.call('npm list webpack', shell=True)
+            es6_promise = subprocess.call('npm list es6-promise', shell=True)
+            install_cmd = "npm install"
             install = False
 
             if webpack != 0:  # 0 means it is installed
