@@ -14,6 +14,7 @@ from .TestDSpaceHandlers import (
     FindIDViaMetadata, DeleteItem, GetBitstreams, GetBitstreamData, ListAllItems
 )
 from .UploadBundleHandler import UploadBundleHandler
+from .UploadBundleAlternateHandler import UploadBundleAlternateHandler
 from .LDAPHandler import LDAPHandler
 from .CustomNbconvertHandler import CustomNbconvertHandler
 from .DownloadHandler import DownloadHandler
@@ -49,6 +50,11 @@ def load_jupyter_server_extension(nbapp):
     web_app.add_handlers(host_pattern, [(route_pattern_uploadbundle,
                                          UploadBundleHandler)])
 
+    route_pattern_uploadbundlealternate = url_path_join(web_app.settings['base_url'],
+                                               '/uploadbundle_alternate')
+    web_app.add_handlers(host_pattern, [(route_pattern_uploadbundlealternate,
+                                         UploadBundleAlternateHandler)])
+
     route_pattern_find_id = url_path_join(web_app.settings['base_url'],
                                           '/dspace/findid')
     web_app.add_handlers(host_pattern, [(route_pattern_find_id,
@@ -82,13 +88,13 @@ def load_jupyter_server_extension(nbapp):
                                        '/ldap')
     web_app.add_handlers(host_pattern, [(route_pattern_ldap, LDAPHandler)])
 
-    route_pattern_ldap = url_path_join(web_app.settings['base_url'],
+    route_pattern_config = url_path_join(web_app.settings['base_url'],
                                        '/linker_config')
-    web_app.add_handlers(host_pattern, [(route_pattern_ldap, ConfigHandler)])
+    web_app.add_handlers(host_pattern, [(route_pattern_config, ConfigHandler)])
 
-    route_pattern_ldap = url_path_join(web_app.settings['base_url'],
+    route_pattern_download = url_path_join(web_app.settings['base_url'],
                                        '/dspace_download')
-    web_app.add_handlers(host_pattern, [(route_pattern_ldap, DownloadHandler)])
+    web_app.add_handlers(host_pattern, [(route_pattern_download, DownloadHandler)])
 
     route_pattern_nbconvert = url_path_join(web_app.settings['base_url'],
                                             r"/customnbconvert/%s%s%s"

@@ -130,18 +130,18 @@ span#login_widget {
   margin-left: 4px; 
 }
 
-#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input, .download-url{
+#fields1 > input, #fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input, .download-url, #files-page > input, #metadata-page > input{
   margin-bottom: 8px;
   outline: none;
   box-shadow: none; 
   width: 600px;
 }
 
-#fields2 input[readonly], #data_fields input[readonly] {
+#fields2 input[readonly], #metadata-page input[readonly] {
   width: 533px;
 }
 
-#fields1 > label, #fields2 > label, #data_fields > label, #extra_nb_metadata_1 > label, #extra_nb_metadata_2 > label {
+#fields1 > label, #fields2 > label, #data_fields > label, #extra_nb_metadata_1 > label, #extra_nb_metadata_2 > label, #files-page > label, #metadata-page > label {
   margin-bottom: 2px;
   display: block;
 }
@@ -278,10 +278,6 @@ input.fileinput {
   border: none;
 }
 
-#data_fields {
-  margin-top: 15px;
-}
-
 .btn-file {
   margin-top: -3px;
   position: relative;
@@ -323,4 +319,15 @@ input.fileinput {
 label.required:after {
   content:"*";
   color:red;
+}
+#files-page .btn-file {
+  margin-bottom: 5px;
+}
+#data-files-wrap input {
+  width: 62px;
+  height: 27px;
+  margin-left: -10px;
+}
+#data-files-list .MultiFile-remove {
+  color: red;
 }

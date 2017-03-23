@@ -80,6 +80,10 @@ define([
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Publish associated data")))
+                   .append($("<li/>").attr("id","publish_bundle_alternate")
+                                     .append($("<a/>")
+                                             .attr("href","#")
+                                             .text("Publish associated data (alternate)")))
 
                    .append($("<li/>").attr("id","publish_notebook_and_bundle")
                                      .append($("<a/>")

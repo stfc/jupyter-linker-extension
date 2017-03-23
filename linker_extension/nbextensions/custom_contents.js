@@ -52,6 +52,19 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
+    //used to upload some data
+    var upload_data_alternate = function(data) {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/uploadbundle_alternate"]);
+        var settings = {
+            type : "POST",
+            processData : false,
+            data: data,
+            contentType: "application/json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
     //not used anymore but used to be used instead of get_collections
     var sword_get_servicedocument = function() {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
@@ -136,6 +149,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         get_collections: get_collections,
         sword_new_item: sword_new_item,
         upload_data: upload_data,
+        upload_data_alternate: upload_data_alternate,
         ldap_auth: ldap_auth,
         ldap_search: ldap_search,
         update_config: update_config,
