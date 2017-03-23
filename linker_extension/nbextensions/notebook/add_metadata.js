@@ -147,8 +147,8 @@ define(["base/js/namespace",
             md_set = true;
         }
 
-        var form1 = $("<fieldset/>").attr("title","fields1").attr("id","fields1");
-        var form2 = $("<fieldset/>").addClass("hide-me").attr("title","fields2").attr("id","fields2");
+        var form1 = $("<fieldset/>").attr("id","fields1");
+        var form2 = $("<fieldset/>").addClass("hide-me").attr("id","fields2");
 
         var title = $("<input/>")
             .attr("name","title")
