@@ -81,7 +81,7 @@ define([
                 var divs = {};
                 db_copy.forEach(function(item) {
                     var div = $("<div/>")
-                        .text(item.path)
+                        .text(item.name)
                         .attr("data-indent",0)
                         .attr("class","bundle-item")
                         .css("margin-left","0px");
@@ -89,8 +89,8 @@ define([
                     if(item.type === "directory") {
                         divs[item.path] = div;
                     }
-                    if(divs.hasOwnProperty(utils.url_path_split(item.path)[0])){
-                        var parent = utils.url_path_split(item.path)[0];
+                    var parent = utils.url_path_split(item.path)[0];
+                    if(divs.hasOwnProperty(parent)) {
                         var indent = divs[parent].attr("data-indent") + 1;
 
                         div.text(item.name)
