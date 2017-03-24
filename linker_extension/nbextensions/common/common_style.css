@@ -321,6 +321,7 @@ label.required:after {
   color:red;
 }
 #files-page .btn-file {
+  margin-top: 2px;
   margin-bottom: 5px;
 }
 #data-files-wrap input {
