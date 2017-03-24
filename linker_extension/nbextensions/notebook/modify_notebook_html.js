@@ -88,7 +88,11 @@ define([
                    .append($("<li/>").attr("id","publish_notebook_and_bundle")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Publish Notebook and associated data")));
+                                             .text("Publish Notebook and associated data")))
+                   .append($("<li/>").attr("id","publish_notebook_and_bundle_alternate")
+                                     .append($("<a/>")
+                                             .attr("href","#")
+                                             .text("Publish Notebook and associated data (alternate)")));
 
         var data_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","data-menu");
         var data_button  = $("<button/>")
