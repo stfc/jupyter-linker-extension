@@ -72,7 +72,7 @@ class LDAPHandler(IPythonHandler):
 
         elif fedID and not firstname and not lastname:
             conn.search('dc=fed,dc=cclrc,dc=ac,dc=uk',
-                        '(cn=*' + fedID + '*)',
+                        '(cn=' + fedID + ')',
                         attributes=['sn', 'givenName', 'cn', 'displayName', 'department'])
             result = conn.entries
         else:  # malformed request
