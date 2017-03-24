@@ -82,7 +82,7 @@ define([
                     class : "btn-primary",
                     click: function() { //todo: remove this button or sort out username
                         $(".login-error").remove();
-                        validate_upload_data();
+                        validate_metadata();
                         if($(".data-form-error").length === 0) {
                             var username_field_val = $("#username").val();
                             var password_field_val = $("#password").val();
@@ -422,10 +422,37 @@ define([
     };
 
     /*  
+     *  Validates data files. Clears errors when run and adds
+     *  errors above the file selector
+     */ 
+    var validate_files = function() {
+        $(".data-form-error").remove();
+
+        var file_inputs = $("#data-files-wrap input");
+        var at_least_one_file = false;
+        file_inputs.each(function(index,item) {
+            if ($(item).prop("files").length !== 0) {
+                at_least_one_file = true;
+            }
+        });
+
+        if(!at_least_one_file) {
+            var files_error = $("<div/>")
+                .attr("id","data-files-missing-error")
+                .addClass("data-form-error")
+                .text("Please select at least one file");
+
+            $("#files-page").prepend(files_error);
+        }
+
+        $(".data-form-error").css("color", "red");
+    };
+
+    /*  
      *  Validates fields for the data metadata. Clears errors when run and adds
      *  errors beneath the labels of the relevant fields
      */ 
-    var validate_upload_data = function() {
+    var validate_metadata = function() {
         $(".data-form-error").remove();
 
         //in case they delete the default abstract
@@ -931,7 +958,8 @@ define([
         upload_data_alternate: upload_data_alternate,
         upload_data_form_alternate: upload_data_form_alternate,
         get_values_from_fields_alternate: get_values_from_fields_alternate,
-        validate_upload_data: validate_upload_data,
+        validate_metadata: validate_metadata,
+        validate_files: validate_files,
         get_values_from_fields: get_values_from_fields,
     };
 });
