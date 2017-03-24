@@ -131,14 +131,31 @@ casper.notebook_test(function() {
     this.waitForSelector("#data-files");
     this.wait(1000); //need to wait for modal to be fully visible
 
+    //check that validation works
+    this.thenClick("#next");
     this.then(function() {
-        this.page.uploadFile("#data-files",nbdir + "/file_in_nbdir.txt");
-        this.page.uploadFile("#data-files_F1",nbdir + "/sub ∂ir1/file_in_sub_∂ir1.txt");
-        this.page.uploadFile("#data-files_F2",nbdir + "/sub ∂ir1/sub ∂ir 1a/file_in_sub_∂ir1a.txt");
+        this.test.assertVisible("#data-files-missing-error",
+                                "Data files missing error showing correctly");
     });
 
+    //check that validation works, even after uploading a file then deleting
     this.then(function() {
-        this.capture("screenshots/files.png");
+        this.page.uploadFile("#data-files",nbdir + "/file_in_nbdir.txt");
+    });
+
+    this.thenClick(".MultiFile-remove");
+
+    this.thenClick("#next");
+    this.then(function() {
+        this.test.assertVisible("#data-files-missing-error",
+                                "Data files missing error showing correctly after file upload and delete");
+    });
+
+    //upload files for test
+    this.then(function() {
+        this.page.uploadFile("#data-files_F1",nbdir + "/file_in_nbdir.txt");
+        this.page.uploadFile("#data-files_F2",nbdir + "/sub ∂ir1/file_in_sub_∂ir1.txt");
+        this.page.uploadFile("#data-files_F3",nbdir + "/sub ∂ir1/sub ∂ir 1a/file_in_sub_∂ir1a.txt");
     });
 
     this.thenClick("#next");
@@ -299,7 +316,6 @@ casper.notebook_test(function() {
     var alert = ".alert";
     this.waitForSelector(alert);
     this.then(function() {
-        this.capture("screenshots/alert.png");
         this.test.assertExists(".data-upload-success-alert",
                                "Data upload success alert seen");
     });
@@ -520,7 +536,7 @@ casper.notebook_test(function() {
      */
 
     //Click on menu item
-    selector = "#publish_bundle > a";
+    selector = "#publish_bundle_alternate > a";
     this.waitForSelector(selector);
     this.thenClick(selector);
 
