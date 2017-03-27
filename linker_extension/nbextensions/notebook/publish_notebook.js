@@ -35,7 +35,7 @@ define(["base/js/namespace",
 
         var instructions = $("<label/>")
             .attr("id","publish_instructions")
-            .attr("for","publish_form");
+            .attr("for","publish-form");
 
         instructions.text("Check the files currently associated with this " + 
                           "notebook and add additional metadata for the zip " + 
@@ -50,14 +50,11 @@ define(["base/js/namespace",
             .attr("id","upload-data-container")
             .append(upload_data_info.dialog_body);
 
-        var form_body = $("<div/>").attr("title", "Publish notebook")
-        .append(
-            $("<form id=\"publish_form\"/>")
-                    .append(instructions)
-                    .append(upload_data_container)
-                    .append(add_metadata_form_fields.form1)
-                    .append(add_metadata_form_fields.form2)
-        );
+        var form_body = $("<form/>").attr("id","publish-form")
+                        .append(instructions)
+                        .append(upload_data_container)
+                        .append(add_metadata_form_fields.form1)
+                        .append(add_metadata_form_fields.form2);
 
         //We need a last page to prompt the user for their username/password
         var final_page = $("<div/>").attr("id","final-page");
@@ -308,22 +305,19 @@ define(["base/js/namespace",
 
         var instructions = $("<label/>")
             .attr("id","publish_instructions")
-            .attr("for","publish_form");
+            .attr("for","publish-form");
 
         instructions.text("Select the files that you would like to be uploaded " +
                           "to eData as a data bundle for this notebook");
 
         var upload_data_pages = upload_data.upload_data_form_alternate(); 
 
-        var form_body = $("<div/>").attr("title", "Publish notebook")
-        .append(
-            $("<form id=\"publish_form\"/>")
-                    .append(instructions)
-                    .append(upload_data_pages.files_page)
-                    .append(upload_data_pages.metadata_page)
-                    .append(add_metadata_form_fields.form1)
-                    .append(add_metadata_form_fields.form2)
-        );
+        var form_body = $("<form/>").attr("id","publish-form")
+                            .append(instructions)
+                            .append(upload_data_pages.files_page)
+                            .append(upload_data_pages.metadata_page)
+                            .append(add_metadata_form_fields.form1)
+                            .append(add_metadata_form_fields.form2);
 
         //We need a last page to prompt the user for their username/password
         var final_page = $("<div/>").attr("id","final-page");
@@ -658,7 +652,7 @@ define(["base/js/namespace",
 
         var instructions = $("<label/>")
             .attr("id","publish_instructions")
-            .attr("for","publish_form");
+            .attr("for","publish-form");
 
         instructions.text("Check the files currently associated with this " + 
                           "notebook and add additional metadata for the zip " + 
@@ -667,13 +661,10 @@ define(["base/js/namespace",
                           "page to select additional data to associate with " +
                           "this notebook");
 
-        var form_body = $("<div/>").attr("title", "Publish notebook")
-        .append(
-            $("<form id=\"publish_form\"/>")
+        var form_body = $("<form/>").attr("id","publish-form")
                     .append(instructions)
                     .append(add_metadata_form_fields.form1)
-                    .append(add_metadata_form_fields.form2)
-        );
+                    .append(add_metadata_form_fields.form2);
 
 
         var final_page = $("<div/>").attr("id","final-page");
@@ -859,7 +850,7 @@ define(["base/js/namespace",
 
         var instructions = $("<label/>")
             .attr("id","publish_instructions")
-            .attr("for","publish_form");
+            .attr("for","publish-form");
 
         instructions.text("Check the files currently associated with this " + 
                           "notebook and add additional metadata for the zip " + 
@@ -874,12 +865,9 @@ define(["base/js/namespace",
             .attr("id","upload-data-container")
             .append(upload_data_info.dialog_body);
 
-        var form_body = $("<div/>").attr("title", "Publish data")
-        .append(
-            $("<form id=\"publish_form\"/>")
-                    .append(instructions)
-                    .append(upload_data_container)
-        );
+        var form_body = $("<form/>").attr("id","publish-form")
+                        .append(instructions)
+                        .append(upload_data_container);
 
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");
@@ -1075,19 +1063,17 @@ define(["base/js/namespace",
 
         var instructions = $("<label/>")
             .attr("id","publish_instructions")
-            .attr("for","publish_form");
+            .attr("for","publish-form");
 
         instructions.text("Select the files that you would like to be uploaded " +
                           "to eData as a data bundle for this notebook");
 
         var upload_data_fields = upload_data.upload_data_form_alternate(); 
 
-        var form_body = $("<div/>").append(
-            $("<form id=\"publish_form\"/>")
-                    .append(instructions)
-                    .append(upload_data_fields.files_page)
-                    .append(upload_data_fields.metadata_page)
-        );
+        var form_body = $("<form/>").attr("id","publish-form")
+                        .append(instructions)
+                        .append(upload_data_fields.files_page)
+                        .append(upload_data_fields.metadata_page);
 
         var final_page = $("<div/>").attr("id","final-page");
         final_page.addClass("hide-me");

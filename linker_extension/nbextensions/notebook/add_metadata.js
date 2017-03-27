@@ -19,15 +19,12 @@ define(["base/js/namespace",
     var add_metadata = function() {
         var form_fields = create_fields();
 
-        var form_body = $("<div/>").attr("title", "Add the metadata")
-            .append(
-                $("<form/>").attr("id","add_metadata_form").append(
-                        $("<label/>")
-                        .attr("for","add_metadata_form")
-                        .text("Add the metadata for the notebook."))
-                        .append(form_fields.form1)
-                        .append(form_fields.form2)
-            );
+        var form_body = $("<form/>").attr("id","add_metadata_form")
+                                    .append($("<label/>")
+                                            .attr("for","add_metadata_form")
+                                            .text("Add the metadata for the notebook."))
+                                    .append(form_fields.form1)
+                                    .append(form_fields.form2);
         
         var modal = dialog.modal({
             title: "Add " + Jupyter.notebook.notebook_name + " Metadata",
@@ -613,7 +610,7 @@ define(["base/js/namespace",
             .attr("for","nb-citations")
             .text("Add citations for any third party resources that have been used in this notebook: ");
 
-        var citations = $("<div/>");
+        var citations = $("<div/>").attr("id","nb-citations");
 
         var citation_div = $("<div/>").addClass("nb-citation_div");
 
@@ -639,7 +636,7 @@ define(["base/js/namespace",
         citations.append(citation_div);
 
         var referencedByLabel = $("<label/>")
-            .attr("for","nb-referencedBy_div")
+            .attr("for","nb-referencedBys")
             .text("Add URIs for items that reference this notebook or its data: ");
 
         var referencedBy = $("<input/>")
@@ -649,7 +646,7 @@ define(["base/js/namespace",
 
         var referencedBy_div = $("<div/>").addClass("nb-referencedBy_div");
 
-        var referencedBy_divs = $("<div/>");
+        var referencedBy_divs = $("<div/>").attr("id","nb-referencedBys");
 
         var addReferencedByButton = $("<button/>")
             .addClass("btn btn-xs btn-default btn-add add-ReferencedBy-button")
