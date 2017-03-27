@@ -216,7 +216,7 @@ casper.notebook_test(function() {
 
     //testing the date validation
     this.then(function() {
-        this.fillSelectors("form#publish_form > fieldset#fields1", {
+        this.fillSelectors("form#publish-form > fieldset#fields1", {
             "#title": "My Title",
             "#author-last-name-0": "Davies",
             "#author-first-name-0": "Louise",
@@ -234,7 +234,7 @@ casper.notebook_test(function() {
 
 
     this.then(function() {
-        this.fill("form#publish_form > fieldset#fields1", {
+        this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
             "abstract": "My abstract",
             "year": "1000",
@@ -249,7 +249,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fill("form#publish_form > fieldset#fields1", {
+        this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
             "abstract": "My abstract",
             "year": "2000",
@@ -265,7 +265,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fill("form#publish_form > fieldset#fields1", {
+        this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
             "abstract": "My abstract",
             "year": "2000",
@@ -282,7 +282,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fill("form#publish_form > fieldset#fields1", {
+        this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
             "abstract": "My abstract",
             "year": "1900", //not a leap year
@@ -299,7 +299,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fill("form#publish_form > fieldset#fields1", {
+        this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
             "abstract": "My abstract",
             "year": "2000", //is a leap year!
@@ -324,7 +324,7 @@ casper.notebook_test(function() {
     //Add some test metadata
     this.then(function() {
         //need to use fillSelectors over fill to fill in the authors
-        this.fillSelectors("form#publish_form > fieldset#fields1", { 
+        this.fillSelectors("form#publish-form > fieldset#fields1", { 
             "#title": "My Title",
             "#nb-abstract": "My abstract",
             "#year": "1995",
@@ -356,7 +356,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function(){
-        this.fillSelectors("form#publish_form > fieldset#fields2", {
+        this.fillSelectors("form#publish-form > fieldset#fields2", {
             "#department": "12",
             "#nb-licence-dropdown": "Other"
         });
@@ -367,7 +367,7 @@ casper.notebook_test(function() {
     //todo: when communities finalised make it so we always test to the default
     //repository
     this.then(function() {
-        this.fill("form#publish_form > fieldset#fields2", {
+        this.fill("form#publish-form > fieldset#fields2", {
             "repository": "edata/8",
         });
     });
@@ -417,7 +417,7 @@ casper.notebook_test(function() {
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
-        this.fillSelectors("form#publish_form > fieldset#fields2", {
+        this.fillSelectors("form#publish-form > fieldset#fields2", {
             "#publisher": "test publisher",
             "#nb-citation-0": "Citation 1",
             "#nb-citation-2": "Citation 2",
