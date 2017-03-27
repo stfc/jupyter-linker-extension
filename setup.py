@@ -178,6 +178,7 @@ setup_args = dict(
         'nbconvert',
         'ldap3',
         'requests',
+	'requests-futures',
     ],
     cmdclass={
         'install': CustomInstallCommand,
