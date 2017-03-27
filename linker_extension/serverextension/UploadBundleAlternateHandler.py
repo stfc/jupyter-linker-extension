@@ -180,6 +180,7 @@ class UploadBundleAlternateHandler(IPythonHandler):
             tempdir = t.name
             os.chdir(tempdir)
         except OSError:
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "OSError when opening temp dir")
 
         # for each file, write to a file.
@@ -194,6 +195,7 @@ class UploadBundleAlternateHandler(IPythonHandler):
                 with open(file["file_name"], "wb") as f:
                     f.write(base64.decodestring(base64_data.encode("utf-8")))
         except OSError:
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "OSError when writing the files")
 
         # for each TOS file, write to a file. They're names TOS [ID].txt
@@ -208,6 +210,7 @@ class UploadBundleAlternateHandler(IPythonHandler):
                 with open("TOS " + str(index), "wb") as f:
                     f.write(base64.decodestring(base64_data.encode("utf-8")))
         except OSError:
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "OSError when writing the TOS files")
 
         # set licence file path to the relevant licence preset
@@ -267,6 +270,7 @@ class UploadBundleAlternateHandler(IPythonHandler):
             files.append(licence_xml)
 
         except IndexError:
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "IndexError when getting"
                                      "'files' root node")
 
@@ -322,6 +326,7 @@ class UploadBundleAlternateHandler(IPythonHandler):
             struct.append(licence_struct_xml)
 
         except IndexError:
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "IndexError when getting "
                                      "'struct' root node")
 
@@ -329,6 +334,7 @@ class UploadBundleAlternateHandler(IPythonHandler):
             # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except OSError:
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "OSError when writing tree to mets.xml")
 
         # create a zip file for our sword submission. Write mets.xml,
@@ -337,32 +343,21 @@ class UploadBundleAlternateHandler(IPythonHandler):
         try:
             created_zip_file = zipfile.ZipFile("data_bundle.zip", "w")
             created_zip_file.write("mets.xml")
-            copy("data_bundle.zip","/home/mnf98541/data_bundle-0.zip")
-            print("before data files")
 
             for i in list(range(0, len(data_files))):
                 created_zip_file.write(data_files[i]["file_name"])
-                print("added " + data_files[i]["file_name"])
-
-            print("after data files")
 
             for i in list(range(0, len(TOS_files))):
                 created_zip_file.write("TOS " + str(i))
-                print("added " + "TOS " + str(i))
-
-            print("after TOS files")
 
             created_zip_file.write(licence_file_path, "LICENSE.txt")
 
-            print("after licence file")
-
         except:  # dunno what exceptions we might encounter here
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
             # close the zip either way
             created_zip_file.close()
-            copy("data_bundle.zip","/home/mnf98541")
-            print("closed zip file")
 
         # reading the newly created zip file as binary so we can send it via
         # a http request
@@ -370,6 +365,7 @@ class UploadBundleAlternateHandler(IPythonHandler):
             with open("data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
         except OSError:
+            os.chdir(notebook_dir)
             raise web.HTTPError(500, "OSError when reading zip file"
                                      "as binary data")
 
@@ -400,7 +396,6 @@ class UploadBundleAlternateHandler(IPythonHandler):
         except requests.exceptions.RequestException:
             raise web.HTTPError(500, "Requests made an error")
 
-        print(r.status_code)  # TODO: remove later
         retries = 5
 
         while (r.status_code != 201 and
@@ -419,19 +414,16 @@ class UploadBundleAlternateHandler(IPythonHandler):
             except requests.exceptions.RequestException:
                 raise web.HTTPError(500, "Requests made an error")
 
-            print(r.status_code)
             retries -= 1
 
         # Delete temp directory and pass along the status code and request text
         if(r.status_code == 201):  # created
             self.clear()
             self.set_status(201)
-            print(r.text)
             self.finish(r.text)
         elif (r.status_code == 202):  # accepted (waiting for approval)
             self.clear()
             self.set_status(202)
-            print(r.text)
             self.finish(r.text)
         else:  # Still failed even after the retries
             raise web.HTTPError(500, "Requests failed after 5 retries")
