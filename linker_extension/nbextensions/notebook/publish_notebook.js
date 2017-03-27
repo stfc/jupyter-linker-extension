@@ -834,6 +834,9 @@ define(["base/js/namespace",
 
         //remove the data-dismiss attributes
         modal.on("shown.bs.modal", function () {
+            //disable keyboard - need this because we may have triggered the
+            //warning modal, which on close reenables the keyboard, so just re-disable it
+            Jupyter.notebook.keyboard_manager.disable();
             $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
                                                     .attr("id","previous")
                                                     .prop("disabled",true);
