@@ -1,4 +1,4 @@
-"""DSpace Tornado handlers used for testing."""
+"""DSpace Tornado handlers used for downloading data from DSpace."""
 
 import requests
 from requests_futures.sessions import FuturesSession
@@ -34,6 +34,8 @@ class DownloadHandler(IPythonHandler):
         un = arguments['username']
         pw = arguments['password']
         URLs = arguments["URLs"]
+        notebook_path = arguments["notebookpath"]
+        notebook_wd = os.path.dirname(notebook_path)
 
         # login for token
         login_url = urljoin(dspace_url, "/rest/login")
@@ -60,6 +62,7 @@ class DownloadHandler(IPythonHandler):
         # handle TODO: this probably needs testing to see if it's super slow
         # with lots of items?
         find_requests = {}
+        item_names = {}
         
         for url in URLs:
             if url.find(dspace_url) != -1:
@@ -67,6 +70,7 @@ class DownloadHandler(IPythonHandler):
                 r1 = session.get(get_url,verify=False)
                 r1_json = r1.result().json()
                 id = None
+                item_names[url] = None
                 for item_json in r1_json:
                     url_split = url.split("/")
                     # get handle be getting the last two elements of url_split
@@ -105,11 +109,13 @@ class DownloadHandler(IPythonHandler):
                 # no matter whether it's a list of 1 item or not
                 if type(response_json) is list:
                     id = response.json()[0]["id"]
+                    item_names[key] = response.json()[0]["name"]
 
                 # however, if we search via handle and then just get the item we
                 # just get the 1 dict that matches since we requested the item by id
                 elif type(response_json) is dict:
                     id = response.json()["id"]
+                    item_names[key] = response.json()["name"]
 
                 # this should in theory never happen but just in case...
                 else:
@@ -180,35 +186,58 @@ class DownloadHandler(IPythonHandler):
         for url in URLs: # check each download to check everything ok
             if find_requests[url].result().status_code != 200:
                 # fail on find via metadata.
-                result_dict[url] = "Error! Failed trying to find the item in eData"
+                result_dict[url] = {
+                    "error": True,
+                    "message": "Error! Failed trying to find the item in eData",
+                    "name": item_names[url],
+                    "paths": []
+                }
             else:
                 if get_bitstreams_requests[url].result().status_code != 200:
                     # fail on get bistreams
-                    result_dict[url] = "Error! Failed trying to list the bitstreams"
+                    result_dict[url] = {
+                        "error": True,
+                        "message": "Error! Failed trying to list the bitstreams",
+                        "name": item_names[url],
+                        "paths": []
+                    }
                 else:
                     for result in get_content[url]:
                         if result["bitstream_data_request"].result().status_code != 200:
-                            result_dict[url] = "Error! Failed trying to retrieve bitstream content"
+                            result_dict[url] = {
+                                "error": True,
+                                "message": "Error! Failed trying to retrieve bitstream content",
+                                "name": item_names[url],
+                                "paths": []
+                            }
                             break
 
             if len(get_content[url]) == 0:
                 # shouldn't /really/ get this - users must specify a bitstream
                 # when uploading. But you can delete all the bitstreams from an
                 # existing item
-                result_dict[url] = "Error! Found no bitstreams for the item"
+                result_dict[url] = {
+                    "error": True,
+                    "message": "Error! Found no bitstreams for the item",
+                    "name": item_names[url],
+                    "paths": []
+                }
 
             if url not in result_dict:
                 #we succeeded - save the files into the notebook folder
-                result_dict[url] = "Success!"
+                result_dict[url] = {
+                    "error": False, 
+                    "message": "Success!",
+                    "name": item_names[url],
+                    "paths": []
+                }
 
                 index = ""
                 cwd = os.getcwd()
 
-                first_bistream = get_content[url][0]
-
                 while True:
                     try:
-                        path = cwd + "/" + first_bistream["item_name"] + index
+                        path = cwd + "/" + notebook_wd  + "/" + item_names[url] + index
                         os.makedirs(path)
                         break
                     except FileExistsError:
@@ -224,7 +253,7 @@ class DownloadHandler(IPythonHandler):
                         result_dict[url] = "Error! Failed when creating directory"
                         break
 
-                if result_dict[url] == "Success!":
+                if not result_dict[url]["error"]:
                     for bitstream in get_content[url]:
                         os.chdir(path)
                         try:
@@ -237,9 +266,34 @@ class DownloadHandler(IPythonHandler):
 
                             with open(os.path.basename(filename),"w+b") as f:
                                 f.write(bitstream["bitstream_data_request"].result().content)
+
+                            try:
+                                first_dot = os.path.basename(filename).index(".")
+                                filename_no_extension = os.path.basename(filename)[:first_dot]
+                                # extract files
+                                shutil.unpack_archive(os.path.basename(filename))
+                                extracted_files = os.listdir(filename_no_extension)
+
+                                # add all the extracted files to the path list
+                                for extracted_file in extracted_files:
+                                    result_dict[url]["paths"].append(os.getcwd() + filename_no_extension + extracted_file)
+                            except shutil.ReadError as e:
+                                if  e.args[0] != "Unknown archive format '{0}'".format(os.path.basename(filename)):
+                                    # actual error, aka it has the right format
+                                    # and we still can't unzip it. add warning
+                                    # to message
+                                    result_dict[url]["message"] = result_dict[url]["message"] + "However, we were unable to unpack some of the archive files in the item "
+
+                                result_dict[url]["paths"].append(os.getcwd() + os.path.basename(filename))    
+
                             os.chdir(cwd)
                         except OSError:
-                            result_dict[url] = "Error! Failed when writing files"
+                            result_dict[url] = {
+                                "error": True,
+                                "message": "Error! Failed when writing files",
+                                "name": item_names[url],
+                                "paths": []
+                            }
                             os.chdir(cwd)
                             # clean up the folder so we don't have a half completed download
                             # TODO: is this sensible behaviour?
