@@ -125,7 +125,6 @@ define([
                                             }
                                         );
                                     }
-                                    $(".modal").modal("hide");
                                 }).catch(function() {
                                     //TODO: move this to apply to both file upload fields
                                     var error = $("<div/>")
@@ -133,6 +132,7 @@ define([
                                         .css("color","red")
                                         .text("File upload failed - please try again.");
                                     $("label[for=\"TOS\"]").after(error);
+                                    return false;
                                 });
                             }).catch(function(reason) { //fail function
                                 var error = $("<div/>")
@@ -141,6 +141,7 @@ define([
 
                                 error.text(reason.message);
                                 login.after(error);
+                                return false;
                             });
                         }
                     }
@@ -151,8 +152,6 @@ define([
         });
 
         modal_obj.on("shown.bs.modal", function () {
-            //don't auto-dismiss when you click upload in case there's errors
-            $(".modal-footer > .btn-primary").removeAttr("data-dismiss");
             //Multifile has to be initialised after it has been added to DOM
             $("#data-files").MultiFile({
                 afterFileAppend: function(element, value, master_element) {
@@ -276,11 +275,16 @@ define([
 
         if(TOS_files) {
             for(var i = 0; i < TOS_files.length; i++) {
+                var file = TOS_files[i];
                 var promise = new Promise(function(resolve,reject) {
                     var reader = new FileReader();
 
                     reader.onload = function(e) {
-                        TOS_files_contents.push(e.target.result);
+                        var file_info = {};
+                        file_info["file_name"] = file.name;
+                        file_info["file_mimetype"] = file.type;
+                        file_info["file_contents"] = e.target.result;
+                        TOS_files_contents.push(file_info);
                         resolve(e.target.result);
                     };
 

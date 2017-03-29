@@ -242,6 +242,8 @@ define(["base/js/namespace",
                                         );
                                     }
                                 });
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //fail function
                                 var error = $("<div/>")
@@ -252,6 +254,7 @@ define(["base/js/namespace",
                                 login.after(error);
                             });
                         }
+                        return false;
                     },
                 }
             },
@@ -259,14 +262,10 @@ define(["base/js/namespace",
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
 
-        /*  
-         *  The default modal from the notebook automatically has all the buttons
-         *  dismiss the modal. This is obviously not desired, so remove the
-         *  data dismiss attriute. Also dismiss any previous download alerts
-         */ 
+        //stuff to do when modal is open and fully visible
         modal.on("shown.bs.modal", function () {
-            $(".modal-footer > button.btn-primary").removeAttr("data-dismiss")
-                                                    .attr("id","download");
+            //add id for ease of usage
+            $(".modal-footer > button.btn-primary").attr("id","download");
             $(".download-success-alert").alert("close");
             $(".download-failure-alert").alert("close");
             $(".download-redownload-alert").alert("close");

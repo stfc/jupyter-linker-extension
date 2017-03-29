@@ -147,6 +147,7 @@ define([
 
                                 error.text(reason.message);
                                 login.after(error);
+                                return false;
                             });
                         } else {
                             custom_utils.create_alert(
@@ -161,11 +162,6 @@ define([
             },
             notebook: Jupyter.notebook,
             keyboard_manager: Jupyter.keyboard_manager,
-        });
-
-        modal_obj.on("shown.bs.modal", function () {
-            //don't auto-dismiss when you click upload
-            $(".modal-footer > .btn-primary").removeAttr("data-dismiss");
         });
     };
 

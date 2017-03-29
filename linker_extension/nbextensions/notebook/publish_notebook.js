@@ -150,6 +150,7 @@ define(["base/js/namespace",
                             instructions.text("Check and edit the metadata for " +
                                               "the notebook before uploading to eData.");
                         }
+                        return false;
                     }
                 },
                 Next: { 
@@ -189,7 +190,6 @@ define(["base/js/namespace",
                                 //TODO: do we need to save this metadata or not? ask
                                 Jupyter.notebook.metadata.bundle_metadata = bundle_metadata;*/
 
-                                
                             }
                         } else if (!$("#fields1").hasClass("hide-me")) {
                             add_metadata.validate_fields1();
@@ -220,7 +220,6 @@ define(["base/js/namespace",
                                         .text("File upload failed - please try again.");
                                     instructions.after(error);
                                 });
-
                             }
                         } else if (!$("#final-page").hasClass("hide-me")) {
                             //do login validation and publishing here!
@@ -265,7 +264,8 @@ define(["base/js/namespace",
                                         }
                                     );
                                 }
-
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //login failed
                                 var error = $("<div/>")
@@ -276,19 +276,18 @@ define(["base/js/namespace",
                                 login.after(error);
                             });
                         }
+                        return false;
                     },
                 }
             },
             notebook: Jupyter.notebook,
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
-        //remove the data-dismiss attributes
+        //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous")
+            $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
-            $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
-                                                    .attr("id","next");
+            $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
         });
 
     };
@@ -417,6 +416,7 @@ define(["base/js/namespace",
                             instructions.text("Check and edit the metadata for " +
                                               "the notebook before uploading to eData.");
                         }
+                        return false;
                     }
                 },
                 Next: { 
@@ -462,7 +462,6 @@ define(["base/js/namespace",
                                 //TODO: do we need to save this metadata or not? ask
                                 Jupyter.notebook.metadata.bundle_metadata = bundle_metadata;*/
 
-                                
                             }
                         } else if (!$("#fields1").hasClass("hide-me")) {
                             add_metadata.validate_fields1();
@@ -538,7 +537,8 @@ define(["base/js/namespace",
                                         }
                                     );
                                 }
-
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //login failed
                                 var error = $("<div/>")
@@ -549,19 +549,18 @@ define(["base/js/namespace",
                                 login.after(error);
                             });
                         }
+                        return false;
                     },
                 }
             },
             notebook: Jupyter.notebook,
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
-        //remove the data-dismiss attributes
+        //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous")
+            $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
-            $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
-                                                    .attr("id","next");
+            $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
 
             //Multifile has to be initialised after it has been added to DOM
             $("#data-files").MultiFile({
@@ -745,6 +744,7 @@ define(["base/js/namespace",
                             instructions.text("Check and edit the metadata for " +
                                               "the notebook before uploading to eData.");
                         }
+                        return false;
                     }
                 },
                 Next: { 
@@ -814,7 +814,8 @@ define(["base/js/namespace",
                                         }
                                     );
                                 }
-
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //login failed
                                 var error = $("<div/>")
@@ -825,6 +826,7 @@ define(["base/js/namespace",
                                 login.after(error);
                             });
                         }
+                        return false;
                     },
                 }
             },
@@ -832,16 +834,14 @@ define(["base/js/namespace",
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
 
-        //remove the data-dismiss attributes
+        //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
             //disable keyboard - need this because we may have triggered the
             //warning modal, which on close reenables the keyboard, so just re-disable it
             Jupyter.notebook.keyboard_manager.disable();
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous")
+            $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
-            $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
-                                                    .attr("id","next");
+            $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
         });
 
     };
@@ -941,6 +941,7 @@ define(["base/js/namespace",
                             //we want button text to be next
                             //on any page but the last one
                             $("#next").text("Next");
+                            return false;
                         }
                     }
                 },
@@ -1030,7 +1031,8 @@ define(["base/js/namespace",
                                         }
                                     );
                                 }
-
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //login failed
                                 var error = $("<div/>")
@@ -1041,6 +1043,7 @@ define(["base/js/namespace",
                                 login.after(error);
                             });
                         }
+                        return false;
                     },
                 }
             },
@@ -1048,13 +1051,11 @@ define(["base/js/namespace",
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
 
-        //remove the data-dismiss attributes
+        //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous")
+            $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
-            $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
-                                                    .attr("id","next");
+            $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
         });
 
     };
@@ -1159,6 +1160,7 @@ define(["base/js/namespace",
                             $("#metadata-page").removeClass("hide-me");
 
                         }
+                        return false;
                     }
                 },
                 Next: { 
@@ -1253,7 +1255,8 @@ define(["base/js/namespace",
                                         }
                                     );
                                 }
-
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
                                 $(".modal").modal("hide");
                             }).catch(function(reason) { //login failed
                                 var error = $("<div/>")
@@ -1264,6 +1267,7 @@ define(["base/js/namespace",
                                 login.after(error);
                             });
                         }
+                        return false;
                     },
                 }
             },
@@ -1271,13 +1275,11 @@ define(["base/js/namespace",
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
 
-        //remove the data-dismiss attributes
+        //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous")
+            $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
-            $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
-                                                    .attr("id","next");
+            $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
 
             //Multifile has to be initialised after it has been added to DOM
             $("#data-files").MultiFile({
