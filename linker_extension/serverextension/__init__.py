@@ -18,6 +18,7 @@ from .UploadBundleAlternateHandler import UploadBundleAlternateHandler
 from .LDAPHandler import LDAPHandler
 from .CustomNbconvertHandler import CustomNbconvertHandler
 from .DownloadHandler import DownloadHandler
+from .MiscHandlers import ContentsHandler
 
 # ----------------------------------------------------------------------------
 # URL to handler mappings
@@ -95,6 +96,10 @@ def load_jupyter_server_extension(nbapp):
     route_pattern_download = url_path_join(web_app.settings['base_url'],
                                        '/dspace_download')
     web_app.add_handlers(host_pattern, [(route_pattern_download, DownloadHandler)])
+
+    route_pattern_contents = url_path_join(web_app.settings['base_url'],
+                                       '/dspace_contents')
+    web_app.add_handlers(host_pattern, [(route_pattern_contents, ContentsHandler)])
 
     route_pattern_nbconvert = url_path_join(web_app.settings['base_url'],
                                             r"/customnbconvert/%s%s%s"

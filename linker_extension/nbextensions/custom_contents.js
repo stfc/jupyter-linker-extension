@@ -143,6 +143,18 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         return utils.promising_ajax(url, settings);
     };
 
+    //returns the base path for the server. 
+    var get_server_path = function() {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/dspace_contents"]);
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "GET",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
     //export them so we can use the functions
     module.exports = {
         sword_get_servicedocument: sword_get_servicedocument,
@@ -155,5 +167,6 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         update_config: update_config,
         get_config: get_config,
         download_data: download_data,
+        get_server_path: get_server_path,
     };
 });
