@@ -268,10 +268,17 @@ class DownloadHandler(IPythonHandler):
                                 f.write(bitstream["bitstream_data_request"].result().content)
 
                             try:
-                                first_dot = os.path.basename(filename).index(".")
-                                filename_no_extension = os.path.basename(filename)[:first_dot]
-                                # extract files
-                                shutil.unpack_archive(os.path.basename(filename))
+                                try:
+                                    first_dot = os.path.basename(filename).index(".")
+                                    filename_no_extension = os.path.basename(filename)[:first_dot]
+                                except ValueError:
+                                    # we get this if there's no dot i.e. no file
+                                    # extension. Since this could be a valid file
+                                    # just set filename_no_extension to be filename
+                                    filename_no_extension = os.path.basename(filename)
+
+                                # extract files into a folder with the filename as the name
+                                shutil.unpack_archive(os.path.basename(filename), filename_no_extension)
                                 extracted_files = os.listdir(filename_no_extension)
 
                                 # add all the extracted files to the path list
