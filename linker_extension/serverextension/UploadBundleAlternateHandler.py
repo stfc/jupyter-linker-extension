@@ -198,16 +198,18 @@ class UploadBundleAlternateHandler(IPythonHandler):
             os.chdir(notebook_dir)
             raise web.HTTPError(500, "OSError when writing the files")
 
-        # for each TOS file, write to a file. They're names TOS [ID].txt
+        # for each TOS file, write to a file. They're named TOS [ID].[extension]
         try:
             for index, file in enumerate(TOS_files):
-                base64_data = file.split(",")[1]
+                base64_data = file["file_contents"].split(",")[1]
 
-                encoding_info = file.split(",")[0]
+                encoding_info = file["file_contents"].split(",")[0]
                 encoding_info = encoding_info.split(";")[0]
                 encoding_info = encoding_info.split(":")[1]
-
-                with open("TOS " + str(index), "wb") as f:
+                TOS_file_name = file["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+                with open("TOS " + str(index) + TOS_file_extension, "wb") as f:
                     f.write(base64.decodestring(base64_data.encode("utf-8")))
         except OSError:
             os.chdir(notebook_dir)
@@ -245,13 +247,17 @@ class UploadBundleAlternateHandler(IPythonHandler):
                 files.append(files_xml)
 
             for i in list(range(0, len(TOS_files))):
+                TOS_file_name = TOS_files[i]["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+
                 file_attr = {"GROUPID": "TOS-File-" + str(i),
-                             "ID": "TOS " + str(i),
-                             "MIMETYPE": encoding_info}
+                             "ID": "TOS " + str(i) + TOS_file_extension,
+                             "MIMETYPE": TOS_files[i]["file_mimetype"]}
                 files_xml = ET.Element('file', file_attr)
 
                 FLocat_attr = {"LOCTYPE": "URL",
-                               "xlink:href": "TOS " + str(i)}
+                               "xlink:href": "TOS " + str(i) + TOS_file_extension}
                 FLocat_xml = ET.Element('FLocat', FLocat_attr)
 
                 files_xml.append(FLocat_xml)
@@ -299,12 +305,16 @@ class UploadBundleAlternateHandler(IPythonHandler):
                                    "DMDID": "sword-mets-dmd-2",
                                    "TYPE": "TOS"}
             for i in list(range(0, len(TOS_files))):
+                TOS_file_name = TOS_files[i]["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+
                 TOS_struct_xml = ET.Element('div', TOS_struct_attr)
 
-                TOS_struct_child_attr = {"ID": "TOS " + str(i), "TYPE": "File"}
+                TOS_struct_child_attr = {"ID": "TOS " + str(i) + TOS_file_extension, "TYPE": "File"}
                 TOS_struct_xml_child = ET.Element('div', TOS_struct_child_attr)
 
-                TOS_fptr_xml = ET.Element("ftpr", {"FILEID": "TOS " + str(i)})
+                TOS_fptr_xml = ET.Element("ftpr", {"FILEID": "TOS " + str(i) + TOS_file_extension})
 
                 TOS_struct_xml_child.append(TOS_fptr_xml)
                 TOS_struct_xml.append(TOS_struct_xml_child)
@@ -348,7 +358,10 @@ class UploadBundleAlternateHandler(IPythonHandler):
                 created_zip_file.write(data_files[i]["file_name"])
 
             for i in list(range(0, len(TOS_files))):
-                created_zip_file.write("TOS " + str(i))
+                TOS_file_name = TOS_files[i]["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+                created_zip_file.write("TOS " + str(i) + TOS_file_extension)
 
             created_zip_file.write(licence_file_path, "LICENSE.txt")
 
