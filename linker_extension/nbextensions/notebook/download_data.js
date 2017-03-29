@@ -188,24 +188,30 @@ define(["base/js/namespace",
                                     URLs: urls,
                                     username: $("#username").val(),
                                     password: $("#password").val(),
+                                    notebookpath: Jupyter.notebook.notebook_path
                                 }).then(function(response) {
+                                    var downloaded_items = Jupyter.notebook.metadata.downloaded_items || {};
                                     Object.keys(response).forEach(function(key) {
-                                        var value = response[key];
-                                        if(value === "Success!") {
-                                            custom_utils.create_alert(
-                                                "alert-success download-success-alert",
-                                                "Success! <a href=\"" + key +  
-                                                "\"class=\"alert-link\">" + key +
-                                                "</a> downloaded from eData.");
-                                        } else {
+                                        var result = response[key];
+                                        if(result.error) {
                                             custom_utils.create_alert(
                                                 "alert-danger download-failure-alert",
-                                                value + " while downloading " +
-                                                "<a href=\"" + key + "\" " + 
-                                                "class=\"alert-link\">"+ key + "</a>")
-                                                        .attr("id",key) ;
+                                                result.message + " while downloading " +
+                                                result.name + " (<a href=\"" + key + 
+                                                "\" class=\"alert-link\">"+ key + 
+                                                "</a>)").attr("id",key);
+                                        } else {
+                                            custom_utils.create_alert(
+                                                "alert-success download-success-alert",
+                                                result.message + " " + result.name +
+                                                " (<a href=\"" + key +  
+                                                "\"class=\"alert-link\">" + key +
+                                                "</a>) downloaded from eData.");
+                                            downloaded_items[result.name] = result.paths;
                                         }
                                     });
+                                    Jupyter.notebook.metadata.downloaded_items = downloaded_items;
+                                    Jupyter.notebook.save_notebook();
                                     var failed_urls = [];
                                     $(".download-failure-alert").each(function() {
                                         failed_urls.push($(this).attr("id"));
