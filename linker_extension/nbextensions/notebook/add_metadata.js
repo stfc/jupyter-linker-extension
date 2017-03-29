@@ -49,6 +49,8 @@ define(["base/js/namespace",
                             //but the last one
                             $("#next").text("Next"); 
                         }
+                        //return false tells the modal not to dismiss itself
+                        return false;
                     }
                 },
                 Next: { 
@@ -66,6 +68,7 @@ define(["base/js/namespace",
                                 //we want button text to be save on the last page
                                 $("#next").text("Save");
                             }
+                            return false;
                         }
                         else if($("#fields1").hasClass("hide-me") &&
                                 !$("#fields2").hasClass("hide-me"))
@@ -77,7 +80,8 @@ define(["base/js/namespace",
                                     Jupyter.notebook.save_notebook();
                                 });
                                 $("#collections_loaded").remove();
-                                $(".modal").modal("hide");
+                            } else {
+                                return false;
                             }
                         }
                     },
@@ -87,19 +91,14 @@ define(["base/js/namespace",
             keyboard_manager: Jupyter.notebook.keyboard_manager,
         });
 
-        /*  
-         *  The default modal from the notebook automatically has all the buttons
-         *  dismiss the modal. This is obviously not desired, so remove the
-         *  data dismiss attriute. Also, add_metadata can't be used to select a
-         *  licence file due to JS limitations regarding remembering which
-         *  file was selected so just disable them.  
-         */ 
+        //stuff to be done once the modal is loaded and shown
         modal.on("shown.bs.modal", function () {
-            $(".modal-footer > button.btn-sm").eq(1).removeAttr("data-dismiss")
-                                                    .attr("id","previous")
+            //disable previous button on first page, and add ids to the next
+            //and previous buttons to make life easier
+            $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
-            $(".modal-footer > button.btn-sm").eq(2).removeAttr("data-dismiss")
-                                                    .attr("id","next");
+            $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
+
             //we can't store licence file info in metadata so disable it
             //only allow the option when publishing
             $("#licence-file-radio").prop("disabled",true);
@@ -196,7 +195,10 @@ define(["base/js/namespace",
                         query.then(function(data) {
                             response($.map(data, function(item) {
                                 var parsed = JSON.parse(item);
-                                return parsed.attributes.displayName;
+                                //get rid of 03 admin accounts
+                                if(parsed.dn.indexOf("OU=Local Admins") === -1) {
+                                    return parsed.attributes.displayName;
+                                }
                             }));
                         }).catch(function(reason) {
                             var ldap_error = $("<div/>")
