@@ -451,7 +451,13 @@ define(["base/js/namespace",
         var abstract = $("<textarea/>")
             .attr("name","abstract")
             .attr("id","nb-abstract")
+            .attr("readonly","readonly")
             .attr("required","required");
+
+        //TODO: fill in from first notebook cell
+        if(Jupyter.notebook.get_cell(0).cell_type === "markdown") {
+            abstract.val(Jupyter.notebook.get_cell(0).get_text());
+        }
 
         var tagsLabel = $("<label/>")
             .attr("for","tags")
@@ -1219,8 +1225,6 @@ define(["base/js/namespace",
                 }
             });
 
-            abstract.val(md.reportmetadata.abstract);
-
             md.reportmetadata.tags.forEach(function(item) {
                 tags.val(tags.val() + item + "\n");
             });
@@ -1313,13 +1317,22 @@ define(["base/js/namespace",
 
             $("label[for=\"title\"]").after(title_error);
         }
+        if(Jupyter.notebook.get_cell(0).cell_type !== "markdown") {
+            var abstract_invalid_error = $("<div/>")
+                .attr("id","nb-abstract-invalid-error")
+                .addClass("metadata-form-error")
+                .text("Please exit this dialog and create a markdown cell " +
+                      "at the top of the notebook to be used as an abstract");
+
+            $("label[for=\"nb-abstract\"]").after(abstract_invalid_error);
+        }
         if($("#nb-abstract").val() === "") {
-            var abstract_error = $("<div/>")
+            var abstract_missing_error = $("<div/>")
                 .attr("id","nb-abstract-missing-error")
                 .addClass("metadata-form-error")
-                .text("Please enter an abstract");
+                .text("Please exit this dialog and enter an abstract");
 
-            $("label[for=\"nb-abstract\"]").after(abstract_error);
+            $("label[for=\"nb-abstract\"]").after(abstract_missing_error);
         }
         if($("#author-first-name-0").val() === "" || $("#author-last-name-0").val() === "") {
             var author_error = $("<div/>")

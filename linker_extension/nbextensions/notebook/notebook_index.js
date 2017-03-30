@@ -21,6 +21,19 @@ var download_data = require("./download_data.js");
 function load_ipython_extension(){
     console.log("Linker extension (notebook) loaded");
 
+    //on load, set the first cell to be markdown and indicate to the user
+    //that it is an abstract cell and will be used as the abstract
+    //in eData. Only do this the cell is empty
+    if(Jupyter.notebook.get_cell(0).get_text() === "") {
+        Jupyter.notebook.get_cell(0).cell_type = "markdown";
+        Jupyter.notebook.cells_to_markdown();
+        Jupyter.notebook.get_cell(0).set_text("The first cell of the notebook " + 
+            "is used as the abstract for the notebook. Please enter your " + 
+            "abstract here. If you accidentally delete this cell, please " + 
+            "just create a new markdown cell at the top of the notebook.");
+        Jupyter.notebook.get_cell(0).execute();
+    }    
+
     modify_notebook_html.load();
     add_metadata.load();
     select_data_notebook.load();
