@@ -117,9 +117,11 @@ casper.notebook_test(function() {
     //check the cell metadata using edit metadata
     selector = "li[data-name=\"Edit%20Metadata\"] > a";
     this.thenClick(selector);
+    this.then(function() {
+        this.capture("screenshots/cellt.png");
+    });
 
-    selector = ".cell:nth-of-type(1) > .input > .inner_cell > .ctb_show > " +
-               ".celltoolbar > .button_container > button";
+    selector = ".cell:nth-of-type(1) .celltoolbar > .button_container > button";
     this.thenClick(selector);
 
     this.waitForSelector(".modal-body");
@@ -144,8 +146,7 @@ casper.notebook_test(function() {
 
     this.waitWhileSelector(".modal");
 
-    selector = ".cell:nth-of-type(2) > .input > .inner_cell > .ctb_show > " +
-               ".celltoolbar > .button_container > button";
+    selector = ".cell:nth-of-type(2) .celltoolbar > .button_container > button";
     this.waitForSelector(selector);
     this.thenClick(selector);
 
@@ -245,8 +246,7 @@ casper.notebook_test(function() {
     selector = "li[data-name=\"Edit%20Metadata\"] > a";
     this.thenClick(selector);
 
-    selector = ".cell:nth-of-type(1) > .input > .inner_cell > .ctb_show > " +
-               ".celltoolbar > .button_container > button";
+    selector = ".cell:nth-of-type(1) .celltoolbar > .button_container > button";
     this.thenClick(selector);
 
     this.waitForSelector(".modal-body");
@@ -271,8 +271,7 @@ casper.notebook_test(function() {
 
     this.waitWhileSelector(".modal");
 
-    selector = ".cell:nth-of-type(2) > .input > .inner_cell > .ctb_show > " + 
-               ".celltoolbar > .button_container > button";
+    selector = ".cell:nth-of-type(2) .celltoolbar > .button_container > button";
     this.waitForSelector(selector);
     this.thenClick(selector);
 
