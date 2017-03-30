@@ -101,6 +101,27 @@ casper.notebook_test(function() {
         });
     }, {nbname:nbname});
 
+    //test abstract cell was created right, and remove defaults to test validation
+    this.then(function() {
+        var cell_type = this.evaluate(function() {
+            return Jupyter.notebook.get_cell(0).cell_type;
+        });
+        this.test.assertEquals(cell_type,"markdown","Abstract cell type changed");
+        var cell_val = this.evaluate(function() {
+            return Jupyter.notebook.get_cell(0).get_text();
+        });
+        this.test.assertEquals(
+            cell_val,
+            "The first cell of the notebook is used as the abstract for the " + 
+            "notebook. Please enter your abstract here. If you accidentally " + 
+            "delete this cell, please just create a new markdown cell at the " +
+            "top of the notebook.",
+            "Default text inserted into abstract cell successfully.");
+        this.evaluate(function() {
+            Jupyter.notebook.get_cell(0).set_text("My abstract");
+        });
+    });
+
     //Click on menu item
     var selector = "#publish_notebook_and_bundle > a";
     this.waitForSelector(selector);
@@ -160,8 +181,10 @@ casper.notebook_test(function() {
                                "Title missing error exists");
         this.test.assertExists("#author-missing-error",
                                "Author missing error exists");
-        this.test.assertExists("#nb-abstract-missing-error",
-                               "Abstract missing error exists");
+        this.test.assertDoesntExist("#nb-abstract-missing-error",
+                                    "Abstract missing error does not exist");
+        this.test.assertDoesntExist("#nb-abstract-invalid-error",
+                                    "Abstract invalid error does not exist");
         var date = [];
         var curr_date = new Date();
         date.push(curr_date.getDate().toString());
@@ -212,7 +235,6 @@ casper.notebook_test(function() {
             "#title": "My Title",
             "#author-last-name-0": "Davies",
             "#author-first-name-0": "Louise",
-            "#nb-abstract": "My abstract",
             "#year": "4000",
         });
     });
@@ -228,7 +250,6 @@ casper.notebook_test(function() {
     this.then(function() {
         this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
-            "abstract": "My abstract",
             "year": "1000",
         });
     });
@@ -243,7 +264,6 @@ casper.notebook_test(function() {
     this.then(function() {
         this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
-            "abstract": "My abstract",
             "year": "2000",
             "day": "31",
         });
@@ -259,7 +279,6 @@ casper.notebook_test(function() {
     this.then(function() {
         this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
-            "abstract": "My abstract",
             "year": "2000",
             "month": "2",
             "day": "31",
@@ -276,7 +295,6 @@ casper.notebook_test(function() {
     this.then(function() {
         this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
-            "abstract": "My abstract",
             "year": "1900", //not a leap year
             "month": "2",
             "day": "29",
@@ -293,7 +311,6 @@ casper.notebook_test(function() {
     this.then(function() {
         this.fill("form#publish-form > fieldset#fields1", {
             "title": "My Title",
-            "abstract": "My abstract",
             "year": "2000", //is a leap year!
             "month": "2",
             "day": "29",
@@ -318,7 +335,6 @@ casper.notebook_test(function() {
         //need to use fillSelectors over fill to fill in the authors
         this.fillSelectors("form#publish-form > fieldset#fields1", { 
             "#title": "My Title",
-            "#nb-abstract": "My abstract",
             "#year": "1995",
             "#month": "8",
             "#day": "20",
