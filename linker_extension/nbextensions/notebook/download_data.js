@@ -162,7 +162,8 @@ define(["base/js/namespace",
                         $(".download-url").each(function(index,item) {
                             if(validate_url($(item).val())) {
                                 urls.push($(item).val());
-                            } else {
+                            } else if ($(item).val() !== "") {
+                                //ignore blank inputs
                                 var error = $("<div/>")
                                     .addClass("download-form-error")
                                     .css("color","red")
