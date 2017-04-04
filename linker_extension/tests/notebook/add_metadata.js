@@ -365,8 +365,8 @@ casper.notebook_test(function() {
 
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertExists("#licence-dropdown-error",
-                               "Licence dropdown invalid error exists");
+        this.test.assertDoesntExist("#licence-dropdown-error",
+                                    "Licence dropdown invalid error doesn't exist");
         this.test.assertExists("#repository-missing-error",
                                "Repository missing error exists");
     });
@@ -379,6 +379,17 @@ casper.notebook_test(function() {
         department = this.evaluate(function() {
             return $("#department").val();
         });
+        this.evaluate(function() {
+            $("#nb-licence-dropdown").val("");
+        });
+    });
+
+    this.thenClick("#next");
+    this.then(function() {
+        this.test.assertExists("#licence-dropdown-error",
+                               "Licence dropdown invalid error exists");
+        this.test.assertExists("#repository-missing-error",
+                               "Repository missing error exists");
     });
 
     this.then(function(){

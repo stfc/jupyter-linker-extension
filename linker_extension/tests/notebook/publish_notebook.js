@@ -335,8 +335,8 @@ casper.notebook_test(function() {
 
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertExists("#licence-dropdown-error",
-                               "Licence dropdown invalid error exists");
+        this.test.assertDoesntExist("#licence-dropdown-error",
+                                    "Licence dropdown invalid error doesn't exist");
         this.test.assertExists("#department-missing-error",
                                "Department missing error exists");
         this.test.assertExists("#repository-missing-error",
@@ -346,15 +346,24 @@ casper.notebook_test(function() {
     this.then(function(){
         this.fillSelectors("form#publish-form > fieldset#fields2", {
             "#department": "12",
-            "#nb-licence-dropdown": "Other"
         });
+        this.evaluate(function() {
+            $("#nb-licence-dropdown").val("");
+        });
+    });
+
+    this.thenClick("#next");
+    this.then(function() {
+        this.test.assertExists("#licence-dropdown-error",
+                               "Licence dropdown invalid error exists");
     });
 
     this.waitForSelector("#collections_loaded");
 
     this.then(function() {
-        this.fill("form#publish-form > fieldset#fields2", {
-            "repository": "edata/8",
+        this.fillSelectors("form#publish-form > fieldset#fields2", {
+            "#repository": "edata/8",
+            "#nb-licence-dropdown": "Other"
         });
     });
 
