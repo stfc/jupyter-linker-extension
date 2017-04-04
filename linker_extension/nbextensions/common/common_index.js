@@ -8,7 +8,7 @@ require("style-loader!css-loader!tree-multiselect/dist/jquery.tree-multiselect.c
  *  pages, and so the common html is the html that modifies all pages.
  */ 
 function load_ipython_extension(){
-    console.log('Linker extension (common) loaded');
+    console.log("Linker extension (common) loaded");
 
     modify_common_html.load();
 }

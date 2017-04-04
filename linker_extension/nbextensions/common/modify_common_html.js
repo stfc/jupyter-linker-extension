@@ -44,6 +44,8 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
                           + "nbextensions/linker_extension/common/common_style.css")
         );
 
+
+
         document.head = document.head || document.getElementsByTagName("head")[0];
 
         var src = utils.get_body_data("baseUrl") +  "nbextensions/linker_extension/common/favicon.ico";
