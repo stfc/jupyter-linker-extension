@@ -42,11 +42,26 @@ class DownloadHandler(IPythonHandler):
         login_headers = {'Content-Type': 'application/json',
                          'Accept': 'application/json'}
 
-        login = requests.request('POST',
-                                 login_url,
-                                 headers=login_headers,
-                                 json={"email": un, "password": pw},
-                                 verify=False)
+        verify_param = True
+        cert = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                  "resources",
+                                  "cert.pem")
+        try:
+            login = requests.request('POST',
+                                     login_url,
+                                     headers=login_headers,
+                                     json={"email": un, "password": pw},
+                                     verify=False)
+        except requests.exceptions.SSLError:
+            verify_param = cert
+            login = requests.request('POST',
+                                     login_url,
+                                     headers=login_headers,
+                                     json={"email": un, "password": pw},
+                                     verify=False)
+        except requests.exceptions.RequestException:
+            raise web.HTTPError(500, "Requests made an error")
+
         token = login.text
 
         session = FuturesSession()
@@ -92,7 +107,7 @@ class DownloadHandler(IPythonHandler):
                                            headers=headers,
                                            json={"key": "dc.identifier.uri",
                                                  "value": url},
-                                           verify=False)
+                                           verify=verify_param)
                 find_requests[url] = find_request
 
 
@@ -129,7 +144,7 @@ class DownloadHandler(IPythonHandler):
                 id = None
 
             rest_url = "/rest/items/" + str(id) + "/bitstreams"
-            get_bitstream_request = session.get(dspace_url + rest_url,headers=headers,verify=False)
+            get_bitstream_request = session.get(dspace_url + rest_url,headers=headers,verify=verify_param)
             get_bitstreams_requests[key] = get_bitstream_request
 
         # get the content of the bitstreams (plus the name of the file and the name
@@ -174,7 +189,7 @@ class DownloadHandler(IPythonHandler):
                         result["bitstream_name"] = bitstream["name"] 
                         id = bitstream["id"]
                         rest_url = "/rest/bitstreams/" + str(id) + "/retrieve"
-                        get_content_request = session.get(dspace_url + rest_url,headers=headers,verify=False)
+                        get_content_request = session.get(dspace_url + rest_url,headers=headers,verify=verify_param)
                         result["bitstream_data_request"] = get_content_request
                         get_content_requests.append(result)
 

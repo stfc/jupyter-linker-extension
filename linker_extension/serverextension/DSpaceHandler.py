@@ -34,7 +34,17 @@ class DSpaceHandler(IPythonHandler):
         else:
             url = urljoin(dspace_url, "/rest/communities")
 
-        r = requests.request('GET', url, verify=False)
+        verify_param = True
+        cert = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                  "resources",
+                                  "cert.pem")
+        try:
+            r = requests.request('GET', url, verify=verify_param)
+        except requests.exceptions.SSLError:
+            verify_param = cert
+            r = requests.request('GET', url, verify=verify_param)
+        except requests.exceptions.RequestException:
+            raise web.HTTPError(500, "Requests made an error")
 
         # create a new object so that we can specify the parent community.
         children = json.loads(r.text)
@@ -62,12 +72,27 @@ class DSpaceHandler(IPythonHandler):
         login_headers = {'Content-Type': 'application/json',
                          'Accept': 'application/json'}
 
-        login = requests.request('POST',
-                                 login_url,
-                                 headers=login_headers,
-                                 json={"email": un, "password": pw},
-                                 verify=False)
-
+        verify_param = True
+        cert = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                  "resources",
+                                  "cert.pem")
+        try:
+            login = requests.request('POST',
+                                     login_url,
+                                     headers=login_headers,
+                                     json={"email": un, "password": pw},
+                                     verify=verify_param)
+        except requests.exceptions.SSLError:
+            verify_param = cert
+            r = requests.request('POST',
+                                 url,
+                                 headers=headers,
+                                 data=binary_zip_file,
+                                 verify=cert,
+                                 auth=(un, pw))
+        except requests.exceptions.RequestException:
+            raise web.HTTPError(500, "Requests made an error")
+        
         token = login.text
         metadata = []
 
@@ -135,7 +160,7 @@ class DSpaceHandler(IPythonHandler):
                                     url,
                                     headers=headers,
                                     json={"type": "item", "metadata": metadata},
-                                    verify=False)
+                                    verify=verify_param)
 
         reponse = json.loads(new_item.text)
         new_item_id = reponse["id"]
@@ -155,7 +180,7 @@ class DSpaceHandler(IPythonHandler):
                                         url,
                                         headers=headers,
                                         data=binary_data,
-                                        verify=False)
+                                        verify=verify_param)
 
         reponse_notebook = json.loads(add_notebook.text)
         add_notebook_id = reponse_notebook["id"]
@@ -171,5 +196,5 @@ class DSpaceHandler(IPythonHandler):
                                                  url,
                                                  headers=headers,
                                                  json=json,
-                                                 verify=False)
+                                                 verify=verify_param)
         self.finish()

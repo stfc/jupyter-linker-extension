@@ -18,16 +18,17 @@ from urllib.parse import urljoin
 
 
 class UploadBundleHandler(IPythonHandler):
-
-    blank_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                              "resources",
-                              "blank.xml")
-
     # upload a data bundle to DSpace
     @web.authenticated
     @json_errors
     @gen.coroutine
     def post(self):
+        blank_file = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                  "resources",
+                                  "blank.xml")
+        cert = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                  "resources",
+                                  "cert.pem")
         config = LinkerExtensionConfig()
         dspace_url = config.dspace_url
 
@@ -48,7 +49,7 @@ class UploadBundleHandler(IPythonHandler):
 
         # try opening our blank file as an ElementTree
         try:
-            tree = ET.ElementTree(file=UploadBundleHandler.blank_file)
+            tree = ET.ElementTree(file=blank_file)
         except ET.ParseError:
             raise web.HTTPError(500, "IndexError occured when "
                                      "fetching metadata node")
@@ -370,18 +371,27 @@ class UploadBundleHandler(IPythonHandler):
                    "X-On-Behalf-Of": un}
 
         # try sending off the request
+        verify_param = True
         try:
             r = requests.request('POST',
                                  url,
                                  headers=headers,
                                  data=binary_zip_file,
-                                 verify=False,
+                                 verify=verify_param,
                                  auth=(un, pw))
+
             # TODO: add authenication to the request
+        except requests.exceptions.SSLError:
+            verify_param = cert
+            r = requests.request('POST',
+                                 url,
+                                 headers=headers,
+                                 data=binary_zip_file,
+                                 verify=cert,
+                                 auth=(un, pw))
         except requests.exceptions.RequestException:
             raise web.HTTPError(500, "Requests made an error")
 
-        print(r.status_code)  # TODO: remove later
         retries = 5
 
         while (r.status_code != 201 and
@@ -391,28 +401,25 @@ class UploadBundleHandler(IPythonHandler):
             # a couple of times
             try:
                 r = requests.request('POST',
-                                     url,
-                                     headers=headers,
-                                     data=binary_zip_file,
-                                     verify=False,
-                                     auth=(un, pw))
+                             url,
+                             headers=headers,
+                             data=binary_zip_file,
+                             verify=verify_param,
+                             auth=(un, pw))
 
             except requests.exceptions.RequestException:
                 raise web.HTTPError(500, "Requests made an error")
 
-            print(r.status_code)
             retries -= 1
 
         # Delete temp directory and pass along the status code and request text
         if(r.status_code == 201):  # created
             self.clear()
             self.set_status(201)
-            print(r.text)
             self.finish(r.text)
         elif (r.status_code == 202):  # accepted (waiting for approval)
             self.clear()
             self.set_status(202)
-            print(r.text)
             self.finish(r.text)
         else:  # Still failed even after the retries
             raise web.HTTPError(500, "Requests failed after 5 retries")
