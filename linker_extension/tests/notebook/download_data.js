@@ -70,7 +70,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        var items = this.evaluate(function(un,pw) {
+        this.evaluate(function(un,pw) {
             var nb_utils = require("base/js/utils");
             var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
                                                      "/dspace/listitems");
@@ -92,7 +92,7 @@ casper.notebook_test(function() {
     });
 
     var items;
-    this.wait(500);
+    this.waitForSelector("#test-list-items-result");
     this.then(function() {
         items = JSON.parse(this.evaluate(function() {
             return $("#test-list-items-result").attr("item-list");
