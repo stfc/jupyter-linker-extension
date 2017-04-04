@@ -159,9 +159,11 @@ define(["base/js/namespace",
                     click: function() {
                         $(".download-form-error").remove();
                         var urls = [];
+                        var at_least_one_url = false;
                         $(".download-url").each(function(index,item) {
                             if(validate_url($(item).val())) {
                                 urls.push($(item).val());
+                                at_least_one_url = true;
                             } else if ($(item).val() !== "") {
                                 //ignore blank inputs
                                 var error = $("<div/>")
@@ -172,6 +174,15 @@ define(["base/js/namespace",
                                 $(item).before(error);
                             }
                         });
+                        if(!at_least_one_url) {
+                            var error = $("<div/>")
+                                .addClass("download-form-error")
+                                .css("color","red")
+                                .text("Please enter at least one url");
+
+                            $("label[for=\"download_data_form\"]").before(error);
+                        }
+
                         if($(".download-form-error").length === 0) {
                             $(".login-error").remove();
                             var username_field_val = $("#username").val();
