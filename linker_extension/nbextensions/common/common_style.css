@@ -332,3 +332,30 @@ label.required:after {
 #data-files-list .MultiFile-remove {
   color: red;
 }
+#files-page {
+  max-height: 400px;
+  overflow: auto;
+}
+div.selected div.item {
+  width: 300px;
+  overflow-x: hidden;
+}
+div.selections div.item {
+  margin-bottom: -3px;
+}
+div.selections div.item label {
+  position: relative;
+  top: -4px;
+  vertical-align: bottom;
+  display: inline;
+}
+div.selections div.title {
+  padding-bottom: 6px;
+}
+div.selections div.title * {
+  margin-top: 0px;
+}
+div.selections div.title input {
+  position: relative;
+  top: 4px;
+}

@@ -47,7 +47,7 @@ define([
 
                    .append($("<li/>").addClass("divider"))
 
-                   .append($("<li/>").attr("id","select_data")
+                   /*.append($("<li/>").attr("id","select_data")
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Select associated data")))
@@ -57,7 +57,7 @@ define([
                                              .attr("href","#")
                                              .text("View associated data")))
  
-                   .append($("<li/>").addClass("divider"))
+                   .append($("<li/>").addClass("divider"))*/
 
                    .append($("<li/>").attr("id","toggle_cell_references_bar")
                                      .append($("<a/>")
@@ -83,16 +83,16 @@ define([
                    .append($("<li/>").attr("id","publish_bundle_alternate")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Publish associated data (alternate)")))
+                                             .text("Publish associated data (alternate)")));
 
-                   .append($("<li/>").attr("id","publish_notebook_and_bundle")
+                   /*.append($("<li/>").attr("id","publish_notebook_and_bundle")
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Publish Notebook and associated data")))
                    .append($("<li/>").attr("id","publish_notebook_and_bundle_alternate")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Publish Notebook and associated data (alternate)")));
+                                             .text("Publish Notebook and associated data (alternate)")));*/
 
         var data_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","data-menu");
         var data_button  = $("<button/>")

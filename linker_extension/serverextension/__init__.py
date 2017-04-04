@@ -15,6 +15,7 @@ from .TestDSpaceHandlers import (
 )
 from .UploadBundleHandler import UploadBundleHandler
 from .UploadBundleAlternateHandler import UploadBundleAlternateHandler
+from .UploadBundleAlternateHandler2 import UploadBundleAlternateHandler2
 from .LDAPHandler import LDAPHandler
 from .CustomNbconvertHandler import CustomNbconvertHandler
 from .DownloadHandler import DownloadHandler
@@ -55,6 +56,11 @@ def load_jupyter_server_extension(nbapp):
                                                '/uploadbundle_alternate')
     web_app.add_handlers(host_pattern, [(route_pattern_uploadbundlealternate,
                                          UploadBundleAlternateHandler)])
+
+    route_pattern_uploadbundlealternate2 = url_path_join(web_app.settings['base_url'],
+                                               '/uploadbundle_alternate2')
+    web_app.add_handlers(host_pattern, [(route_pattern_uploadbundlealternate2,
+                                         UploadBundleAlternateHandler2)])
 
     route_pattern_find_id = url_path_join(web_app.settings['base_url'],
                                           '/dspace/findid')

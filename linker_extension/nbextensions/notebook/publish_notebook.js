@@ -1304,6 +1304,230 @@ define(["base/js/namespace",
 
     };
 
+    /*  
+     *  Only publish the data
+     */ 
+    var publish_bundle_alternate_2 = function() {
+
+        var instructions = $("<label/>")
+            .attr("id","publish_instructions")
+            .attr("for","publish-form");
+
+        instructions.text("Select the files that you would like to be uploaded " +
+                          "to eData as a data bundle for this notebook");
+
+        var upload_data_fields = upload_data.upload_data_form_alternate_2(); 
+
+        var form_body = $("<form/>").attr("id","publish-form")
+                        .append(instructions)
+                        .append(upload_data_fields.files_page)
+                        .append(upload_data_fields.metadata_page);
+
+        var final_page = $("<div/>").attr("id","final-page");
+        final_page.addClass("hide-me");
+        
+        var config_username = "";
+        var login = $("<table/>").attr("id","login-fields-upload-data");
+        var login_labels = $("<tr/>");
+        var login_fields = $("<tr/>");
+
+        var username_label = $("<label/>")
+            .attr("for","username")
+            .addClass("required")
+            .text("Username: ");
+        var username_field = $("<input/>")
+            .attr("id","username")
+            .attr("required","required");
+
+        var password_label = $("<label/>")
+            .attr("for","password")
+            .addClass("required")
+            .text("Password: ");
+        var password_field = $("<input/>")
+            .attr("id","password")
+            .attr("required","required")
+            .attr("type","password");
+
+        login_labels.append($("<td/>").append(username_label))
+                    .append($("<td/>").append(password_label));
+
+        login_fields.append($("<td/>").append(username_field))
+                    .append($("<td/>").append(password_field));
+
+        login.append(login_labels).append(login_fields);
+
+        final_page.append(login);
+        
+        form_body.append(final_page);
+
+        //holder for get_values_from_fields return value
+        var data_metadata = {};
+
+        custom_contents.get_config().then(function(response){
+            config_username = response.username;
+            username_field.val(config_username);
+        }).catch(function(reason){
+            var error = $("<div/>")
+                .addClass("config-error")
+                .css("color","red");
+            error.text(reason.message);
+            login.after(error);
+        });
+
+        var modal = dialog.modal({
+            title: "Publish Data",
+            body: form_body,
+            buttons: {
+                Cancel: {},
+                Previous: { 
+                    click: function() {
+                        //make a multi page form by changing visibility of the forms
+                        if($("#files-page").hasClass("hide-me") &&
+                                !($("#metadata-page").hasClass("hide-me")))
+                        {
+                            $("#metadata-page").addClass("hide-me");
+                            instructions.text("Select the files that you would like to be uploaded " +
+                                              "to eData as a data bundle for this notebook");
+                            $("#files-page").removeClass("hide-me");
+                            $("#previous").prop("disabled",true);
+
+                            //we want button text to be next
+                            //on any page but the last one
+                            $("#next").text("Next");
+                        }
+                        if($("#metadata-page").hasClass("hide-me") &&
+                                !($("#final-page").hasClass("hide-me")))
+                        {
+                            $("#final-page").addClass("hide-me");
+                            instructions.text(
+                                "Add metadata to the file bundle.");
+                            $("#metadata-page").removeClass("hide-me");
+
+                        }
+                        return false;
+                    }
+                },
+                Next: { 
+                    class : "btn-primary",
+                    click: function() {
+                        if(!$("#files-page").hasClass("hide-me")) {
+                            upload_data.validate_files_alternate();
+                            if($(".data-form-error").length === 0) {
+                                $("#files-page").addClass("hide-me");
+                                $("#metadata-page").removeClass("hide-me");
+                                $("#previous").prop("disabled",false);
+                                instructions.text(
+                                    "Add metadata to the file bundle.");
+                            }
+                        }
+                        else if(!$("#metadata-page").hasClass("hide-me")) {
+                            upload_data.validate_metadata();
+                            if($(".data-form-error").length === 0) {
+                                /*var bundle_metadata = {};
+                                bundle_metadata.abstract = $("#data_abstract").val();
+                                var referencedBy_URLs = [];
+                                $(".data_referencedBy").each(function(i,e) {
+                                    referencedBy_URLs.push($(e).val());
+                                });
+                                bundle_metadata.referencedBy = referencedBy_URLs;
+                                //TODO: do we need to save this metadata or not? ask
+
+                                Jupyter.notebook.metadata.bundle_metadata = bundle_metadata;*/
+
+                                var data_promise = upload_data.get_values_from_fields_alternate_2();
+                                data_promise.then(function(results) { //success function
+                                    data_metadata = results;
+                                    
+                                    data_metadata.notebookpath = Jupyter.notebook.notebook_path;
+
+                                    $("#metadata-page").addClass("hide-me");
+                                    $("#final-page").removeClass("hide-me");
+                                    $("#previous").prop("disabled",false);
+                                    instructions.text("Confirm that you would like " + 
+                                                      "to upload the notebook.");
+                                    $("#next").text("Publish");
+                                }).catch(function() {
+                                    var error = $("<div/>")
+                                        .addClass("upload-error")
+                                        .css("color","red")
+                                        .text("File upload failed - please try again.");
+                                    instructions.after(error);
+                                });
+                            }
+                        }
+
+                        else if (!$("#final-page").hasClass("hide-me")) {
+                            //do login validation and publishing here!
+                            $(".login-error").remove();
+                            var username_field_val = $("#username").val();
+                            var password_field_val = $("#password").val();
+                            var login_details = JSON.stringify({
+                                username: username_field_val,
+                                password: password_field_val
+                            });
+
+                            var request = custom_contents.ldap_auth(login_details);
+
+
+                            //wait for ldap request
+                            request.then(function() { //success function
+                                data_metadata.username = username_field_val;
+                                data_metadata.password = password_field_val;
+                                var metadata = add_metadata.get_values_from_metadata();
+
+                                //copy the properties in the nb metadata that
+                                // are missing from the data metadata
+                                Object.keys(metadata).forEach(function(key) {
+                                    if(!data_metadata.hasOwnProperty(key)) {
+                                        data_metadata[key] = metadata[key];
+                                    }
+                                });
+
+                                upload_data.upload_data_alternate_2(data_metadata);
+
+                                if(username_field_val !== config_username) {
+                                    var config = JSON.stringify({username: username_field_val});
+                                    custom_contents.update_config(config).catch(
+                                        function(reason){
+                                            custom_utils.create_alert(
+                                                "alert-danger",
+                                                "Error! " + reason.message + 
+                                                "when trying to save username " +
+                                                "to config. If it " +
+                                                "continues to fail please " + 
+                                                "contact the developers.");
+                                        }
+                                    );
+                                }
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
+                                $(".modal").modal("hide");
+                            }).catch(function(reason) { //login failed
+                                var error = $("<div/>")
+                                    .addClass("login-error")
+                                    .css("color","red");
+
+                                error.text(reason.message);
+                                login.after(error);
+                            });
+                        }
+                        return false;
+                    },
+                }
+            },
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.notebook.keyboard_manager,
+        });
+
+        //stuff to do on modal load
+        modal.on("shown.bs.modal", function () {
+            $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
+                                                    .prop("disabled",true);
+            $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
+        });
+
+    };
+
     //register all the actions and set up the buttons
 
     var publish_notebook_action = {
@@ -1331,7 +1555,7 @@ define(["base/js/namespace",
         help: "Publish data bundle (alternate)",
         help_index: "a",
         icon: "fa-upload",
-        handler : publish_bundle_alternate,
+        handler : publish_bundle_alternate_2,
     };
 
     var publish_bundle_alternate_prefix = "linker_extension";
@@ -1372,7 +1596,7 @@ define(["base/js/namespace",
             publish_bundle_prefix
         );
         $("#publish_bundle").click(function () {
-            publish_bundle();
+            publish_bundle_alternate();
         });
         Jupyter.actions.register(
             publish_bundle_alternate_action,
@@ -1380,8 +1604,8 @@ define(["base/js/namespace",
             publish_bundle_alternate_prefix
         );
         $("#publish_bundle_alternate").click(function () {
-            publish_bundle_alternate();
-        });
+            publish_bundle_alternate_2();
+        });/*
         Jupyter.actions.register(
             publish_both_action,
             publish_both_action_name,
@@ -1397,7 +1621,7 @@ define(["base/js/namespace",
         );
         $("#publish_notebook_and_bundle_alternate").click(function () {
             publish_notebook_and_bundle_alternate();
-        });
+        });*/
     };
 
     module.exports = {
