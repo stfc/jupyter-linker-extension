@@ -1,4 +1,7 @@
 var modify_common_html = require("./modify_common_html.js");
+//use webpack to load tree-multiselect css so we don't have to manually include
+//it with our package
+require("style-loader!css-loader!tree-multiselect/dist/jquery.tree-multiselect.css");
 
 /*  
  *  entry point for the common section of the extension. This is loaded on all

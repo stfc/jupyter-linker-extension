@@ -10,9 +10,13 @@ Install Node.js and npm
 
 Download and extract or clone this git repo.
 
-Navigate into the extracted/cloned folder and run the command. It will install some node packages (`webpack` and `es6-promise`) if they are not already installed:
+Navigate into the extracted/cloned folder and run the command:
 
-`python setup.py sdist --formats=gztar,zip`
+`python setup.py build_dev`
+
+or, if building for production (minifies files)
+
+`python setup.py build_prod`
 
 Install using the command:
 
@@ -23,5 +27,3 @@ Install and enable the extensions by running the command:
 `python setup.py installextensions`
 
 This requires elevated permission to be able to install the extension globally. TODO: is it sensible to do a system-wide install & enable by default? or copy the Jupyter.
-
-NOTE: the certificates haven't been sorted out yet so the requests aren't HTTPS. Don't use as it currently is! TODO: make everything secure 

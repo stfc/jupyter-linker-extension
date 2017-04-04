@@ -9,35 +9,91 @@ from setuptools.command.sdist import sdist
 from setuptools.command.install import install
 from distutils.cmd import Command
 
+try:
+    from shutil import which
+except ImportError:
+    ## which() function copied from Python 3.4.3; PSF license
+    def which(cmd, mode=os.F_OK | os.X_OK, path=None):
+        """Given a command, mode, and a PATH string, return the path which
+        conforms to the given mode on the PATH, or None if there is no such
+        file.
+        `mode` defaults to os.F_OK | os.X_OK. `path` defaults to the result
+        of os.environ.get("PATH"), or can be overridden with a custom search
+        path.
+        """
+        # Check that a given file can be accessed with the correct mode.
+        # Additionally check that `file` is not a directory, as on Windows
+        # directories pass the os.access check.
+        def _access_check(fn, mode):
+            return (os.path.exists(fn) and os.access(fn, mode)
+                    and not os.path.isdir(fn))
+
+        # If we're given a path with a directory part, look it up directly rather
+        # than referring to PATH directories. This includes checking relative to the
+        # current directory, e.g. ./script
+        if os.path.dirname(cmd):
+            if _access_check(cmd, mode):
+                return cmd
+            return None
+
+        if path is None:
+            path = os.environ.get("PATH", os.defpath)
+        if not path:
+            return None
+        path = path.split(os.pathsep)
+
+        if sys.platform == "win32":
+            # The current directory takes precedence on Windows.
+            if not os.curdir in path:
+                path.insert(0, os.curdir)
+
+            # PATHEXT is necessary to check on Windows.
+            pathext = os.environ.get("PATHEXT", "").split(os.pathsep)
+            # See if the given file matches any of the expected path extensions.
+            # This will allow us to short circuit when given "python.exe".
+            # If it does match, only test that one, otherwise we have to try
+            # others.
+            if any(cmd.lower().endswith(ext.lower()) for ext in pathext):
+                files = [cmd]
+            else:
+                files = [cmd + ext for ext in pathext]
+        else:
+            # On other platforms you don't have things like PATHEXT to tell you
+            # what file suffixes are executable, so just pass on cmd as-is.
+            files = [cmd]
+
+        seen = set()
+        for dir in path:
+            normdir = os.path.normcase(dir)
+            if not normdir in seen:
+                seen.add(normdir)
+                for thefile in files:
+                    name = os.path.join(dir, thefile)
+                    if _access_check(name, mode):
+                        return name
+        return None
+
 
 # On build, build the javascript files (production ver)
 class CustomsdistCommandProd(sdist):
 
     def run(self):
         # insert custom code here
-        try:
-            import subprocess
-            webpack = subprocess.call('npm list webpack', shell=True)
-            es6_promise = subprocess.call('npm list es6-promise', shell=True)
-            install_cmd = "npm install"
-            install = False
+        import subprocess
 
-            if webpack != 0:  # 0 means it is installed
-                install_cmd = install_cmd + " webpack"
-                install = True
+        repo_root = os.path.dirname(os.path.abspath(__file__))
 
-            if es6_promise != 0:
-                install_cmd = install_cmd + " es6-promise"
-                install = True
-
-            install_cmd = install_cmd + " --progress=false"
-            if install:
-                subprocess.call(install_cmd, shell=True)
-
-            subprocess.call("webpack -p")
-        except OSError as e:
-            print("Failed to run `npm install`: %s" % e, file=sys.stderr)
+        install = False
+        if not which('npm'):
             print("npm is required to build the notebook.", file=sys.stderr)
+        if not os.path.exists(os.path.join(repo_root, 'node_modules')):
+            install = True
+
+        if install:
+            subprocess.check_call(["npm","install","--progress=false"],cwd=repo_root)
+
+        subprocess.check_call(["webpack", "-p"])
+
         sdist.run(self)
 
 
@@ -46,29 +102,22 @@ class CustomsdistCommandDev(sdist):
 
     def run(self):
         # insert custom code here
-        try:
-            import subprocess
-            webpack = subprocess.call('npm list -g webpack', shell=True)
-            es6_promise = subprocess.call('npm list -g es6-promise', shell=True)
-            install_cmd = "npm install -g"
-            install = False
 
-            if webpack != 0:  # 0 means it is installed
-                install_cmd = install_cmd + " webpack"
-                install = True
+        import subprocess
 
-            if es6_promise != 0:
-                install_cmd = install_cmd + " es6-promise"
-                install = True
+        repo_root = os.path.dirname(os.path.abspath(__file__))
 
-            install_cmd = install_cmd + " --progress=false"
-            if install:
-                subprocess.call(install_cmd, shell=True)
-
-            subprocess.call("webpack")
-        except OSError as e:
-            print("Failed to run `npm install`: %s" % e, file=sys.stderr)
+        install = False
+        if not which('npm'):
             print("npm is required to build the notebook.", file=sys.stderr)
+        if not os.path.exists(os.path.join(repo_root, 'node_modules')):
+            install = True
+
+        if install:
+            subprocess.check_call(["npm","install","--progress=false"],cwd=repo_root)
+
+        subprocess.check_call(["webpack"])
+
         sdist.run(self)
 
 
@@ -171,14 +220,14 @@ setup_args = dict(
     package_data={
         '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
              notebook_tests + tree_tests + resource_files + ['tests/*.txt']
-             + ["nbextensions/common/logo.png","nbextensions/common/favicon.ico"])
+             + ["nbextensions/common/logo.png","nbextensions/common/favicon.ico"])  # TODO: find better way of including multiselect css?
     },
     install_requires=[
         'notebook>=4',
         'nbconvert',
         'ldap3',
         'requests',
-	'requests-futures',
+    	'requests-futures',
     ],
     cmdclass={
         'install': CustomInstallCommand,

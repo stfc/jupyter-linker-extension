@@ -1,4 +1,3 @@
-var Promise = require("es6-promise").Promise;
 require("../custom_contents.js");
 require("../custom_utils.js");
 var add_metadata = require("./add_metadata.js");

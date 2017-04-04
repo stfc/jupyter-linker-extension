@@ -1,0 +1,24 @@
+{
+  "name": "linker-extension-deps",
+  "version": "1.0.0",
+  "description": "Linker Extension nodejs dependencies",
+  "author": "Louise Davies",
+  "license": "CC0-1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stfc/jupyter-linker-extension.git"
+  },
+  "scripts": {
+    "build-dev": "python3 setup.py build_dev",
+    "build-prod": "python3 setup.py build_prod"
+  },
+  "devDependencies": {
+    "css-loader": "^0.28.0",
+    "style-loader": "^0.16.1",
+    "webpack": "^1.12.13"
+  },
+  "dependencies": {
+    "es6-promise": "^4.1.0",
+    "tree-multiselect": "^2.1.6"
+  }
+}
