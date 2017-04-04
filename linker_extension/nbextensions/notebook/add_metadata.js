@@ -776,7 +776,7 @@ define(["base/js/namespace",
             .attr("id","nb-licence-dropdown")
             .append($("<option/>").attr("value","").text("None Selected"))
             .append($("<option/>").attr("value","CC0").text("CC0"))
-            .append($("<option/>").attr("value","CC BY").text("CC BY"))
+            .append($("<option/>").attr("value","CC BY").text("CC BY (Default)"))
             .append($("<option/>").attr("value","CC BY-SA").text("CC BY-SA"))
             .append($("<option/>").attr("value","CC BY-NC").text("CC BY-NC"))
             .append($("<option/>").attr("value","CC BY-ND").text("CC BY-ND"))
@@ -794,6 +794,8 @@ define(["base/js/namespace",
             .append($("<option/>").attr("value","CDDL-1.0").text("CDDL-1.0"))
             .append($("<option/>").attr("value","EPL-1.0").text("EPL-1.0"))
             .append($("<option/>").attr("value","Other").text("Other"));
+
+        licenceDropdown.val("CC BY");
 
         var licenceDropdownLabel = $("<label/>")
             .attr("for","nb-licence-dropdown")
