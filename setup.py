@@ -200,13 +200,10 @@ def package_files(directory):
 
 
 notebook_tests = package_files('linker_extension/tests/notebook')
-tree_tests = package_files('linker_extension/tests/tree')
 resource_files = package_files('linker_extension/resources')
 jsfiles = ['nbextensions/notebook/linker_extension_notebook.js',
-           'nbextensions/tree/linker_extension_tree.js',
            'nbextensions/common/linker_extension_common.js']
 cssfiles = ['nbextensions/notebook/notebook_style.css',
-            'nbextensions/tree/tree_style.css',
             'nbextensions/common/common_style.css']
 
 setup_args = dict(
@@ -219,8 +216,8 @@ setup_args = dict(
     packages=find_packages(),
     package_data={
         '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
-             notebook_tests + tree_tests + resource_files + ['tests/*.txt']
-             + ["nbextensions/common/logo.png","nbextensions/common/favicon.ico"])  # TODO: find better way of including multiselect css?
+             notebook_tests + resource_files + ['tests/*.txt']
+             + ["nbextensions/common/logo.png","nbextensions/common/favicon.ico"])
     },
     install_requires=[
         'notebook>=4',

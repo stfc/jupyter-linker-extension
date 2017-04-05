@@ -1,7 +1,7 @@
 define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
 
     /*  
-     *  all the common html hacks
+     *  all the common html hacks. plus some tree hacks so we don't need an extra tree extension
      */ 
     var load = function() {
         //add an extra div to the header, purely so we can colour in the whole
@@ -71,6 +71,12 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
             menubar_container_container.append(menubar_container);
             $(".header-bar").after(menubar_container_container);
         }
+
+        //tree hacks. only one "btn-upload" exists in the entire notebook,
+        //so it's fine for it to be in the common file.
+        var upload_html = $(".btn-upload").html();
+        upload_html = upload_html.replace("Upload","Add files to current directory");
+        $(".btn-upload").html(upload_html);  
         
     };
 
