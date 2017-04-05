@@ -60,14 +60,14 @@ def load_jupyter_server_extension(nbapp):
     web_app.add_handlers(host_pattern, [(route_pattern_delete,
                                          DeleteItem)])
 
-    route_pattern_get_bistreams = url_path_join(web_app.settings['base_url'],
-                                                '/dspace/getbistreams')
-    web_app.add_handlers(host_pattern, [(route_pattern_get_bistreams,
+    route_pattern_get_bitstreams = url_path_join(web_app.settings['base_url'],
+                                                '/dspace/getbitstreams')
+    web_app.add_handlers(host_pattern, [(route_pattern_get_bitstreams,
                                          GetBitstreams)])
 
-    route_pattern_get_bistream_data = url_path_join(web_app.settings['base_url'],
-                                              '/dspace/getbistreamdata')
-    web_app.add_handlers(host_pattern, [(route_pattern_get_bistream_data,
+    route_pattern_get_bitstream_data = url_path_join(web_app.settings['base_url'],
+                                              '/dspace/getbitstreamdata')
+    web_app.add_handlers(host_pattern, [(route_pattern_get_bitstream_data,
                                          GetBitstreamData)])
 
     route_pattern_find_id = url_path_join(web_app.settings['base_url'],

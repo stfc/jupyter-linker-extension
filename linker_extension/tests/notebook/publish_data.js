@@ -382,7 +382,7 @@ casper.notebook_test(function() {
         this.evaluate(function(id,un,pw) {
             var nb_utils = require("base/js/utils");
             var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
-                                                     "/dspace/getbistreams");
+                                                     "/dspace/getbitstreams");
             var settings = {
                 processData : false,
                 cache : false,
@@ -409,7 +409,7 @@ casper.notebook_test(function() {
 
     this.waitForSelector(".test-bitstream-id");
 
-    //get the content from the bistreams
+    //get the content from the bitstreams
 
     this.then(function() {
         this.evaluate(function(un,pw) {
@@ -420,7 +420,7 @@ casper.notebook_test(function() {
             });
             var nb_utils = require("base/js/utils");
             var request_url = nb_utils.url_path_join(Jupyter.notebook.base_url,
-                                                     "/dspace/getbistreamdata");
+                                                     "/dspace/getbitstreamdata");
             var settings = {
                 processData : false,
                 cache : false,
