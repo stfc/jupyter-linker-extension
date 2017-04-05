@@ -42,7 +42,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
     //used to upload some data
     var upload_data = function(data) {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/uploadbundle_alternate2"]);
+                                                  "/uploadbundle"]);
         var settings = {
             type : "POST",
             processData : false,

@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from tempfile import TemporaryDirectory
 import base64
+from shutil import copy, copytree
 
 from tornado import web, gen, escape
 
@@ -153,26 +154,32 @@ class UploadBundleHandler(IPythonHandler):
         #if funders is not None:
         #    metadata.append({"key": "dc.description.sponsorship", "value": sponsors})
 
+        original_cwd = os.getcwd()
 
-        # transform the notebook path given by jupyter to an actual system path.
-        # also get the notebook name so that we cna use it to name the file.
+        # split notebook path into file name and base directory
         try:
             notebook_path = arguments['notebookpath']
             notebook_split = notebook_path.split('/')
             notebook_name = notebook_split[-1]  # get last bit of path
-            notebook_dir = os.getcwd()
+            notebook_dir = "/".join(notebook_split[:-1])
         except web.MissingArgumentError:
             raise web.HTTPError(500, "MissingArgumentError occured - "
                                      "notebook path isn't specified")
         except IndexError:
             raise web.HTTPError(500, "IndexError when parsing notebook_path")
 
-        # get the file names, paths and types, plus the TOS files and the licence
-        file_names = arguments['file_names']
-        file_paths = arguments['file_paths']
-        file_types = arguments['file_types']
-        file_mimetypes = arguments['file_mimetypes']
+        # get the file paths and mimetypes, 
+        data_files = arguments["files"]
+        file_paths = []
+        file_names = []
+        file_mimetypes = []
+        for file in data_files:
+            split = file.split(";")
+            file_paths.append(split[0])
+            file_names.append(split[0].split("/")[-1])
+            file_mimetypes.append(split[1])
 
+        # the TOS files and the licence
         TOS_files = arguments["TOS"]
         licence = arguments["licence"]
 
@@ -183,20 +190,24 @@ class UploadBundleHandler(IPythonHandler):
             tempdir = t.name
             os.chdir(tempdir)
         except OSError:
+            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when opening temp dir")
 
-        # for each TOS file, write to a file. They're names TOS [ID].txt
+        # for each TOS file, write to a file. They're named TOS [ID].[extension]
         try:
             for index, file in enumerate(TOS_files):
-                base64_data = file.split(",")[1]
+                base64_data = file["file_contents"].split(",")[1]
 
-                encoding_info = file.split(",")[0]
+                encoding_info = file["file_contents"].split(",")[0]
                 encoding_info = encoding_info.split(";")[0]
                 encoding_info = encoding_info.split(":")[1]
-
-                with open("TOS " + str(index), "wb") as f:
+                TOS_file_name = file["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+                with open("TOS " + str(index) + TOS_file_extension, "wb") as f:
                     f.write(base64.decodestring(base64_data.encode("utf-8")))
         except OSError:
+            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when writing the TOS files")
 
         # set licence file path to the relevant licence preset
@@ -220,28 +231,31 @@ class UploadBundleHandler(IPythonHandler):
             if file_paths is not []:  # TODO: enforce that this doesn't happen
                 if len(file_names) > 0:
                     for index, file_path in enumerate(file_paths):
-                        if(file_types[index] == 'file'):
-                            file_attr = {"GROUPID": "sword-mets-fgid-" + str(i),
-                                         "ID": file_path,
-                                         "MIMETYPE": file_mimetypes[index]}
-                            files_xml = ET.Element('file', file_attr)
+                        file_attr = {"GROUPID": "sword-mets-fgid-" + str(i),
+                                     "ID": file_path,
+                                     "MIMETYPE": file_mimetypes[index]}
+                        files_xml = ET.Element('file', file_attr)
 
-                            FLocat_attr = {"LOCTYPE": "URL",
-                                           "xlink:href": file_path}
-                            FLocat_xml = ET.Element('FLocat', FLocat_attr)
+                        FLocat_attr = {"LOCTYPE": "URL",
+                                       "xlink:href": file_path}
+                        FLocat_xml = ET.Element('FLocat', FLocat_attr)
 
-                            files_xml.append(FLocat_xml)
-                            files.append(files_xml)
-                            i += 1
+                        files_xml.append(FLocat_xml)
+                        files.append(files_xml)
+                        i += 1
 
             for i in list(range(0, len(TOS_files))):
+                TOS_file_name = TOS_files[i]["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+
                 file_attr = {"GROUPID": "TOS-File-" + str(i),
-                             "ID": "TOS " + str(i),
-                             "MIMETYPE": encoding_info}
+                             "ID": "TOS " + str(i) + TOS_file_extension,
+                             "MIMETYPE": TOS_files[i]["file_mimetype"]}
                 files_xml = ET.Element('file', file_attr)
 
                 FLocat_attr = {"LOCTYPE": "URL",
-                               "xlink:href": "TOS " + str(i)}
+                               "xlink:href": "TOS " + str(i) + TOS_file_extension}
                 FLocat_xml = ET.Element('FLocat', FLocat_attr)
 
                 files_xml.append(FLocat_xml)
@@ -260,6 +274,7 @@ class UploadBundleHandler(IPythonHandler):
             files.append(licence_xml)
 
         except IndexError:
+            os.chdir(original_cwd)
             raise web.HTTPError(500, "IndexError when getting"
                                      "'files' root node")
 
@@ -269,52 +284,54 @@ class UploadBundleHandler(IPythonHandler):
         # file that creates the correct directory structure
         try:
             struct = tree.getroot()[3]
-
-            struct_attr = {"ID": "sword-mets-div-1",
-                           "DMDID": "sword-mets-dmd-1",
-                           "TYPE": "SWORD Object"}
-            struct_xml = ET.Element('div', struct_attr)
-
+            files_struct_attr = {"ID": "sword-mets-div-1",
+                                   "DMDID": "sword-mets-dmd-1",
+                                   "TYPE": "Data Files"}
+            files_struct_xml = ET.Element('div', files_struct_attr)
             if file_paths is not []:
                 if len(file_names) > 0:
                     for index, file_path in enumerate(file_paths):
-                        file_type = file_types[index]
                         helper.dir_search(file_path,
-                                          file_type,
-                                          struct_xml)
+                                          files_struct_xml)
 
-            struct.append(struct_xml)
+            struct.append(files_struct_xml)
 
-            for i in list(range(0, len(TOS_files))):
-                TOS_struct_attr = {"ID": "sword-mets-div-2",
+            TOS_struct_attr = {"ID": "sword-mets-div-2",
                                    "DMDID": "sword-mets-dmd-2",
                                    "TYPE": "TOS"}
+            for i in list(range(0, len(TOS_files))):
+                TOS_file_name = TOS_files[i]["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+
                 TOS_struct_xml = ET.Element('div', TOS_struct_attr)
 
-                TOS_struct_child_attr = {"ID": "sword-mets-div-2", "TYPE": "File"}
+                TOS_struct_child_attr = {"ID": "TOS " + str(i) + TOS_file_extension, "TYPE": "File"}
                 TOS_struct_xml_child = ET.Element('div', TOS_struct_child_attr)
 
-                TOS_fptr_xml = ET.Element("ftpr", {"FILEID": "TOS " + str(i)})
+                TOS_fptr_xml = ET.Element("ftpr", {"FILEID": "TOS " + str(i) + TOS_file_extension})
 
                 TOS_struct_xml_child.append(TOS_fptr_xml)
                 TOS_struct_xml.append(TOS_struct_xml_child)
-                struct.append(TOS_struct_xml)
+
+            struct.append(TOS_struct_xml)
 
             licence_struct_attr = {"ID": "sword-mets-div-3",
                                    "DMDID": "sword-mets-dmd-3",
                                    "TYPE": "License"}
             licence_struct_xml = ET.Element('div', licence_struct_attr)
 
-            licence_struct_child_attr = {"ID": "sword-mets-div-3", "TYPE": "File"}
+            licence_struct_child_attr = {"ID": "licence", "TYPE": "File"}
             licence_struct_xml_child = ET.Element('div', licence_struct_child_attr)
 
-            licence_fptr_xml = ET.Element("ftpr", {"FILEID": "sword-mets-file-3"})
+            licence_fptr_xml = ET.Element("ftpr", {"FILEID": "licence"})
 
             licence_struct_xml_child.append(licence_fptr_xml)
             licence_struct_xml.append(licence_struct_xml_child)
             struct.append(licence_struct_xml)
 
         except IndexError:
+            os.chdir(original_cwd)
             raise web.HTTPError(500, "IndexError when getting "
                                      "'struct' root node")
 
@@ -322,6 +339,7 @@ class UploadBundleHandler(IPythonHandler):
             # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
         except OSError:
+            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when writing tree to mets.xml")
 
         # create a zip file for our sword submission. Write mets.xml,
@@ -330,17 +348,25 @@ class UploadBundleHandler(IPythonHandler):
         try:
             created_zip_file = zipfile.ZipFile("data_bundle.zip", "w")
             created_zip_file.write("mets.xml")
+
             if file_paths is not []:
                 if len(file_paths) > 0:
                     for file_path in file_paths:
-                        created_zip_file.write(notebook_dir + "/" + file_path, file_path)
+                        path = os.path.join(original_cwd,notebook_dir,file_path)
+                        created_zip_file.write(path, file_path)
+
 
             for i in list(range(0, len(TOS_files))):
-                created_zip_file.write("TOS " + str(i))
+                TOS_file_name = TOS_files[i]["file_name"]
+                index_of_dot = TOS_file_name.index(".")
+                TOS_file_extension = TOS_file_name[index_of_dot:]
+                created_zip_file.write("TOS " + str(i) + TOS_file_extension)
 
             created_zip_file.write(licence_file_path, "LICENSE.txt")
 
+
         except:  # dunno what exceptions we might encounter here
+            os.chdir(original_cwd)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
             # close the zip either way
@@ -352,11 +378,12 @@ class UploadBundleHandler(IPythonHandler):
             with open("data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
         except OSError:
+            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when reading zip file"
                                      "as binary data")
 
         # get out of our temp directory and back to the notebook directory
-        os.chdir(notebook_dir)
+        os.chdir(original_cwd)
 
         # set up some variables needed for the request
         notebook_name_no_extension = notebook_name.split(".")[0]
@@ -391,6 +418,7 @@ class UploadBundleHandler(IPythonHandler):
                                  auth=(un, pw))
         except requests.exceptions.RequestException:
             raise web.HTTPError(500, "Requests made an error")
+        
 
         retries = 5
 
@@ -432,10 +460,10 @@ class helper:
     # directories and files to the existing node, otherwise it just creates
     # one. This creates the correct structure that SWORD requires.
     @staticmethod
-    def dir_search(path, file_type, parent_node):
+    def dir_search(path, parent_node):
         path_arr = path.split("/")
         curr_node = parent_node
-        for index, item in enumerate(path_arr, start=0):
+        for index, item in enumerate(path_arr):
             # Need to check if directory already exists
             existing_div = None
             for div in curr_node.findall('div'):
@@ -447,13 +475,12 @@ class helper:
             if existing_div is not None:
                 curr_node = existing_div
             else:
-                if(file_type == 'file'):
+                if(index == len(path_arr) - 1):
                     struct_xml_child = ET.Element('div', {"ID": path,
                                                           "TYPE": "File"})
                     fptr_xml = ET.Element("ftpr", {"FILEID": path})
                     struct_xml_child.append(fptr_xml)
                     curr_node.append(struct_xml_child)
-
                 else:
                     struct_child_attr = {"ID": "/".join(path_arr[:(index+1)]),
                                          "TYPE": "Directory"}
