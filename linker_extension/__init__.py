@@ -31,14 +31,6 @@ def _jupyter_nbextension_paths():
             # _also_ in the `nbextension/` namespace
             require="linker_extension/common/linker_extension_common"),
         dict(
-            section="tree",
-            # the path is relative to the `linker_extension` directory
-            src="nbextensions/tree/",
-            # directory in the `nbextension/` namespace
-            dest="linker_extension/tree/",
-            # _also_ in the `nbextension/` namespace
-            require="linker_extension/tree/linker_extension_tree"),
-        dict(
             section="notebook",
             # the path is relative to the `linker_extension` directory
             src="nbextensions/notebook/",
