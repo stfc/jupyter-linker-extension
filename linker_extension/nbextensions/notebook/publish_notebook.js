@@ -227,10 +227,10 @@ define(["base/js/namespace",
                             $(".login-error").remove();
                             var username_field_val = $("#username").val();
                             var password_field_val = $("#password").val();
-                            var login_details = JSON.stringify({
+                            var login_details = {
                                 username: username_field_val,
                                 password: password_field_val
-                            });
+                            };
 
                             var request = custom_contents.ldap_auth(login_details);
 
@@ -252,7 +252,7 @@ define(["base/js/namespace",
                                 upload_notebook.upload_notebook(metadata);
 
                                 if(username_field_val !== config_username) {
-                                    var config = JSON.stringify({username: username_field_val});
+                                    var config = {username: username_field_val};
                                     custom_contents.update_config(config).catch(
                                         function(reason){
                                             custom_utils.create_alert(
@@ -494,10 +494,10 @@ define(["base/js/namespace",
                             $(".login-error").remove();
                             var username_field_val = $("#username").val();
                             var password_field_val = $("#password").val();
-                            var login_details = JSON.stringify({
+                            var login_details = {
                                 username: username_field_val,
                                 password: password_field_val
-                            });
+                            };
 
                             var request = custom_contents.ldap_auth(login_details);
 
@@ -509,7 +509,7 @@ define(["base/js/namespace",
                                 upload_notebook.upload_notebook(metadata);
 
                                 if(username_field_val !== config_username) {
-                                    var config = JSON.stringify({username: username_field_val});
+                                    var config = {username: username_field_val};
                                     custom_contents.update_config(config).catch(
                                         function(reason){
                                             custom_utils.create_alert(
@@ -711,10 +711,10 @@ define(["base/js/namespace",
                             $(".login-error").remove();
                             var username_field_val = $("#username").val();
                             var password_field_val = $("#password").val();
-                            var login_details = JSON.stringify({
+                            var login_details = {
                                 username: username_field_val,
                                 password: password_field_val
-                            });
+                            };
 
                             var request = custom_contents.ldap_auth(login_details);
 
@@ -736,7 +736,7 @@ define(["base/js/namespace",
                                 upload_data.upload_data(data_metadata);
 
                                 if(username_field_val !== config_username) {
-                                    var config = JSON.stringify({username: username_field_val});
+                                    var config = {username: username_field_val};
                                     custom_contents.update_config(config).catch(
                                         function(reason){
                                             custom_utils.create_alert(

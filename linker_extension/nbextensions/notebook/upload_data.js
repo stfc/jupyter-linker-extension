@@ -97,7 +97,7 @@ define([
                                       "will not be reuploaded.");
         }
         else if ("reportmetadata" in md) {                    
-            custom_contents.upload_data(JSON.stringify(data)).then(
+            custom_contents.upload_data(data).then(
                 function(response) {
                     var id = "";
                     var xml_str = response.split("\n");

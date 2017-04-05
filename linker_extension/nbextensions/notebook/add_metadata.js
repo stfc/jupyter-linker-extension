@@ -981,7 +981,7 @@ define(["base/js/namespace",
                 }
             }
             var fedID = url_arr[i + 1]; //the url part right after user will be the username
-            custom_contents.update_config(JSON.stringify({"username":fedID})).catch(function(reason) {
+            custom_contents.update_config({"username":fedID}).catch(function(reason) {
                 var error = $("<div/>")
                     .addClass("config-error")
                     .css("color","red");

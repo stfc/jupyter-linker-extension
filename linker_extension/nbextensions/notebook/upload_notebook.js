@@ -18,7 +18,7 @@ define([
      *  create an error notification.
      */ 
     var upload_notebook = function(data) {
-        custom_contents.sword_new_item(JSON.stringify(data)).then(
+        custom_contents.sword_new_item(data).then(
             function(response) {
                 var id = "";
                 var xml_str = response.split("\n");

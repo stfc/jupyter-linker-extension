@@ -188,10 +188,10 @@ define(["base/js/namespace",
                             var username_field_val = $("#username").val();
                             var password_field_val = $("#password").val();
 
-                            var login_details = JSON.stringify({
+                            var login_details = {
                                 username: username_field_val,
                                 password: password_field_val
-                            });
+                            };
 
                             var login_request = custom_contents.ldap_auth(login_details);
 
@@ -240,7 +240,7 @@ define(["base/js/namespace",
                                     }
 
                                     if(username_field_val !== config_username) {
-                                        var config = JSON.stringify({username: username_field_val});
+                                        var config = {username: username_field_val};
                                         custom_contents.update_config(config).catch(
                                             function(reason){
                                                 custom_utils.create_alert(

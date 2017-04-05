@@ -33,7 +33,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
             type : "POST",
             cache: false,
             processData : false,
-            data: data,
+            data: JSON.stringify(data),
             contentType: "application/json",
         };
         return utils.promising_ajax(url, settings);
@@ -46,7 +46,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         var settings = {
             type : "POST",
             processData : false,
-            data: data,
+            data: JSON.stringify(data),
             contentType: "application/json",
         };
         return utils.promising_ajax(url, settings);
@@ -72,7 +72,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
             processData : false,
             cache : false,
             type : "POST",
-            data: data,
+            data: JSON.stringify(data),
             contentType: "application/json",
         };
         return utils.promising_ajax(url, settings);
@@ -98,7 +98,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
             processData : false,
             cache : false,
             type : "POST",
-            data: data,
+            data: JSON.stringify(data),
             contentType: "application/json",
         };
         return utils.promising_ajax(url, settings);
