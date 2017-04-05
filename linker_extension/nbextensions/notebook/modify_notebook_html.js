@@ -7,21 +7,6 @@ define([
      *  Makes all the hacky changes to the notebook page.
      */ 
     var load = function() {
-        //make publish menu
-        /*var dropdown = $("<li/>").addClass("dropdown publish-dropdown")
-            .append($("<a/>")
-                    .attr("href","#")
-                    .addClass("dropdown-toggle")
-                    .attr("data-toggle","dropdown")
-                    .text("Publish"));
-
-        dropdown.click(function () {
-            // The selected cell loses focus when the menu is entered, so we
-            // re-select it upon selection.
-            var i = Jupyter.notebook.get_selected_index();
-            Jupyter.notebook.select(i, false);
-        });*/
-
         var publish_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","publish-menu");
         var publish_button  = $("<button/>")
                       .addClass("btn btn-default dropdown-toggle")
@@ -79,20 +64,12 @@ define([
                    .append($("<li/>").attr("id","publish_bundle")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Publish associated data")))
-                   .append($("<li/>").attr("id","publish_bundle_alternate")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Publish associated data (alternate)")));
+                                             .text("Publish associated data")));
 
                    /*.append($("<li/>").attr("id","publish_notebook_and_bundle")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Publish Notebook and associated data")))
-                   .append($("<li/>").attr("id","publish_notebook_and_bundle_alternate")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Publish Notebook and associated data (alternate)")));*/
+                                             .text("Publish Notebook and associated data")));*/
 
         var data_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","data-menu");
         var data_button  = $("<button/>")

@@ -4,9 +4,8 @@ define([
     "base/js/dialog",
     "../custom_utils",
     "../custom_contents",
-    "./add_metadata",
     "./modify_notebook_html"
-],function(Jupyter,utils,dialog,custom_utils,custom_contents,add_metadata){
+],function(Jupyter,utils,dialog,custom_utils,custom_contents){
 
     /*  
      *  Actually upload the notebook. Requires a username & password, and if
@@ -47,122 +46,6 @@ define([
             }
             //TODO: aim the error messages at the user and not me
         );
-    };
-
-
-    /*  
-     *  Creates a dialog that prompts for username and password. Queries LDAP on
-     *  whether the user is valid before bothering to send a request to DSpace.
-     *  This is mostly here for testing purposes and will eventually be removed.
-     */ 
-    var upload_notebook_dialog = function() {
-        var config_username = "";
-
-        var login = $("<table/>").attr("id","login-fields-new-item");
-        var login_labels = $("<tr/>");
-        var login_fields = $("<tr/>");
-
-        var username_label = $("<label/>")
-            .attr("for","username")
-            .addClass("required")
-            .text("Username: ");
-        var username_field = $("<input/>")
-            .attr("id","username")
-            .attr("required","required");
-
-        var password_label = $("<label/>")
-            .attr("for","password")
-            .addClass("required")
-            .text("Password: ");
-        var password_field = $("<input/>")
-            .attr("id","password")
-            .attr("required","required")
-            .attr("type","password");
-
-        login_labels.append($("<td/>").append(username_label))
-                    .append($("<td/>").append(password_label));
-
-        login_fields.append($("<td/>").append(username_field))
-                    .append($("<td/>").append(password_field));
-
-        login.append(login_labels).append(login_fields);
-
-        custom_contents.get_config().then(function(response){
-            config_username = response.username;
-            username_field.val(config_username);
-        }).catch(function(reason){
-            var error = $("<div/>")
-                .addClass("config-error")
-                .css("color","red");
-            error.text(reason.message);
-            login.after(error);
-        });
-
-        var modal_obj = dialog.modal({
-            title: "Upload Notebook",
-            body: login,
-            default_button: "Cancel",
-            buttons: {
-                Upload:  {
-                    class : "btn-primary",
-                    click: function() {
-                        if("reportmetadata" in Jupyter.notebook.metadata) {
-                            $(".login-error").remove();
-                            var username_field_val = $("#username").val();
-                            var password_field_val = $("#password").val();
-
-                            var login_details = JSON.stringify({
-                                username: username_field_val,
-                                password: password_field_val
-                            });
-
-                            var request = custom_contents.ldap_auth(login_details);
-
-                            request.then(function() { //success function
-                                var data = add_metadata.get_values_from_metadata();
-                                data.username = username_field_val;
-                                data.password = password_field_val;
-                                data.notebookpath = Jupyter.notebook.notebook_path;
-                                upload_notebook(data);
-
-                                if(username_field_val !== config_username) {
-                                    var config = JSON.stringify({username: username_field_val});
-                                    custom_contents.update_config(config).catch(
-                                        function(reason){
-                                            custom_utils.create_alert(
-                                                "alert-danger",
-                                                "Error! " + reason.message + 
-                                                ", please try again. If it " +
-                                                "continues to fail please " + 
-                                                "contact the developers.");
-                                        }
-                                    );
-                                }
-
-                                $(".modal").modal("hide");
-                            }).catch(function(reason) { //fail function
-                                var error = $("<div/>")
-                                    .addClass("login-error")
-                                    .css("color","red");
-
-                                error.text(reason.message);
-                                login.after(error);
-                                return false;
-                            });
-                        } else {
-                            custom_utils.create_alert(
-                                "alert-danger",
-                                "Error! No metadata found. Please use " +
-                                "the \"Add Metadata\" menu item to add " +
-                                "the metadata for this report");
-                        }
-                    }
-                },
-                Cancel: {},
-            },
-            notebook: Jupyter.notebook,
-            keyboard_manager: Jupyter.keyboard_manager,
-        });
     };
 
     module.exports = {upload_notebook: upload_notebook};
