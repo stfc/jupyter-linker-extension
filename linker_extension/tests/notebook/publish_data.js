@@ -120,9 +120,8 @@ casper.notebook_test(function() {
     this.thenClick(selector);
 
     //add check here for dialog correctness, also to wait for files to be loaded
-    this.waitForSelector(".tree-multiselect");
-    //wait for modal to be fully loaded
-    this.wait(1000);
+    this.waitForSelector("#files-loading");
+    this.waitWhileVisible("#files-loading");
 
     //check that validation works
     this.thenClick("#next");
@@ -132,21 +131,30 @@ casper.notebook_test(function() {
     });
 
     //check that validation works, even after uploading a file then deleting
-    this.thenClick(".selections .item[data-value=\"file_in_nbdir.txt;text/plain\"] input");
+    this.thenEvaluate(function() {
+        $("#file-tree li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
+    });
 
-    this.thenClick(".selected .item[data-value=\"file_in_nbdir.txt;text/plain\"] .remove-selected");
-
+    this.thenEvaluate(function() {
+        $("#file-tree li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
+    });
     this.thenClick("#next");
     this.then(function() {
         this.test.assertVisible("#data-files-missing-error",
                                 "Data files missing error showing correctly after file upload and delete");
     });
 
-    //upload files for test
+    //select files for test
+    this.thenEvaluate(function() {
+        $("#file-tree li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
+        $("#file-tree li > a[title=\"sub ∂ir1\"]").prev(".button.chk").click();
+    });
+
+    this.waitForSelector("#files-loading");
+    this.waitWhileVisible("#files-loading");
+
     this.then(function() {
-        this.thenClick(".selections .item[data-value=\"file_in_nbdir.txt;text/plain\"] input");
-        this.thenClick(".selections .item[data-value=\"sub ∂ir1/file_in_sub_∂ir1.txt;text/plain\"] input");
-        this.thenClick(".selections .item[data-value=\"sub ∂ir1/sub ∂ir 1a/file_in_sub_∂ir1a.txt;text/plain\"] input");
+        this.capture("screenshots/files.png");
     });
 
     this.thenClick("#next");
@@ -156,9 +164,9 @@ casper.notebook_test(function() {
         var test_textarea_val = this.evaluate(function() {
             return $("#data-abstract").val();
         });
-        var correct_textarea_str = "file_in_nbdir.txt\n\n" + 
+        var correct_textarea_str = "file_in_sub_∂ir1a.txt\n\n" +
                                    "file_in_sub_∂ir1.txt\n\n" +
-                                   "file_in_sub_∂ir1a.txt\n\n";
+                                   "file_in_nbdir.txt\n\n";
         this.test.assertEquals(test_textarea_val,
                                correct_textarea_str,
                                "Default string in abstract form field correct");
@@ -167,6 +175,7 @@ casper.notebook_test(function() {
     //check that validation works
     this.thenClick(".btn-primary");
     this.then(function() {
+        this.capture("screenshots/metadata.png");
         this.test.assertExists("#TOS-missing-error",
                                "TOS missing error showing correctly");
         this.test.assertExists("#copyright-missing-error",

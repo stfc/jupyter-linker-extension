@@ -35,6 +35,26 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
         logo.attr("src", utils.get_body_data("baseUrl") + 
                          "nbextensions/linker_extension/common/logo.png");
 
+        //zTree
+
+        
+
+        $("head").append(
+            $("<link>")
+            .attr("rel", "stylesheet")
+            .attr("type", "text/css")
+            .attr("href", utils.get_body_data("baseUrl")
+                          + "nbextensions/linker_extension/common/zTreeStyle.css")
+        );
+
+        $("head").append(
+            $("<link>")
+            .attr("rel", "stylesheet")
+            .attr("type", "text/css")
+            .attr("href", utils.get_body_data("baseUrl")
+                          + "nbextensions/linker_extension/common/font-awesome-zTree.css")
+        );
+
         //add our custom css
         $("head").append(
             $("<link>")
@@ -43,6 +63,9 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
             .attr("href", utils.get_body_data("baseUrl")
                           + "nbextensions/linker_extension/common/common_style.css")
         );
+
+
+
 
 
 

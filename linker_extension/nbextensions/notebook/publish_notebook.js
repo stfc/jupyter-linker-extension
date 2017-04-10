@@ -774,6 +774,9 @@ define(["base/js/namespace",
             $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
             $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
+
+            //init tree
+            upload_data.init_tree();
         });
 
     };

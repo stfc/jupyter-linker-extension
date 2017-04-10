@@ -19,6 +19,6 @@
   },
   "dependencies": {
     "es6-promise": "^4.1.0",
-    "tree-multiselect": "^2.1.6"
+    "ztree": "^3.5.24"
   }
 }

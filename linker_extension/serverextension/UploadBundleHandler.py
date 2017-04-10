@@ -174,11 +174,14 @@ class UploadBundleHandler(IPythonHandler):
         file_names = []
         file_mimetypes = []
         for file in data_files:
-            split = file.split(";")
-            file_paths.append(split[0])
-            file_names.append(split[0].split("/")[-1])
-            file_mimetypes.append(split[1])
+            file_paths.append(file["path"])
+            file_names.append(file["name"])
 
+            if(file["mimetype"] == None):
+                file_mimetypes.append("application/octet-stream")
+            else:
+                file_mimetypes.append(file["mimetype"])
+    
         # the TOS files and the licence
         TOS_files = arguments["TOS"]
         licence = arguments["licence"]
