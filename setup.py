@@ -92,7 +92,7 @@ class CustomsdistCommandProd(sdist):
         if install:
             subprocess.check_call(["npm","install","--progress=false"],cwd=repo_root)
 
-        subprocess.check_call(["webpack", "-p"])
+        subprocess.check_call(["node_modules/.bin/webpack", "-p"])
 
         sdist.run(self)
 
@@ -116,7 +116,7 @@ class CustomsdistCommandDev(sdist):
         if install:
             subprocess.check_call(["npm","install","--progress=false"],cwd=repo_root)
 
-        subprocess.check_call(["webpack"])
+        subprocess.check_call(["node_modules/.bin/webpack"])
 
         sdist.run(self)
 
@@ -217,7 +217,8 @@ setup_args = dict(
     package_data={
         '': (jsfiles + cssfiles + ['*.md', 'tests/*.js', 'tests/*.md'] +
              notebook_tests + resource_files + ['tests/*.txt']
-             + ["nbextensions/common/logo.png","nbextensions/common/favicon.ico"])
+             + ["nbextensions/common/logo.png","nbextensions/common/favicon.ico"]
+             + ["nbextensions/common/font-awesome-zTree.css","nbextensions/common/zTreeStyle.css"])  # TODO: find better way of including multiselect css?
     },
     install_requires=[
         'notebook>=4',
