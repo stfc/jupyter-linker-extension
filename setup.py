@@ -3,7 +3,6 @@
 import os
 import sys
 import shutil
-import nbconvert
 from setuptools import setup, find_packages
 from setuptools.command.sdist import sdist
 from setuptools.command.install import install
@@ -125,6 +124,7 @@ class CustomInstallExtenstionsCommand(Command):
     description = "Install and enable the extension"
     user_options = []
 
+
     def initialize_options(self):
         pass
 
@@ -133,12 +133,36 @@ class CustomInstallExtenstionsCommand(Command):
 
     def run(self):
         import subprocess
-        subprocess.call('jupyter serverextension enable --py '
-                        'linker_extension --system', shell=True)
-        subprocess.call('jupyter nbextension install --py --overwrite '
-                        'linker_extension --system', shell=True)
-        subprocess.call('jupyter nbextension enable --py '
-                        'linker_extension --system', shell=True)
+        import notebook
+        import tempfile
+        out = tempfile.TemporaryFile('a+')
+        err = tempfile.TemporaryFile('a+')
+
+        try:
+            subprocess.check_call(["jupyter","serverextension","enable","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            subprocess.check_call(["jupyter","nbextension","install","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            subprocess.check_call(["jupyter","nbextension","enable","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            # only install bundlerextension if notebook version 5 or above
+            if(int(notebook.__version__.split(".")[0]) >= 5):
+                subprocess.check_call(["jupyter","bundlerextension","enable","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            out.seek(0)
+            print(out.read())
+        except subprocess.CalledProcessError as e:
+            err.seek(0)
+            errors = err.read()
+            if(errors.find("PermissionError") > -1):
+                #give a slighly easier to read error messages if it's a permission error
+                print("Error! You do not have the permissions to modify the nbconfig "+
+                      "folder. Have you tried running it with sudo?")
+            else:
+                print(errors)
+        finally:
+            err.close()
+            out.close()
 
 
 class CustomUninstallExtenstionsCommand(Command):
@@ -153,12 +177,36 @@ class CustomUninstallExtenstionsCommand(Command):
 
     def run(self):
         import subprocess
-        subprocess.call('jupyter nbextension disable --py '
-                        'linker_extension --system', shell=True)
-        subprocess.call('jupyter nbextension uninstall --py '
-                        'linker_extension --system', shell=True)
-        subprocess.call('jupyter serverextension disable --py '
-                        'linker_extension --system', shell=True)
+        import notebook
+        import tempfile
+        out = tempfile.TemporaryFile('a+')
+        err = tempfile.TemporaryFile('a+')
+
+        try:
+            # only install bundlerextension if notebook version 5 or above
+            if(int(notebook.__version__.split(".")[0]) >= 5):
+                subprocess.check_call(["jupyter","bundlerextension","disable","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            subprocess.check_call(["jupyter","nbextension","disable","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            subprocess.check_call(["jupyter","nbextension","uninstall","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            subprocess.check_call(["jupyter","serverextension","disable","--py",
+                                    "linker_extension","--sys-prefix"],stderr=err,stdout=out)
+            out.seek(0)
+            print(out.read())
+        except subprocess.CalledProcessError as e:
+            err.seek(0)
+            errors = err.read()
+            if(errors.find("PermissionError") > -1):
+                #give a slighly easier to read error messages if it's a permission error
+                print("Error! You do not have the permissions to modify the nbconfig "+
+                      "folder. Have you tried running this command with sudo?")
+            else:
+                print(errors)
+        finally:
+            err.close()
+            out.close()
 
 
 # on install, install and enable the extension and copy the template files
@@ -167,6 +215,8 @@ class CustomInstallCommand(install):
 
     def run(self):
         install.run(self)
+
+        import nbconvert
         # insert custom code here
         nbconvert_loc = os.path.dirname(nbconvert.__file__)
         template_path = os.path.join(nbconvert_loc, 'templates', 'latex')
