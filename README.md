@@ -6,7 +6,9 @@ TODO: upload to PyPi to make simple install easier?
 
 ### BUILD AND INSTALL INSTRUCTIONS
 
-Install Node.js and npm
+Install Node.js and npm (the following command works on Ubuntu)
+
+`sudo apt-get install nodejs-legacy npm`
 
 Download and extract or clone this git repo.
 

@@ -4,6 +4,10 @@ This directory includes regression tests for the linker extension. These tests
 depend on [CasperJS](http://casperjs.org/), which in turn requires a recent
 version of [PhantomJS](http://phantomjs.org/).
 
+To install PhantomJS and CasperJS
+
+`npm install phantomjs-prebuilt casperjs`
+
 To run all of the JavaScript tests do:
 
 ```
