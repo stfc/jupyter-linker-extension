@@ -7,7 +7,7 @@ module.exports = {
     //instance by putting it as a plugin like with es6-promise
     entry: {
         "linker_extension/nbextensions/notebook/linker_extension_notebook": "./linker_extension/nbextensions/notebook/notebook_index.js",
-        "linker_extension/nbextensions/common/linker_extension_common": ["tree-multiselect/dist/jquery.tree-multiselect.min.js","./linker_extension/nbextensions/common/common_index.js"]
+        "linker_extension/nbextensions/common/linker_extension_common": ["ztree/js/jquery.ztree.all.js","./linker_extension/nbextensions/common/common_index.js"]
     },
     //output file
     output: {
@@ -16,13 +16,6 @@ module.exports = {
         libraryTarget: "amd",
     },
 
-    loaders: [
-        { 
-            test: /\.css$/,
-            loader: "style-loader/css-loader" 
-        }
-    ],
-
     //export some names
     externals: {
         "base/js/namespace": "base/js/namespace",
@@ -30,7 +23,6 @@ module.exports = {
         "base/js/dialog": "base/js/dialog",
         "base/js/events": "base/js/events",
         "notebook/js/celltoolbar": "notebook/js/celltoolbar",
-        "tree-multiselect/dist/jquery.tree-multiselect.css": "tree-multiselect/dist/jquery.tree-multiselect.css"
     },
 
     //add es6-promise plugin
@@ -40,4 +32,3 @@ module.exports = {
         })
     ]
 };
-

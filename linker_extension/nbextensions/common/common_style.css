@@ -320,42 +320,7 @@ label.required:after {
   content:"*";
   color:red;
 }
-#files-page .btn-file {
-  margin-top: 2px;
-  margin-bottom: 5px;
-}
-#data-files-wrap input {
-  width: 62px;
-  height: 27px;
-  margin-left: -10px;
-}
-#data-files-list .MultiFile-remove {
-  color: red;
-}
-#files-page {
+#files-page #file-tree-container {
   max-height: 400px;
   overflow: auto;
-}
-div.selected div.item {
-  width: 300px;
-  overflow-x: hidden;
-}
-div.selections div.item {
-  margin-bottom: -3px;
-}
-div.selections div.item label {
-  position: relative;
-  top: -4px;
-  vertical-align: bottom;
-  display: inline;
-}
-div.selections div.title {
-  padding-bottom: 6px;
-}
-div.selections div.title * {
-  margin-top: 0px;
-}
-div.selections div.title input {
-  position: relative;
-  top: 4px;
 }
