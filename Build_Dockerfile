@@ -1,0 +1,53 @@
+# copied 
+
+FROM debian@sha256:52af198afd8c264f1035206ca66a5c48e602afb32dc912ebf9e9478134601ec4
+
+USER root
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN REPO=http://cdn-fastly.deb.debian.org \
+ && echo "deb $REPO/debian jessie main\ndeb $REPO/debian-security jessie/updates main" > /etc/apt/sources.list \
+ && apt-get update && apt-get -yq dist-upgrade \
+ && apt-get install -yqf --no-install-recommends \
+    wget \
+    bzip2 \
+    libbz2-1.0 \
+    ca-certificates \
+    sudo \
+    locales \
+    python3 \
+    python3-pip \
+    nodejs-legacy \
+    npm \
+ && apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
+
+ENV SHELL /bin/bash
+ENV NB_USER jovyan
+ENV NB_UID 1000
+ENV HOME /home/$NB_USER
+
+# Create jovyan user with UID=1000 and in the 'users' group
+RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
+
+# Setup jovyan home directory
+RUN mkdir /home/$NB_USER/work
+
+WORKDIR /home/$NB_USER/work
+
+COPY ./ /home/$NB_USER/work/
+
+RUN pip3 -V
+
+RUN pip3 install --upgrade pip
+
+RUN pip3 -V
+
+RUN pip3 install jupyter
+
+RUN python3 setup.py build_dev
+
+RUN pip3 install dist/LinkerExtension-1.0.tar.gz
+
+RUN python3 setup.py installextensions
