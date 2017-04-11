@@ -79,7 +79,6 @@ define(["base/js/namespace",
                                     Jupyter.notebook.metadata.reportmetadata = result;
                                     Jupyter.notebook.save_notebook();
                                 });
-                                $("#collections_loaded").remove();
                             } else {
                                 return false;
                             }
@@ -1113,7 +1112,6 @@ define(["base/js/namespace",
                 communities_option.text(community.name);
                 department.append(communities_option);
             });
-            $(document.body).append($("<div/>").attr("id","communities_loaded"));
         }).catch(function(reason) { //error
             var department_fetch_error = $("<div/>")
                 .addClass("department-fetch-error")
@@ -1125,7 +1123,6 @@ define(["base/js/namespace",
 
         var populate_repositories = function(community) {
             return custom_contents.get_collections({"community": community}).then(function(response) {
-                $("#communities_loaded").remove();
                 var collections = response.children;
                 collections.forEach(function(collection) {
                     var collection_option = $("<option/>");
@@ -1133,7 +1130,6 @@ define(["base/js/namespace",
                     collection_option.text(collection.name);
                     repository.append(collection_option);
                 });
-                $(document.body).append($("<div/>").attr("id","collections_loaded"));
             }).catch(function(reason) {
                 var repository_fetch_error = $("<div/>")
                     .addClass("repository-fetch-error")

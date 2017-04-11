@@ -331,7 +331,11 @@ casper.notebook_test(function() {
         this.test.assertVisible("#fields2","Valid data has been accepted");
     });
 
-    this.waitForSelector("#communities_loaded"); //feels dirty...
+    this.waitFor(function() {
+        return this.evaluate(function() {
+            return $("#department").children().length > 0;
+        });
+    });
 
     this.thenClick("#next");
     this.then(function() {
@@ -359,7 +363,11 @@ casper.notebook_test(function() {
                                "Licence dropdown invalid error exists");
     });
 
-    this.waitForSelector("#collections_loaded");
+    this.waitFor(function() {
+        return this.evaluate(function() {
+            return $("#repository").children().length > 1;
+        });
+    });
 
     this.then(function() {
         this.fillSelectors("form#publish-form > fieldset#fields2", {

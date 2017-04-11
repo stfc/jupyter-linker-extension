@@ -147,7 +147,11 @@ casper.notebook_test(function() {
         this.test.assertEquals(date,test_date,"Current date has been inserted right");
     });
 
-    this.waitForSelector("#collections_loaded"); //feels dirty...
+    this.waitFor(function() {
+        return this.evaluate(function() {
+            return $("#department").children().length > 0;
+        });
+    });
 
     this.waitFor(function check() {
         return this.evaluate(function() {
@@ -424,9 +428,6 @@ casper.notebook_test(function() {
                                "URL empty error exists");
     });
 
-    //todo: when communities finalised make it so we always test to the default
-    //repository
-
     this.then(function(){
         this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
             "#nb-licence-dropdown": "CC0",
@@ -434,7 +435,15 @@ casper.notebook_test(function() {
         });
     });
 
-    this.waitForSelector("#collections_loaded");
+    //TODO: when communities finalised make it so we always test to the default
+    //repository
+
+    //wait for repository to have more items in it than the "None Selected" option
+    this.waitFor(function() {
+        return this.evaluate(function() {
+            return $("#repository").children().length > 1;
+        });
+    });
 
     this.then(function(){
         var repository = this.evaluate(function() {
@@ -468,7 +477,9 @@ casper.notebook_test(function() {
     }); //TODO: add funders and sponsors if we can use them
 
     this.thenClick("#next");
-    this.waitWhileVisible(".modal");
+    this.waitWhileVisible(".modal",function(){},function() {
+        this.capture("screenshots/modal_lingering.png");
+    });
 
     //hook into the notebook saved event
     this.evaluate(function() {
@@ -901,8 +912,6 @@ casper.notebook_test(function() {
     });
 
     this.thenClick("#next");
-
-    this.waitForSelector("#collections_loaded"); //feels dirty...
 
     this.waitForSelector("#add-nb-referencedBy-button");
     this.thenClick("#add-nb-referencedBy-button");
