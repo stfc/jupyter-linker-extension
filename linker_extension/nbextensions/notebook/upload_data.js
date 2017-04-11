@@ -112,7 +112,7 @@ define([
                     var id = "";
                     var xml_str = response.split("\n");
                     xml_str.forEach(function(item) {
-                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it"s not in the string
+                        if (item.indexOf("<atom:id>") !== -1) { // -1 means it's not in the string
                             var endtag = item.lastIndexOf("<");
                             var without_endtag = item.slice(0,endtag);
                             var starttag = without_endtag.indexOf(">");
@@ -125,7 +125,8 @@ define([
                     custom_utils.create_alert("alert-success data-upload-success-alert",
                                               "Success! Item created in eData! " +
                                               "It is located here: <a href =\"" +
-                                              id + "\">" + id + "</a>")
+                                              id + "\" class=\"alert-link\">"
+                                              + id + "</a>")
                                 .attr("item-id",id);
                 },
                 function(reason) {

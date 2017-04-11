@@ -14,8 +14,7 @@ define([
      *  and sends the request. If successful, shows an success notification
      *  that contains the url of the item uploaded. If it fails, will show
      *  an error notification with the error message and a notice to contact
-     *  the devs. Also guards against there being no metadata, as it will also
-     *  create an error notification.
+     *  the devs.
      */ 
     var upload_notebook = function(data) {
         custom_contents.sword_new_item(data).then(
@@ -34,7 +33,8 @@ define([
                 custom_utils.create_alert("alert-success nb-upload-success-alert",
                                           "Success! Item created in eData! " +
                                           "It is located here: <a href =\"" +
-                                          id + "\">" + id + "</a>")
+                                          id + "\" class=\"alert-link\">"
+                                          + id + "</a>")
                             .attr("item-id",id);
             },
             function(reason) {
