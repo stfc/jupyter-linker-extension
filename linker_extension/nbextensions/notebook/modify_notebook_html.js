@@ -92,7 +92,11 @@ define([
         data_dropdown_ul.append($("<li/>").attr("id","download_data")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Download data")));
+                                             .text("Download data")))
+                        .append($("<li/>").attr("id","redownload_data")
+                                     .append($("<a/>")
+                                             .attr("href","#")
+                                             .text("Retrieve associated data from eData")));
 
         /*  
          *  The notebook metadata doesn't exist immediately and we need it to

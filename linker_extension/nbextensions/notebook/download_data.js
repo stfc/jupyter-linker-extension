@@ -284,27 +284,225 @@ define(["base/js/namespace",
         });
     };
 
+    var redownload_data = function() {
+        
+        var overwrite = $("<input/>")
+            .attr("type","radio")
+            .attr("id","filename-collision-behaviour-overwrite")
+            .attr("name","filename-collision-behaviour")
+            .attr("value","overwrite");
+
+        var overwrite_label = $("<label/>")
+            .attr("for","filename-collision-behaviour-overwrite")
+            .append(overwrite)
+            .append($("<span/>").text("Overwrite the file in your directory " +
+                                      "with the one being downloaded from eData"));
+
+        var rename = $("<input/>")
+            .attr("type","radio")
+            .attr("id","filename-collision-behaviour-rename")
+            .attr("name","filename-collision-behaviour")
+            .attr("value","rename");
+
+        var rename_label = $("<label/>")
+            .attr("for","filename-collision-behaviour-rename")
+            .append(rename)
+            .append($("<span/>").text("Rename the file being downloaded. Warning: " + 
+                                      "this means the notebook may not run as " +
+                                      "it will not be referencing the file that " +
+                                      "has been downloaded and instead will " +
+                                      "reference your local file"));
+
+
+        var config_username = "";
+        var login = $("<table/>").attr("id","login-fields-upload-data");
+        var login_labels = $("<tr/>");
+        var login_fields = $("<tr/>");
+
+        var username_label = $("<label/>")
+            .attr("for","username")
+            .addClass("required")
+            .text("Username: ");
+        var username_field = $("<input/>")
+            .attr("id","username")
+            .attr("required","required");
+
+        var password_label = $("<label/>")
+            .attr("for","password")
+            .addClass("required")
+            .text("Password: ");
+        var password_field = $("<input/>")
+            .attr("id","password")
+            .attr("required","required")
+            .attr("type","password");
+
+        login_labels.append($("<td/>").append(username_label))
+                    .append($("<td/>").append(password_label));
+
+        login_fields.append($("<td/>").append(username_field))
+                    .append($("<td/>").append(password_field));
+
+        login.append(login_labels).append(login_fields);
+
+        custom_contents.get_config().then(function(response){
+            config_username = response.username;
+            username_field.val(config_username);
+        }).catch(function(reason){
+            var error = $("<div/>")
+                .addClass("config-error")
+                .css("color","red");
+            error.text(reason.message);
+            login.after(error);
+        });
+
+        var form_body = $("<div/>")
+            .append(
+                $("<form/>").attr("id","download_data_form").append(
+                        $("<label/>")
+                        .attr("for","download_data_form")
+                        .text("Retrieve the data used to make this notebook from eData. " +
+                              "This will download the files into the same directory as this notebook. " +
+                              "Please select what you want to do if there is a file in this directory " +
+                              "that has the same filename as one that is attempting to be downloaded: "))
+                        .append(overwrite_label)
+                        .append(rename_label)
+                        .append(login)
+            );
+        
+        var modal = dialog.modal({
+            title: "Download data from eData",
+            body: form_body,
+            buttons: {
+                Cancel: {},
+                Download: { 
+                    class : "btn-primary",
+                    click: function() {
+                        $(".download-form-error").remove();
+                        if(!("databundle_url" in Jupyter.notebook.metadata)) {
+                            var error = $("<div/>")
+                                .addClass("download-form-error")
+                                .css("color","red")
+                                .text("No databundle url has been associated with this notebook");
+
+                            $("label[for=\"download_data_form\"]").before(error);
+                        }
+
+                        if($(".download-form-error").length === 0) {
+                            $(".login-error").remove();
+                            var username_field_val = $("#username").val();
+                            var password_field_val = $("#password").val();
+
+                            var login_details = {
+                                username: username_field_val,
+                                password: password_field_val
+                            };
+
+                            var login_request = custom_contents.ldap_auth(login_details);
+
+                            login_request.then(function() { //success function
+                                custom_contents.redownload_data({
+                                    URL: Jupyter.notebook.metadata.databundle_url,
+                                    username: $("#username").val(),
+                                    password: $("#password").val(),
+                                    notebookpath: Jupyter.notebook.notebook_path,
+                                    collision_mode: $("input[name=\"filename-collision-behaviour\"]:checked").val(),
+                                }).then(function(response) {
+                                    var db_url = Jupyter.notebook.metadata.databundle_url;
+                                    if(response.error) {
+                                        custom_utils.create_alert(
+                                            "alert-danger download-failure-alert",
+                                            response.message + " while downloading " +
+                                            response.name + " (<a href=\"" + db_url + 
+                                            "\" class=\"alert-link\">"+ db_url + 
+                                            "</a>)").attr("id",db_url);
+                                    } else {
+                                        custom_utils.create_alert(
+                                            "alert-success download-success-alert",
+                                            response.message + " " + response.name +
+                                            " (<a href=\"" + db_url +  
+                                            "\"class=\"alert-link\">" + db_url +
+                                            "</a>) downloaded from eData.");
+                                    }
+
+                                    if(username_field_val !== config_username) {
+                                        var config = {username: username_field_val};
+                                        custom_contents.update_config(config).catch(
+                                            function(reason){
+                                                custom_utils.create_alert(
+                                                    "alert-danger",
+                                                    "Error! " + reason.message + 
+                                                    "when trying to save username " +
+                                                    "to config. If it " +
+                                                    "continues to fail please " + 
+                                                    "contact the developers.");
+                                            }
+                                        );
+                                    }
+                                });
+                                //dismiss modal - can't return true since
+                                //we're in a promise so dismiss it manually
+                                $(".modal").modal("hide");
+                            }).catch(function(reason) { //fail function
+                                var error = $("<div/>")
+                                    .addClass("login-error")
+                                    .css("color","red");
+
+                                error.text(reason.message);
+                                login.after(error);
+                            });
+                        }
+                        return false;
+                    },
+                }
+            },
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.notebook.keyboard_manager,
+        });
+
+        //stuff to do when modal is open and fully visible
+        modal.on("shown.bs.modal", function () {
+            //add id for ease of usage
+            $(".modal-footer > button.btn-primary").attr("id","download");
+        });
+    };
+
     /*  
      *  The below adds an action to the notebook and assigns the add_metadata
      *  function to the Add metadata function, and handles exporting the
      *  functions we use in other modules/files.
      */
 
-    var action = {
-        help: "Add notebook metadata",
+    var download_action = {
+        help: "Download data from urls/dois",
         help_index: "a",
-        icon: "fa-bars",
+        icon: "fa-download",
         handler : download_data,
     };
 
-    var prefix = "linker_extension";
-    var action_name = "add-notebook-metadata";
+    var download_prefix = "linker_extension";
+    var download_action_name = "download-data";
+
+    var redownload_action = {
+        help: "Redownload associated bundle from eData",
+        help_index: "a",
+        icon: "fa-download",
+        handler : redownload_data,
+    };
+
+    var redownload_prefix = "linker_extension";
+    var redownload_action_name = "redownload-data";
 
     var load = function () {
-        Jupyter.actions.register(action,action_name,prefix);
+        Jupyter.actions.register(download_action,download_action_name,download_prefix);
+        Jupyter.actions.register(redownload_action,redownload_action_name,redownload_prefix);
         $("#download_data").click(function () {
             download_data([]);
         });
+
+        $("#redownload_data").click(function () {
+            redownload_data();
+        });
+
     };
 
     module.exports = {

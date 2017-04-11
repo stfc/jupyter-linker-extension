@@ -51,14 +51,14 @@ class DownloadHandler(IPythonHandler):
                                      login_url,
                                      headers=login_headers,
                                      json={"email": un, "password": pw},
-                                     verify=False)
+                                     verify=verify_param)
         except requests.exceptions.SSLError:
             verify_param = cert
             login = requests.request('POST',
                                      login_url,
                                      headers=login_headers,
                                      json={"email": un, "password": pw},
-                                     verify=False)
+                                     verify=verify_param)
         except requests.exceptions.RequestException:
             raise web.HTTPError(500, "Requests made an error")
 
@@ -321,5 +321,232 @@ class DownloadHandler(IPythonHandler):
                             # TODO: is this sensible behaviour?
                             shutil.rmtree(path,ignore_errors=True)
                             break
+
+        self.finish(result_dict)
+
+
+class RedownloadHandler(IPythonHandler):
+
+    # given a username and pass and a purl, access the bitstreams
+    # of the items relating to them and save the files in the notebook folder.
+    # used for data redownload.
+    @web.authenticated
+    @json_errors
+    @gen.coroutine
+    def post(self):
+        #TODO: surround json with try-catch
+        config = LinkerExtensionConfig()
+        dspace_url = config.dspace_url
+
+        arguments = escape.json_decode(self.request.body)
+
+        un = arguments['username']
+        pw = arguments['password']
+        url = arguments["URL"]
+        collision_mode = arguments["collision_mode"]
+        notebook_path = arguments["notebookpath"]
+        notebook_wd = os.path.dirname(notebook_path)
+
+        # login for token
+        login_url = urljoin(dspace_url, "/rest/login")
+        login_headers = {'Content-Type': 'application/json',
+                         'Accept': 'application/json'}
+
+        verify_param = True
+        cert = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                  "resources",
+                                  "cert.pem")
+        try:
+            login = requests.request('POST',
+                                     login_url,
+                                     headers=login_headers,
+                                     json={"email": un, "password": pw},
+                                     verify=verify_param)
+        except requests.exceptions.SSLError:
+            verify_param = cert
+            login = requests.request('POST',
+                                     login_url,
+                                     headers=login_headers,
+                                     json={"email": un, "password": pw},
+                                     verify=verify_param)
+        except requests.exceptions.RequestException:
+            raise web.HTTPError(500, "Requests made an error")
+
+        token = login.text
+
+        session = requests.Session()
+        session.headers.update({
+            'rest-dspace-token': token,
+            'Content-Type': 'application/json'
+        })
+
+        headers = {'Accept': 'application/json'}        
+
+        rest_url = urljoin(dspace_url, "/rest/items/find-by-metadata-field")
+        find_request = session.post(rest_url,
+                                   headers=headers,
+                                   json={"key": "dc.identifier.uri",
+                                         "value": url},
+                                   verify=verify_param)
+
+
+        # get the bitstream ids
+
+        try:
+            id = find_request.json()[0]["id"]
+            item_name = find_request.json()[0]["name"]
+        except json.decoder.JSONDecodeError:
+            id = None
+
+        rest_url = "/rest/items/" + str(id) + "/bitstreams"
+        get_bitstream_request = session.get(dspace_url + rest_url,headers=headers,verify=verify_param)
+
+        # get the content of the bitstreams (plus the name of the file and the name
+        # of the item)
+        bitstreams_info = []
+        get_content_requests = []
+        try:
+            for bitstream in get_bitstream_request.json():
+                # TODO: check that we only want to mess with the ORIGINAL bundle
+                # only download the files in the ORIGINAL bundle i.e. the ones
+                # shown in view/open section
+                bitstream_info = {}
+                if bitstream["bundleName"] == "ORIGINAL":
+                    bitstream_info["name"] = bitstream["name"] 
+                    id = bitstream["id"]
+                    rest_url = "/rest/bitstreams/" + str(id) + "/retrieve"
+                    get_content_request = session.get(dspace_url + rest_url,headers=headers,verify=verify_param)
+                    get_content_requests.append(get_content_request)
+                    bitstream_info["content_request"] = get_content_request
+                    bitstreams_info.append(bitstream_info)
+
+        except json.decoder.JSONDecodeError:
+            pass      
+
+        result_dict = {} 
+
+        if find_request.status_code != 200:
+            # fail on find via metadata.
+            result_dict = {
+                "error": True,
+                "message": "Error! Failed trying to find the item in eData",
+                "name": item_name,
+                "paths": []
+            }
+        elif get_bitstream_request.status_code != 200:
+                # fail on get bistreams
+                result_dict = {
+                    "error": True,
+                    "message": "Error! Failed trying to list the bitstreams",
+                    "name": item_name,
+                    "paths": []
+                }
+        else:
+            for request in get_content_requests:
+                if request.status_code != 200:
+                    result_dict = {
+                        "error": True,
+                        "message": "Error! Failed trying to retrieve bitstream content",
+                        "name": item_name,
+                        "paths": []
+                    }
+                    break
+
+        if len(get_content_requests) == 0:
+            # shouldn't /really/ get this - users must specify a bitstream
+            # when uploading. But you can delete all the bitstreams from an
+            # existing item
+            result_dict = {
+                "error": True,
+                "message": "Error! Found no bitstreams for the item",
+                "name": item_name,
+                "paths": []
+            }
+
+        #if result_dict is still empty then we've succeeded 
+        if not result_dict:
+            #we succeeded - save the files into the notebook folder
+            result_dict = {
+                "error": False, 
+                "message": "Success!",
+                "name": item_name,
+                "paths": []
+            }
+
+            index = ""
+            cwd = os.getcwd()
+
+            path = cwd + "/" + notebook_wd
+
+            for bitstream in bitstreams_info:
+                os.chdir(path)
+                try:
+                    filename = bitstream["name"]
+                    # create subfolders if we need to
+                    if os.path.dirname(filename):
+                        os.makedirs(os.path.dirname(filename),exist_ok=True)
+                        os.chdir(os.path.dirname(filename))
+
+                    try:
+                        first_dot = os.path.basename(filename).index(".")
+                        filename_no_extension = os.path.basename(filename)[:first_dot]
+                        extension = os.path.basename(filename)[first_dot:]
+                    except ValueError:
+                        # we get this if there's no dot i.e. no file
+                        # extension. Since this could be a valid file
+                        # just set filename_no_extension to be filename
+                        filename_no_extension = os.path.basename(filename)
+
+                    if(os.path.exists(os.path.basename(filename))):
+                        #file already exists, need to deal with this
+                        if(collision_mode == "overwrite"):
+                            #easy mode - just overwrite. w+ behaviour already
+                            #overwrites any existing file
+                            with open(os.path.basename(filename),"w+b") as f:
+                                f.write(bitstream["content_request"].content)
+
+                        elif(collision_mode == "rename"):
+                            index = "(1)"
+                            while True:
+                                if(os.path.exists(filename_no_extension + index + extension)):
+                                    index = '('+str(int(index[1:-1])+1)+')' # Append 1 to number in brackets
+                                else:
+                                    with open(filename_no_extension + index + extension,"w+b") as f:
+                                        f.write(bitstream["content_request"].content)
+                                    break
+
+                    else:
+                        with open(os.path.basename(filename),"w+b") as f:
+                            f.write(bitstream["content_request"].content)
+
+                        try:
+                            # extract files into a folder with the filename as the name
+                            shutil.unpack_archive(os.path.basename(filename), filename_no_extension)
+                            extracted_files = os.listdir(filename_no_extension)
+
+                            # add all the extracted files to the path list
+                            for extracted_file in extracted_files:
+                                result_dict["paths"].append(os.getcwd() + filename_no_extension + extracted_file)
+                        except shutil.ReadError as e:
+                            if  e.args[0] != "Unknown archive format '{0}'".format(os.path.basename(filename)):
+                                # actual error, aka it has the right format
+                                # and we still can't unzip it. add warning
+                                # to message
+                                result_dict["message"] = result_dict["message"] + "However, we were unable to unpack some of the archive files in the item "
+
+                            result_dict["paths"].append(os.getcwd() + os.path.basename(filename))    
+
+                    os.chdir(cwd)
+                except OSError:
+                    result_dict = {
+                        "error": True,
+                        "message": "Error! Failed when writing files",
+                        "name": item_name,
+                        "paths": []
+                    }
+                    os.chdir(cwd)
+                    # clean up the folder so we don't have a half completed download
+                    # TODO: is this sensible behaviour?
+                    break
 
         self.finish(result_dict)

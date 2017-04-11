@@ -196,6 +196,13 @@ textarea {
   box-shadow: none; 
 }
 
+label[for=filename-collision-behaviour-overwrite] > span, label[for=filename-collision-behaviour-rename] > span {
+  display:block;
+  margin-left: 22px;
+  margin-top:-24px;
+  margin-bottom: 5px;
+}
+
 .hide-me {
   display: none;
 }

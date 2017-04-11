@@ -3,9 +3,7 @@ Main server extension file. Defines the url to handler mappings
 """
 
 from notebook.utils import url_path_join
-from notebook.base.handlers import (
-    path_regex
-)
+from notebook.base.handlers import path_regex
 
 from .ConfigHandler import LinkerExtensionConfig, ConfigHandler
 from .DSpaceHandler import DSpaceHandler
@@ -16,7 +14,7 @@ from .TestDSpaceHandlers import (
 from .UploadBundleHandler import UploadBundleHandler
 from .LDAPHandler import LDAPHandler
 from .CustomNbconvertHandler import CustomNbconvertHandler
-from .DownloadHandler import DownloadHandler
+from .DownloadHandler import DownloadHandler, RedownloadHandler
 from .MiscHandlers import ContentsHandler
 
 # ----------------------------------------------------------------------------
@@ -90,6 +88,10 @@ def load_jupyter_server_extension(nbapp):
     route_pattern_download = url_path_join(web_app.settings['base_url'],
                                        '/dspace_download')
     web_app.add_handlers(host_pattern, [(route_pattern_download, DownloadHandler)])
+
+    route_pattern_redownload = url_path_join(web_app.settings['base_url'],
+                                       '/dspace_redownload')
+    web_app.add_handlers(host_pattern, [(route_pattern_redownload, RedownloadHandler)])
 
     route_pattern_contents = url_path_join(web_app.settings['base_url'],
                                        '/dspace_contents')
