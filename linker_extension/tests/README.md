@@ -6,7 +6,7 @@ version of [PhantomJS](http://phantomjs.org/).
 
 To install PhantomJS and CasperJS
 
-`npm install phantomjs-prebuilt casperjs`
+`npm install -g phantomjs-prebuilt casperjs`
 
 To run all of the JavaScript tests do:
 
