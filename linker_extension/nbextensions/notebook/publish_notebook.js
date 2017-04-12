@@ -559,6 +559,15 @@ define(["base/js/namespace",
      */ 
     var publish_bundle = function() {
 
+        //need this check here in case the user activates it via action
+        //rather than via the button
+        if("databundle_url" in Jupyter.notebook.metadata) {
+            custom_utils.create_alert("alert-warning",
+                                      "You have already uploaded the associate " +
+                                      "data for this notebook to eData.");
+            return;
+        }
+
         var instructions = $("<label/>")
             .attr("id","publish_instructions")
             .attr("for","publish-form");
@@ -805,7 +814,7 @@ define(["base/js/namespace",
     var publish_bundle_action_name = "publish-bundle";
 
 
-    var publish_both_action = {
+    /*var publish_both_action = {
         help: "Publish notebook and data bundle",
         help_index: "a",
         icon: "fa-upload",
@@ -813,7 +822,7 @@ define(["base/js/namespace",
     };
 
     var publish_both_prefix = "linker_extension";
-    var publish_both_action_name = "publish-notebook-and-data-bundle";
+    var publish_both_action_name = "publish-notebook-and-data-bundle";*/
 
     var load = function () {
         Jupyter.actions.register(
@@ -833,22 +842,49 @@ define(["base/js/namespace",
             publish_bundle();
         });
 
-        Jupyter.actions.register(
+        /*Jupyter.actions.register(
             publish_both_action,
             publish_both_action_name,
             publish_both_prefix
         );
         $("#publish_notebook_and_bundle").click(function () {
             publish_notebook_and_bundle();
-        });/*
-        Jupyter.actions.register(
-            publish_both_alternate_action,
-            publish_both_alternate_action_name,
-            publish_both_alternate_prefix
-        );
-        $("#publish_notebook_and_bundle_alternate").click(function () {
-            publish_notebook_and_bundle_alternate();
         });*/
+
+        //check on load to see whether the user should be able to click the upload
+        //data button. if it's fine on page load, put a watcher on publish-menu
+        //so check whenever it is clicked whether it has to disable the button
+        if(Jupyter.notebook.metadata.databundle_url) {
+            disable_publish_data();
+        } else {
+            $("#publish-menu").click(function() {
+                if(!$("#publish_bundle > a").prop("disabled") && Jupyter.notebook.metadata.databundle_url) {
+                    disable_publish_data();
+                }
+            });
+        }
+        
+    };
+
+    var disable_publish_data = function() {
+        //disable upload_data button if they've already uploaded data to eData
+        $("#publish_bundle").addClass("disabled");
+        $("#publish_bundle").unbind("click").click(function() {
+            return false;
+        });
+        //add hover text and a question mark to indicate that there's hover text
+        $("#publish_bundle > a").attr(
+            "title",
+            "You have already published data associated with this notebook to eData"
+        );
+        
+        $("#publish_bundle > a").append(
+            $("<i/>").addClass("fa fa-question-circle")
+                     .attr("aria-hidden","true")
+                     .css("margin-left","4px"))
+                            .append(
+            $("<span/>").addClass("sr-only")
+                        .text("You have already published data associated with this notebook to eData"));
     };
 
     module.exports = {

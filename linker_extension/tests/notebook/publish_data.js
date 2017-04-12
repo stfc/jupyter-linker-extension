@@ -543,14 +543,24 @@ casper.notebook_test(function() {
         });
     }
 
+    selector = "#publish_bundle > a";
+    this.waitForSelector(selector);
+    this.thenClick(selector);
+    this.wait(1000);
+    this.then(function() {
+        //button should have been disabled - so clicking shouldn't do anything
+        this.test.assertNotVisible(".modal");
+    });
+
     /* 
      * test that username is refilled from config - this tests both the
      * saving of username to config after a successful request and refilling
-     * from config when trying to send a new request
+     * from config when trying to send a new request. need to click publish_notebook
+     * since publish_data should have been disabled
      */
 
     //Click on menu item
-    selector = "#publish_bundle > a";
+    selector = "#publish_notebook > a";
     this.waitForSelector(selector);
     this.thenClick(selector);
 
