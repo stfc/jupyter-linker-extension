@@ -15,5 +15,6 @@ RUN pip install LinkerExtension-1.0.tar.gz
 RUN jupyter serverextension enable --py linker_extension --system
 RUN jupyter nbextension install --py linker_extension
 RUN jupyter nbextension enable --py linker_extension --system
+RUN jupyter bundlerextension enable --py --system linker_extension
 
 RUN rm LinkerExtension-1.0.tar.gz
