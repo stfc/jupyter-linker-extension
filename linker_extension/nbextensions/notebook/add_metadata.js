@@ -969,59 +969,6 @@ define(["base/js/namespace",
         //wise. also it makes a lot of requests...
 
         /*  
-         *  Autofilling author and department from Jupyterhub
-         */ 
-        if(window.location.href.indexOf("user") !== -1) { //we're in jupyterhub
-            console.log("jupyterhub!");
-            var url_arr = window.location.href.split("/");
-            for(var i = 0; i < url_arr.length; i++) {
-                if(url_arr[i] === "user") {
-                    break;
-                }
-            }
-            var fedID = url_arr[i + 1]; //the url part right after user will be the username
-            custom_contents.update_config({"username":fedID}).catch(function(reason) {
-                var error = $("<div/>")
-                    .addClass("config-error")
-                    .css("color","red");
-                error.text(reason.message);
-                form1.prepend(error);
-                form2.prepend(error);
-            });
-            /*
-            var url = Jupyter.notebook.contents.base_url + "ldap";
-            var settings = {
-                processData : false,
-                cache: false,
-                type : "GET",
-                dataType : "json",
-                success: function(data) {
-                    console.log(data);
-                    var parsed = JSON.parse(data);
-                    $("#author-first-name-0").val(parsed.attributes.givenName);
-                    $("#author-last-name-0").val(parsed.attributes.sn);
-                    var department = parsed.attributes.department;
-                    var deps_to_reps = {
-                        "SC": "SCD",
-                        "RALSP": "RAL Space",
-                        "DIA": "DLS",
-                        "TECH":"Technology",
-                        "CLF":"CLF",
-                        "ISIS":"ISIS",
-                        "PPD":"PPD",
-                        "AST":"ASTeC",
-                        "UKATC":"UKATC"
-                    };
-                    var repository = deps_to_reps[department];
-                    communities_promise.then(function() {
-                        $("#repository").val(repository);
-                    });
-                }
-            };
-            $.ajax(url + "?" + $.param({"fedID": fedID}),settings);*/
-        }
-
-        /*  
          *  Autofill from config. we only autofill if there hasn't been metadata
          *  saved because author and deparment are required fields and so must
          *  have been filled by the user - since we don't want to overwrite user
