@@ -161,10 +161,12 @@ define(["base/js/namespace",
                         var urls = [];
                         var at_least_one_url = false;
                         $(".download-url").each(function(index,item) {
-                            if(validate_url($(item).val())) {
-                                urls.push($(item).val());
+                            //trim to remove leading & trailing whitespace
+                            var curr_url = $(item).val().trim();
+                            if(validate_url(curr_url)) {
+                                urls.push(curr_url);
                                 at_least_one_url = true;
-                            } else if ($(item).val() !== "") {
+                            } else if (curr_url !== "") {
                                 //ignore blank inputs
                                 var error = $("<div/>")
                                     .addClass("download-form-error")
