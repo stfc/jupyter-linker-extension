@@ -38,11 +38,7 @@ WORKDIR /home/$NB_USER/work
 
 COPY ./ /home/$NB_USER/work/
 
-RUN pip3 -V
-
 RUN pip3 install --upgrade pip
-
-RUN pip3 -V
 
 RUN pip3 install jupyter
 
