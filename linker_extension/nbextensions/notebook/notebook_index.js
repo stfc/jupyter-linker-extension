@@ -1,4 +1,4 @@
-require("../custom_contents.js");
+var custom_contents = require("../custom_contents.js");
 require("../custom_utils.js");
 var add_metadata = require("./add_metadata.js");
 var custom_cell_toolbar = require("./custom_cell_toolbar.js");
@@ -37,6 +37,24 @@ function load_ipython_extension(){
     publish_notebook.load();
     generate_references.load();
     download_data.load();
+
+    /*  
+     *  Autofilling username config from Jupyterhub
+     */ 
+    if(window.location.href.indexOf("user") !== -1) { //we're in jupyterhub
+        var url_arr = window.location.href.split("/");
+        for(var i = 0; i < url_arr.length; i++) {
+            if(url_arr[i] === "user") {
+                break;
+            }
+        }
+        var fedID = url_arr[i + 1]; //the url part right after user will be the username
+        custom_contents.update_config({"username":fedID}).catch(function(reason) {
+            //TODO: this rarely ever fails, and it's not catastrophic if it does
+            //fail. Should we bother showing the user an error message?
+            console.log(reason.message);
+        });
+    }
 }
 
 module.exports = {load_ipython_extension: load_ipython_extension};
