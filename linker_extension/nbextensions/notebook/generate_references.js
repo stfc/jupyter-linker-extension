@@ -86,7 +86,7 @@ define([
     var action_name = "generate-references";
     
     var load = function () {
-        Jupyter.actions.register(action,action_name,prefix);
+        Jupyter.notebook.keyboard_manager.actions.register(action,action_name,prefix);
         $("#generate_references").click(function () {
             generate_references();
         });

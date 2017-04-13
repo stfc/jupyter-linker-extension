@@ -495,8 +495,8 @@ define(["base/js/namespace",
     var redownload_action_name = "redownload-data";
 
     var load = function () {
-        Jupyter.actions.register(download_action,download_action_name,download_prefix);
-        Jupyter.actions.register(redownload_action,redownload_action_name,redownload_prefix);
+        Jupyter.notebook.keyboard_manager.actions.register(download_action,download_action_name,download_prefix);
+        Jupyter.notebook.keyboard_manager.actions.register(redownload_action,redownload_action_name,redownload_prefix);
         $("#download_data").click(function () {
             download_data([]);
         });

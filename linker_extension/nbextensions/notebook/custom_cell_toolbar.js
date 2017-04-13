@@ -48,7 +48,7 @@ define([
 
         var prefix = "linker_extension";
         var action_name = "toggle-cell-references-bar";
-        Jupyter.actions.register(action,action_name,prefix);
+        Jupyter.notebook.keyboard_manager.actions.register(action,action_name,prefix);
 
         $("#toggle_cell_references_bar").click(function () {
             toggle_cell_references_bar();

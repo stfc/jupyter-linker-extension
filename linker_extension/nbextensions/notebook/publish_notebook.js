@@ -825,7 +825,7 @@ define(["base/js/namespace",
     var publish_both_action_name = "publish-notebook-and-data-bundle";*/
 
     var load = function () {
-        Jupyter.actions.register(
+        Jupyter.notebook.keyboard_manager.actions.register(
             publish_notebook_action,
             publish_notebook_action_name,
             publish_notebook_prefix
@@ -833,7 +833,7 @@ define(["base/js/namespace",
         $("#publish_notebook").click(function () {
             publish_notebook_warning();
         });
-        Jupyter.actions.register(
+        Jupyter.notebook.keyboard_manager.actions.register(
             publish_bundle_action,
             publish_bundle_action_name,
             publish_bundle_prefix
@@ -842,7 +842,7 @@ define(["base/js/namespace",
             publish_bundle();
         });
 
-        /*Jupyter.actions.register(
+        /*Jupyter.notebook.keyboard_manager.actions.register(
             publish_both_action,
             publish_both_action_name,
             publish_both_prefix

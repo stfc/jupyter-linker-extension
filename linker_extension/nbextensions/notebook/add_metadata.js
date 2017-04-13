@@ -1561,7 +1561,7 @@ define(["base/js/namespace",
     var action_name = "add-notebook-metadata";
 
     var load = function () {
-        Jupyter.actions.register(action,action_name,prefix);
+        Jupyter.notebook.keyboard_manager.actions.register(action,action_name,prefix);
         $("#add_metadata").click(function () {
             add_metadata();
         });
