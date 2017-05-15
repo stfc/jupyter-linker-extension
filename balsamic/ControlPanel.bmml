@@ -1,0 +1,52 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1476" measuredH="826" mockupW="1024" mockupH="768">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="452" y="58" w="1024" h="768" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>A%20Web%20Page%0Ahttp%3A//</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Image" x="617" y="143" w="244" h="42" measuredW="310" measuredH="70" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <src>%24ACCOUNT/assets/stfcLogo.png</src>
+        <text/>
+      </controlProperties>
+    </control>
+    <control controlID="3" controlTypeID="com.balsamiq.mockups::Canvas" x="453" y="129" w="1022" h="70" measuredW="100" measuredH="70" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13158</color>
+      </controlProperties>
+    </control>
+    <control controlID="8" controlTypeID="com.balsamiq.mockups::Button" x="1204" y="160" w="-1" h="-1" measuredW="63" measuredH="27" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>Login%26bm%3BLogin.bmml%26bm%3BLogin.bmml%26bm%3BLogin.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22752%2C102%2C815%2C129%22%20href%3D%22Login.bmml%22%20alt%3D%22Login%22%20id%3D%228%22/%3E</map>
+        <text>Logout</text>
+      </controlProperties>
+    </control>
+    <control controlID="10" controlTypeID="com.balsamiq.mockups::Button" x="725" y="239" w="136" h="48" measuredW="116" measuredH="27" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>13369344</color>
+        <text>Stop%20My%20Server</text>
+      </controlProperties>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::Button" x="893" y="239" w="119" h="48" measuredW="84" measuredH="27" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>6989903</color>
+        <href>Tree%26bm%3BTree.bmml%26bm%3BTree.bmml%26bm%3BTree.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22441%2C181%2C560%2C229%22%20href%3D%22Tree.bmml%22%20alt%3D%22Tree%22%20id%3D%2211%22/%3E</map>
+        <text>My%20Server</text>
+      </controlProperties>
+    </control>
+    <control controlID="12" controlTypeID="com.balsamiq.mockups::Button" x="1048" y="239" w="112" h="48" measuredW="58" measuredH="27" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>2848996</color>
+        <text>Admin</text>
+      </controlProperties>
+    </control>
+    <control controlID="13" controlTypeID="com.balsamiq.mockups::StickyNote" x="1033" y="273" w="247" h="123" measuredW="109" measuredH="123" zOrder="7" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Only%20an%20admin%20level%20user%20can%20go%20to%20the%20admin%20panel.%20We%20might%20not%20even%20need%20this%20anyway%20%28all%20an%20admin%20can%20do%20is%20shut%20down%20the%20hub%20and%20stop/start%20individual%20user%20servers%29</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>

@@ -2,6 +2,7 @@ dist/
 build/
 *.pyo
 *.pyc
+*.py~
 *.egg-info/
 __pycache__/
 *.egg
@@ -13,3 +14,5 @@ linker_extension/nbextensions/common/linker_extension_common.js
 screenshots/
 node_modules/
 linker_extension/tests/login_credentials.txt
+*.ipynb
+.project
