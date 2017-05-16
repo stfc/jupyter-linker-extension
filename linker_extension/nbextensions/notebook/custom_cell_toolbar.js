@@ -7,387 +7,132 @@ define([
     "use strict";
 
     /*  
-     *  This contains the stuff we want doing when the extension/page is loaded.
-     *  We have to register our toolbar as a CellToolbar preset. We also add an
-     *  action and button for our toggle button.
-     */  
-    var load = function() {
-        console.log("Loading custom cell toolbar");
-        var CellToolbar = celltoolbar.CellToolbar;
-
-        CellToolbar.prototype._rebuild = CellToolbar.prototype.rebuild;
-        CellToolbar.prototype.rebuild = function () {
-            events.trigger("toolbar_rebuild.CellToolbar", this.cell);
-            this._rebuild();
-        };
-
-        CellToolbar._global_hide = CellToolbar.global_hide;
-        CellToolbar.global_hide = function () {
-            CellToolbar._global_hide();
-            for (var i=0; i < CellToolbar._instances.length; i++) {
-                events.trigger("global_hide.CellToolbar",
-                               CellToolbar._instances[i].cell);
-            }
-        };
-        
-        //Call global hide so toolbar is hidden by default on opening page.
-        CellToolbar.global_hide();
-        
-        Jupyter.notebook.get_cells().forEach(function(cell){
-        	if (is_dataplot(cell)) {
-        		cell.element.find("div.input").hide();
-        	}
-        });
-       
-        var reference_preset = [];
-
-        CellToolbar.register_callback("linker_extension.add_reference_url",
-                                      add_reference_url);
-        reference_preset.push("linker_extension.add_reference_url");
-
-        CellToolbar.register_preset("Linker Extension",
-                                    reference_preset,
-                                    Jupyter.notebook);
-        
-        var dataplot_preset = [];
-
-        CellToolbar.register_callback("linker_extension.add_dataplot",
-                add_dataplot);
-        dataplot_preset.push("linker_extension.add_dataplot");
-
-        CellToolbar.register_preset("Linker Extension Dataplot",
-                                    dataplot_preset,
-                                    Jupyter.notebook);
-
-        var globalAction = {
-            help: "Show/hide the cell references bar on all the cells ",
-            help_index: "g",
-            icon: "fa-eye",
-            handler : toggle_cell_references_bar,
-        };
-
-        var prefix = "linker_extension";
-        var globalActionName = "toggle-cell-references-bar";
-        Jupyter.notebook.keyboard_manager.actions.register(globalAction,globalActionName,prefix);
-
-        $("#toggle_cell_references_bar").click(function () {
-            toggle_cell_references_bar();
-        });
-        
-        console.log("Defining add toolbar");
-        
-        var addCellAction = {
-            help: "Add a cell references bar on the current cell",
-            help_index: "h",
-            icon: "fa-eye",
-            handler : add_current_cell_bar,
-        };
-
-        var prefix = "linker_extension";
-        var addCellActionName = "add-current-cell-bar";
-        
-        console.log("Registering with jupyter");
-        Jupyter.notebook.keyboard_manager.actions.register(addCellAction,addCellActionName,prefix);
-
-        console.log("Setting onclick function");
-        $("#add_current_cell_bar").click(function () {
-            add_current_cell_bar();
-        });
-        
-        console.log("Defining remove toolbar");
-        
-        var removeCellAction = {
-            help: "Remove the cell references bar on the current cell",
-            help_index: "i",
-            icon: "fa-eye",
-            handler : remove_current_cell_bar,
-        };
-
-        var prefix = "linker_extension";
-        var removeCellActionName = "remove-current-cell-bar";
-        
-        console.log("Registering with jupyter");
-        Jupyter.notebook.keyboard_manager.actions.register(removeCellAction,removeCellActionName,prefix);
-
-        console.log("Setting onclick function");
-        $("#remove_current_cell_bar").click(function () {
-            remove_current_cell_bar();
-        });
-        
-        
-        
-        var editCellAction = {
-                help: "Edit the cell references bar on the current cell",
-                help_index: "i",
-                icon: "fa-eye",
-                handler : edit_current_cell,
-            };
-
-            var prefix = "linker_extension";
-            var editCellActionName = "edit-current-cell";
-            
-            console.log("Registering with jupyter");
-            Jupyter.notebook.keyboard_manager.actions.register(editCellAction,
-            		                                           editCellActionName,
-            		                                           prefix);
-
-            console.log("Setting onclick function");
-            $("#edit_current_cell").click(function () {
-                edit_current_cell();
-            });
-        
-        console.log("Successfully loaded custom cell toolbar");
-    };
-
-    /*  
-     *  Toggles the visibility of our toolbar. This is due to the celltoolbar
-     *  menu being a bit of a pain to find. It changes text depending whether
-     *  our toolbar preset is currently active or not.
+     *  Generate the cell toolbars.
+     *  
+     *  Jupyter provides the div of the toolbar and the associated cell,
+     *  we just add all the required features.
      */ 
-    var toggle_cell_references_bar = function() {
-        var CellToolbar = celltoolbar.CellToolbar;
-        if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
-            CellToolbar.global_show();
-
-            CellToolbar.activate_preset("Linker Extension");
-            Jupyter.notebook.metadata.celltoolbar = "Linker Extension";
-
-            $("#toggle_cell_references_bar > a")
-                .text("Hide cell references toolbar");
-            
-            Jupyter.notebook.get_cells().forEach(function(cell){
-            	if (is_dataplot(cell)) {
-            		cell.element.find("div.input").show();
-            	}
-            });
-        } else {
-            CellToolbar.global_hide();
-            delete Jupyter.notebook.metadata.celltoolbar;
-            $("#toggle_cell_references_bar > a")
-                .text("Show cell references toolbar");
-            
-            Jupyter.notebook.get_cells().forEach(function(cell){
-            	if (is_dataplot(cell)) {
-            		cell.element.find("div.input").hide();
-            	}
-            });
-        }
-    };
-    
-    
-    /*  
-     *  Adds a toolbar to the current cell toobar.
-     */ 
-    var add_current_cell_bar = function() {
-        var selectedCell = Jupyter.notebook.get_selected_cell();
-        console.log("Showing cell toolbar for " + Jupyter.notebook.find_cell_index(selectedCell));
-        selectedCell.element.find("div.ctb_hideshow").addClass("ctb_show");
-    };
-    
-    /*  
-     *  Toggles the visibility of our current cell toobar.
-     */ 
-    var remove_current_cell_bar = function() {
-        var selectedCell = Jupyter.notebook.get_selected_cell();
-        console.log("Hiding cell toolbar for " + Jupyter.notebook.find_cell_index(selectedCell));
-        selectedCell.element.find("div.ctb_hideshow").removeClass("ctb_show");
-    };
-    
-    
-    /*  
-     *  Toggles the visibility of our current cell toobar.
-     */ 
-    var edit_current_cell = function() {
-        edit_cell(Jupyter.notebook.get_selected_cell());
-    };
-
-    /*  
-     *  Toggles the visibility of our current cell toobar.
-     */ 
-    var edit_cell = function(cell) {
-    	if (is_dataplot(cell)) {
-        	var CellToolbar = celltoolbar.CellToolbar;
-        	CellToolbar.global_show();
-            CellToolbar.activate_preset("Linker Extension Dataplot");
-            Jupyter.notebook.metadata.celltoolbar = "Linker Extension Dataplot";
-            
-            var cells = Jupyter.notebook.get_cells(); 
-            
-            cells.forEach(function(cell){
-            	cell.element.find("div.ctb_hideshow").removeClass("ctb_show");
-            	if (is_dataplot(cell)) {
-            		cell.element.find("div.input").hide();
-            	}
-            });
-            
-            cell.element.find("div.ctb_hideshow").addClass("ctb_show");
-            cell.element.find("div.input").show();
-            //cell.element.find("div.input_area").hide();
-    	}
-    };
-    
-
-    /*  
-     *  The actual celltoolbar stuff. The CellToolbar stuff in Jupyter gives our
-     *  preset the div that we can attach our stuff to and the cell that is currently
-     *  being edited. We add some help text and a text input with a button that spawns
-     *  more text inputs. We have it so that when any of the inputs changes they
-     *  update the cell's metadata. 
-     */ 
-    var add_reference_url = function(div, cell) {
-        var help_text = "Add the reference URLs that relate to this cell:\n";
+    var reference_url_toolbar = function(div, cell) {
+    	//Container for help, toolbars
         var toolbar_container = $(div).addClass("cell-urls-container");
-
-
+        toolbar_container.append("Add the reference URLs that relate to this cell:\n");
+        
+        //Create the URL container
         var URL_container = $("<div/>").addClass("cell-urls");
-        toolbar_container.append(help_text);
         toolbar_container.append(URL_container);
-
-        var md_set = cell.metadata.hasOwnProperty("referenceURLs");
-        if(!md_set) {
+        
+        //Create reference URLs list in cell metadata
+        var metadata_set = cell.metadata.hasOwnProperty("referenceURLs");
+        if(!metadata_set) {
+        	console.log("Creating reference URL array")
             cell.metadata.referenceURLs = [];
         }
-
-        var base_referenceURL = $("<input/>")
-            .addClass("referenceURL referenceURL_" + cell.cell_id)
-            .attr("name","referenceURL");
-
-        var base_referenceURL_div = $("<div/>")
-            .addClass("referenceURL_div")
-            .addClass("referenceURL_div_" + cell.cell_id);
-
-        base_referenceURL_div.append(base_referenceURL);
-
-        //on focus switch into edit mode so we can type text normally
-        base_referenceURL.focus(function() {
-            Jupyter.keyboard_manager.edit_mode();
-        });
-
-        //does what it says - updates the notebook metadata. Note - it doesn't
-        //save the metadata, just updates it.
+        
+        //Create the add new URL button
+        var add_url_button = $("<button/>")
+    		.addClass("btn btn-xs btn-default add-cell-url-button")
+    		.attr("type","button")
+    		.bind("click", function(){create_referenceUrl(false)})
+    		.attr("aria-label","Add reference URL");
+        add_url_button.append($("<i>").addClass("fa fa-plus"));
+        
+        //If the metadata already exists, pre-populate the URL fields.
+        if (metadata_set) {
+        	populate_from_metadata();
+        } else {
+            //Create and setup the first reference URL
+            create_referenceUrl(true);
+        }
+        
         function update_metadata() {
-            cell.metadata.referenceURLs = [];
+        	cell.metadata.referenceURLs = [];
             $(".referenceURL_" + cell.cell_id).each(function(i,e) {
                 if($(e).val()) {
                     cell.metadata.referenceURLs.push($(e).val());
                 }
             });
         }
-
-        //put all values in metadata on change
-        base_referenceURL.change(function() {
-            update_metadata();
-        });
-
-        /*  
-         *  Adds an extra URL input box whilst adding a remove button to the
-         *  previous input box. 
-         */ 
-        function addURL() {
-            var newURL = ($("<div/>"))
-                          .addClass("referenceURL_div")
-                          .addClass("referenceURL_div_" + cell.cell_id);
-            var URL = $("<input/>")
-                .attr("class","referenceURL referenceURL_" + cell.cell_id)
-                .attr("type","text")
-                .attr("name","referenceURL");
-
-            //on focus switch into edit mode so we can type text normally
-            URL.focus(function() {
+        
+        function create_referenceUrl(first) {
+        	//Create a div to hold the input field and buttons.
+            var reference_url_div = $("<div/>").addClass("referenceURL_div")
+                                               .addClass("referenceURL_div_" + cell.cell_id);
+            
+            //Create and setup the input field.
+            var reference_url = $("<input/>").addClass("referenceURL referenceURL_" + cell.cell_id)
+                                            .attr("name","referenceURL");
+            reference_url_div.append(reference_url);
+            
+           //On focus, allow keyboard editing of the URL.
+            reference_url.focus(function() {
                 Jupyter.keyboard_manager.edit_mode();
             });
-
-            URL.change(function() { //save all values to metadata on change
+            
+            //When the URL changes, update the cell's metadata.
+            reference_url.change(function() {
                 update_metadata();
             });
 
-            var previousURL = $(".referenceURL_div_" + cell.cell_id).last();
+            if (!first) {
+            	var div = $(".referenceURL_div_" + cell.cell_id).last();
+            	add_delete_button(div);
+            }
 
-            //detach from the previously last url input so
-            //we can put it back on the new one
-            addURLButton.detach(); 
-            var deleteURL = $("<button/>")
+            //Attach the add URL button to the latest URL.
+            reference_url_div.append(add_url_button);
+
+            URL_container.append(reference_url_div);
+            
+            return([reference_url, reference_url_div]);
+        }    
+        
+        function add_delete_button(div) {
+        	//Detach the add url button, and add a delete button to the previous URL.       	
+        	add_url_button.detach();
+        	
+        	console.log("Found div: " + div.attr("class"));
+        	
+            var delete_button = $("<button/>")
                 .addClass("btn btn-xs btn-default remove-cell-url-button")
                 .attr("type","button")
                 .attr("aria-label","Remove reference URL")
-                    .click(function() {
-                        previousURL.remove();
-                        $(this).remove();
-                        update_metadata();
-                    }); //add a remove button to the previously last url
+                .click(function() {
+                    div.remove();
+                    $(this).remove();
+                    update_metadata();
+                });
 
-            deleteURL.append($("<i>")
+            delete_button.append($("<i>")
                              .addClass("fa fa-trash")
                              .attr("aria-hidden","true"));
-            previousURL.append(deleteURL);
-            URL_container.append(newURL.append(URL).append(addURLButton));
-            return [URL,newURL];
+            div.append(delete_button);
         }
-        
-        
 
-        var addURLButton = $("<button/>")
-            .addClass("btn btn-xs btn-default add-cell-url-button")
-            .attr("type","button")
-            .bind("click",addURL)
-            .attr("aria-label","Add reference URL");
-
-        addURLButton.append($("<i>").addClass("fa fa-plus"));
-        base_referenceURL_div.append(addURLButton);
-
-        URL_container.append(base_referenceURL_div);
-
-        /*  
-         *  Repopulate from existig notebook metadata 
-         */ 
-        if(md_set) {
-            var URLarr = cell.metadata.referenceURLs;
-            var deleteURL;
-            URLarr.forEach(function(item,index) {
-                if(index === 0) {
-                    base_referenceURL.val(item);
-                    if(URLarr.length > 1) {
-                        deleteURL = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-cell-url-button")
-                            .attr("type","button")
-                            .attr("aria-label","Remove reference URL")
-                                .click(function() {
-                                    base_referenceURL.remove();
-                                    $(this).remove();
-
-                                    update_metadata();
-                                });
-                        deleteURL.append($("<i>")
-                                         .addClass("fa fa-trash")
-                                         .attr("aria-hidden","true"));
-                        base_referenceURL_div.append(deleteURL);
-                    }
-                    
-                } else {
-                    var URL = addURL();
-                    URL[0].val(item);
-                    if(index !== URLarr.length - 1) { //if not last element
-                        deleteURL = $("<button/>")
-                            .addClass("btn btn-xs btn-default remove-cell-url-button")
-                            .attr("type","button")
-                            .attr("aria-label","Remove reference URL")
-                                .click(function() {
-                                    URL[1].remove();
-                                    $(this).remove();
-
-                                    update_metadata();
-                                });
-                        deleteURL.append($("<i>")
-                                         .addClass("fa fa-trash")
-                                         .attr("aria-hidden","true"));
-                        URL[1].append(deleteURL);
-                    }
-                }
+        function populate_from_metadata() {
+        	console.log("Populating URL array from metadata")
+            var URLarray = cell.metadata.referenceURLs;
+        	var base_url;
+        	var base_url_div;
+        	[base_url, base_url_div] = create_referenceUrl(true);
+            URLarray.forEach(function(item,index) {
+            	var reference_url;
+            	var reference_url_div;
+            	if (index == 0) {
+            		[reference_url, reference_url_div] = [base_url, base_url_div];
+            	} else {
+            		[reference_url, reference_url_div] = create_referenceUrl(false);
+            	}
+            	console.log("Found URL: " + item);
+            	reference_url.val(item);
+            	
+            	if (index != URLarray.length - 1) {
+            		add_delete_button(reference_url_div);
+            	}
             });
         }
     };
     
-    var add_dataplot = function(div, cell) {
+    var dataplot_toolbar = function(div, cell) {
     	$(div).addClass("generate-section");
         var title_container = $("<div/>").addClass("generate-title")
                                          .append("Generate dataplot cell");
@@ -484,7 +229,6 @@ define([
         $(div).append(code_container);
         $(div).append(xaxis_div);
         $(div).append(yaxis_div);
-        //$(div).append(title_div);
         $(div).append(generate_container);
         
     };
@@ -522,7 +266,6 @@ define([
     	"\n" +
     	"ax1 = fig.add_subplot(111)\n" +
     	"\n" +
-    	"ax1.set_title('title')\n" +
     	"ax1.set_xlabel(xaxis)\n" +
     	"ax1.set_ylabel(yaxis)\n" +
     	"\n" +
@@ -536,12 +279,72 @@ define([
     	cell.set_text(dataplot_code);
         cell.execute();
     }
+    
+    /*  
+     * Callback Functions
+     */ 
+    var toggle_cell_references_bar = function() {
+    	// Toggles the visibility of the references toolbar.
+        var CellToolbar = celltoolbar.CellToolbar;
+        if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
+            CellToolbar.global_show();
 
-    module.exports = {load: load};
+            CellToolbar.activate_preset("Linker Extension");
+            Jupyter.notebook.metadata.celltoolbar = "Linker Extension";
 
-    /**
-     * Is the cell an dataplot generator cell?
-     */
+            $("#toggle_cell_references_bar > a")
+                .text("Hide cell references toolbar");
+            
+            show_dataplot_input(true);
+        } else {
+            CellToolbar.global_hide();
+            delete Jupyter.notebook.metadata.celltoolbar;
+            $("#toggle_cell_references_bar > a")
+                .text("Show cell references toolbar");
+            
+            show_dataplot_input(false);
+        }
+    };
+
+    var edit_current_cell = function() {
+    	//Opens the edit toolbar for the current selected cell.
+    	var cell = Jupyter.notebook.get_selected_cell();
+    	if (is_dataplot(cell)) {
+        	var CellToolbar = celltoolbar.CellToolbar;
+        	CellToolbar.global_show();
+            CellToolbar.activate_preset("Linker Extension Dataplot");
+            Jupyter.notebook.metadata.celltoolbar = "Linker Extension Dataplot";
+            
+            var cells = Jupyter.notebook.get_cells(); 
+            
+            cells.forEach(function(cell){
+            	cell.element.find("div.ctb_hideshow").removeClass("ctb_show");
+            	if (is_dataplot(cell)) {
+            		cell.element.find("div.input").hide();
+            	}
+            });
+            
+            cell.element.find("div.ctb_hideshow").addClass("ctb_show");
+            cell.element.find("div.input").show();
+            cell.element.find("div.input_area").hide();
+    	}
+    };    
+    
+    //Show or hide input areas for dataplot cells.
+    var show_dataplot_input = function(show) {
+        Jupyter.notebook.get_cells().forEach(function(cell){
+        	if (is_dataplot(cell)) {
+        		if (show) {
+        			cell.element.find("div.input").show();
+        		} else {
+        			cell.element.find("div.input").hide();
+        		}
+        		
+        	}
+        });
+    };
+    
+    //Is the cell a dataplot generator cell?
     var is_dataplot = function(cell) {
         if (cell.metadata.dataplot === undefined) {
             return false;
@@ -549,4 +352,87 @@ define([
             return cell.metadata.dataplot;
         }
     };
+
+    var setup_celltoolbar = function(){
+        var cell_toolbar = celltoolbar.CellToolbar;
+        
+        //Hide everything on page open.
+        cell_toolbar.global_hide();
+        delete Jupyter.notebook.metadata.celltoolbar;
+        $("#toggle_cell_references_bar > a")
+            .text("Show cell references toolbar");
+       
+        //Register the toolbars
+        cell_toolbar.register_callback("linker_extension.add_reference_url",
+                                       reference_url_toolbar);
+        cell_toolbar.register_preset("Linker Extension",
+                                     ["linker_extension.add_reference_url"],
+                                     Jupyter.notebook);
+        
+        cell_toolbar.register_callback("linker_extension.add_dataplot",
+                					   dataplot_toolbar);
+        cell_toolbar.register_preset("Linker Extension Dataplot",
+                                     ["linker_extension.add_dataplot"],
+                                     Jupyter.notebook);
+        
+        //Unsure what setting these functions does?
+    	cell_toolbar.prototype._rebuild = cell_toolbar.prototype.rebuild;
+    	cell_toolbar.prototype.rebuild = function () {
+            events.trigger("toolbar_rebuild.CellToolbar", this.cell);
+            this._rebuild();
+        };
+
+        cell_toolbar._global_hide = cell_toolbar.global_hide;
+        cell_toolbar.global_hide = function () {
+        	cell_toolbar._global_hide();
+            for (var i=0; i < cell_toolbar._instances.length; i++) {
+                events.trigger("global_hide.CellToolbar",
+                		cell_toolbar._instances[i].cell);
+            }
+        };
+        
+    };
+    
+    var register_callbacks = function() {
+        var prefix = "linker_extension";
+        
+        var globalAction = {
+            help: "Show/hide the cell references bar on all the cells ",
+            help_index: "g",
+            icon: "fa-eye",
+            handler : toggle_cell_references_bar,
+        };
+        var globalActionName = "toggle-cell-references-bar";
+        $("#toggle_cell_references_bar").click(function () {
+            toggle_cell_references_bar();
+        });
+        Jupyter.notebook.keyboard_manager.actions.register(globalAction,globalActionName,prefix);
+
+        var editCellAction = {
+            help: "Edit the cell references bar on the current cell",
+            help_index: "i",
+            icon: "fa-eye",
+            handler : edit_current_cell,
+        };
+        var editCellActionName = "edit-current-cell";
+        $("#edit_current_cell").click(function () {
+            edit_current_cell();
+        });        
+        Jupyter.notebook.keyboard_manager.actions.register(editCellAction,
+        		                                           editCellActionName,
+        		                                           prefix);
+
+        console.log("Successfully registered callbacks");	
+    }
+    
+    var load = function() {
+        //Create the cell toolbar
+    	setup_celltoolbar();
+    	register_callbacks();
+    	
+    	//Hide all dataplot input areas.
+    	show_dataplot_input(false);
+    };
+    
+    module.exports = {load: load};
 });
