@@ -48,16 +48,6 @@ define([
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Show/Hide cell references toolbar")))
-
-                   .append($("<li/>").attr("id","add_current_cell_bar")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Show cell references toolbar for current cell")))
-                   
-                   .append($("<li/>").attr("id","remove_current_cell_bar")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Hide cell references toolbar for current cell")))
                                              
                    .append($("<li/>").attr("id","generate_references")
                                      .append($("<a/>")

@@ -1,7 +1,8 @@
 var custom_contents = require("../custom_contents.js");
 require("../custom_utils.js");
 var add_metadata = require("./add_metadata.js");
-var custom_cell_toolbar = require("./custom_cell_toolbar.js");
+var setup_toolbars = require("./toolbars/setup_toolbars.js");
+var dataplot_toolbar = require("./toolbars/dataplot_toolbar.js");
 var modify_notebook_html = require("./modify_notebook_html.js");
 require("./upload_data.js");
 require("./upload_notebook.js");
@@ -34,7 +35,7 @@ function load_ipython_extension(){
 
     modify_notebook_html.load();
     add_metadata.load();
-    custom_cell_toolbar.load();
+    setup_toolbars.load();
     publish_notebook.load();
     generate_references.load();
     insert_dataplot_cell.load();

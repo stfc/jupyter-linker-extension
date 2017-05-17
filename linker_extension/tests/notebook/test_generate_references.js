@@ -22,7 +22,7 @@ casper.notebook_test(function() {
 
     this.then(function() {
     	this.evaluate(function() {
-    		//Put the URL directly into the cell's metadata. custom_cell_toolbar tests the UI.
+    		//Put the URL directly into the cell's metadata. test_references_toolbar tests the UI.
     		var cells = Jupyter.notebook.get_cells();
     		cells[0].metadata.referenceURLs = ["https://cell-url.com/"];
     	});
