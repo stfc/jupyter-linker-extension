@@ -6,7 +6,7 @@ define([
     "use strict";
 
     /*  
-     *  Generate the cell toolbars.
+     *  Generate the reference toolbar.
      *  
      *  Jupyter provides the div of the toolbar and the associated cell,
      *  we just add all the required features.
