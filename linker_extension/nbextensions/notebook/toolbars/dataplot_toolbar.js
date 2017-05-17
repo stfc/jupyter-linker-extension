@@ -1,9 +1,8 @@
 define([
     "base/js/namespace",
-    "notebook/js/celltoolbar",
     "base/js/dialog",
     "base/js/events"
-], function(Jupyter,celltoolbar,dialog,events) {
+], function(Jupyter,dialog,events) {
     "use strict";
 
     var dataplot_toolbar = function(div, cell) {
@@ -103,8 +102,7 @@ define([
         $(div).append(code_container);
         $(div).append(xaxis_div);
         $(div).append(yaxis_div);
-        $(div).append(generate_container);
-        
+        $(div).append(generate_container);  
     };
     
     

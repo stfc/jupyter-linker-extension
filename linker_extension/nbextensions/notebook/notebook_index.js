@@ -8,7 +8,6 @@ require("./upload_data.js");
 require("./upload_notebook.js");
 var publish_notebook = require("./publish_notebook.js");
 var generate_references = require("./generate_references.js");
-var insert_dataplot_cell = require("./insert_dataplot_cell.js");
 var download_data = require("./download_data.js");
 
 /*  
@@ -38,7 +37,6 @@ function load_ipython_extension(){
     setup_toolbars.load();
     publish_notebook.load();
     generate_references.load();
-    insert_dataplot_cell.load();
     download_data.load();
 
     /*  

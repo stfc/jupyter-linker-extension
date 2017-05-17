@@ -1,9 +1,8 @@
 define([
     "base/js/namespace",
-    "notebook/js/celltoolbar",
     "base/js/dialog",
     "base/js/events"
-], function(Jupyter,celltoolbar,dialog,events) {
+], function(Jupyter,dialog,events) {
     "use strict";
 
     /*  

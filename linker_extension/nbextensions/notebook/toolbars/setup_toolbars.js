@@ -22,9 +22,9 @@ define([
     	show_dataplot_input(false);
     };
     
+    var cell_toolbar = celltoolbar.CellToolbar;
+    
     var setup_celltoolbar = function(){
-        var cell_toolbar = celltoolbar.CellToolbar;
-        
         //Hide everything on page open.
         cell_toolbar.global_hide();
         delete Jupyter.notebook.metadata.celltoolbar;
@@ -90,6 +90,20 @@ define([
         Jupyter.notebook.keyboard_manager.actions.register(editCellAction,
         		                                           editCellActionName,
         		                                           prefix);
+        
+        var insertDataplotAction = {
+                help: "Insert a dataplot cell below the current cell",
+                help_index: "i",
+                icon: "fa-eye",
+                handler : insert_dataplot_cell,
+        };
+        var insertDataplotActionName = "insert-dataplot-cell";
+        $("#insert_dataplot_cell").click(function () {
+            insert_dataplot_cell();
+        });        
+        Jupyter.notebook.keyboard_manager.actions.register(insertDataplotAction,
+        		                                           insertDataplotActionName,
+        		                                           prefix);
 
         console.log("Successfully registered callbacks");	
     }
@@ -99,11 +113,10 @@ define([
      */ 
     var toggle_cell_references_bar = function() {
     	// Toggles the visibility of the references toolbar.
-        var CellToolbar = celltoolbar.CellToolbar;
         if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
-            CellToolbar.global_show();
+            cell_toolbar.global_show();
 
-            CellToolbar.activate_preset("Linker Extension");
+            cell_toolbar.activate_preset("Linker Extension");
             Jupyter.notebook.metadata.celltoolbar = "Linker Extension";
 
             $("#toggle_cell_references_bar > a")
@@ -111,7 +124,7 @@ define([
             
             show_dataplot_input(true);
         } else {
-            CellToolbar.global_hide();
+            cell_toolbar.global_hide();
             delete Jupyter.notebook.metadata.celltoolbar;
             $("#toggle_cell_references_bar > a")
                 .text("Show cell references toolbar");
@@ -120,32 +133,8 @@ define([
         }
     }
     
-    //Opens the edit toolbar for the current selected cell.
-    var edit_current_cell = function() {
-    	var cell = Jupyter.notebook.get_selected_cell();
-    	if (dataplot.is_dataplot(cell)) {
-        	var CellToolbar = celltoolbar.CellToolbar;
-        	CellToolbar.global_show();
-            CellToolbar.activate_preset("Linker Extension Dataplot");
-            Jupyter.notebook.metadata.celltoolbar = "Linker Extension Dataplot";
-            
-            var cells = Jupyter.notebook.get_cells(); 
-            
-            cells.forEach(function(cell){
-            	cell.element.find("div.ctb_hideshow").removeClass("ctb_show");
-            	if (dataplot.is_dataplot(cell)) {
-            		cell.element.find("div.input").hide();
-            	}
-            });
-            
-            cell.element.find("div.ctb_hideshow").addClass("ctb_show");
-            cell.element.find("div.input").show();
-            cell.element.find("div.input_area").hide();
-    	}
-    };    
-    
     //Show or hide input areas for dataplot cells.
-    var show_dataplot_input = function(show) {
+    function show_dataplot_input(show) {
         Jupyter.notebook.get_cells().forEach(function(cell){
         	if (dataplot.is_dataplot(cell)) {
         		if (show) {
@@ -156,7 +145,53 @@ define([
         		
         	}
         });
+    }
+    
+    //Insert a new dataplot cell
+    var insert_dataplot_cell = function() {
+    	console.log("Inserting new dataplot cell")
+        
+    	//Create the new cell
+    	var index = Jupyter.notebook.get_selected_index() + 1;
+    	var new_cell = Jupyter.notebook.insert_cell_at_index("code", index);
+    	Jupyter.notebook.select(index, true);
+    	new_cell.metadata.dataplot = true;
+        new_cell.set_text("print('Please use the toolbar to generate an dataplot.');");
+        new_cell.execute();
+    	
+        edit_cell(new_cell);
     };
+    
+    //Opens the edit toolbar for the current selected cell.
+    var edit_current_cell = function() {
+    	var cell = Jupyter.notebook.get_selected_cell();
+    	if (dataplot.is_dataplot(cell)) {
+        	edit_cell(cell);
+    	}
+    };    
+    
+    function enable_dataplot_toolbar() {
+    	cell_toolbar.global_show();
+        cell_toolbar.activate_preset("Linker Extension Dataplot");
+        Jupyter.notebook.metadata.celltoolbar = "Linker Extension Dataplot";
+        
+        var cells = Jupyter.notebook.get_cells(); 
+        
+        cells.forEach(function(cell){
+        	cell.element.find("div.ctb_hideshow").removeClass("ctb_show");
+        	if (dataplot.is_dataplot(cell)) {
+        		cell.element.find("div.input").hide();
+        	}
+        });
+    }
+    
+    function edit_cell(cell){
+    	enable_dataplot_toolbar();
+        
+        cell.element.find("div.ctb_hideshow").addClass("ctb_show");
+        cell.element.find("div.input").show();
+        cell.element.find("div.input_area").hide();
+    }
    
     module.exports = {load: load};
 });
