@@ -33,7 +33,8 @@ define([
     		.addClass("btn btn-xs btn-default add-cell-url-button")
     		.attr("type","button")
     		.bind("click", function(){create_referenceUrl(false)})
-    		.attr("aria-label","Add reference URL");
+    		.attr("aria-label","Add reference URL")
+        	.attr("id", "add_url_" + cell.cell_id);
         add_url_button.append($("<i>").addClass("fa fa-plus"));
         
         //If the metadata already exists, pre-populate the URL fields.
@@ -60,7 +61,12 @@ define([
             
             //Create and setup the input field.
             var reference_url = $("<input/>").addClass("referenceURL referenceURL_" + cell.cell_id)
-                                            .attr("name","referenceURL");
+                                             .attr("name","referenceURL");
+            
+            if (first) {
+            	reference_url.attr("id", "referenceURL_" + cell.cell_id + "_0");
+            }
+            
             reference_url_div.append(reference_url);
             
            //On focus, allow keyboard editing of the URL.
@@ -83,8 +89,17 @@ define([
 
             URL_container.append(reference_url_div);
             
+            update_ids();
+            
             return([reference_url, reference_url_div]);
         }    
+        
+        
+        function update_ids() {
+            $(".referenceURL_" + cell.cell_id).each(function(i,e) {
+                $(e).attr("id", "referenceURL_" + cell.cell_id + "_" + i);
+            });
+        }
         
         function add_delete_button(div) {
         	//Detach the add url button, and add a delete button to the previous URL.       	
@@ -100,6 +115,7 @@ define([
                     div.remove();
                     $(this).remove();
                     update_metadata();
+                    update_ids();
                 });
 
             delete_button.append($("<i>")
@@ -111,16 +127,17 @@ define([
         function populate_from_metadata() {
         	console.log("Populating URL array from metadata")
             var URLarray = cell.metadata.referenceURLs;
-        	var base_url;
-        	var base_url_div;
-        	[base_url, base_url_div] = create_referenceUrl(true);
+        	var url_pair = create_referenceUrl(true);
+        	var base_url = url_pair[0];
+        	var base_url_div = url_pair[1];
             URLarray.forEach(function(item,index) {
-            	var reference_url;
-            	var reference_url_div;
-            	if (index == 0) {
-            		[reference_url, reference_url_div] = [base_url, base_url_div];
-            	} else {
-            		[reference_url, reference_url_div] = create_referenceUrl(false);
+            	var reference_url = base_url;
+            	var reference_url_div = base_url_div;
+            	if (index != 0) {
+            		var reference_pair = create_referenceUrl(false);
+            		reference_url = reference_pair[0];
+            		reference_url_div = reference_pair[1];
+            		reference_url.attr("id", "referenceURL_" + cell.cell_id + "_" + index);
             	}
             	console.log("Found URL: " + item);
             	reference_url.val(item);

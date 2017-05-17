@@ -477,8 +477,8 @@ casper.notebook_test(function() {
         });
         this.test.assertEquals(
             text,
-            "Hide cell references toolbar",
-            "Toggle button says hide when it is visible after reload"
+            "Show cell references toolbar",
+            "Toggle button always defaults to hidden after a reload"
         );
     });
 });

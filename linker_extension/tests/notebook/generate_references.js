@@ -1,6 +1,3 @@
-
-
-
 casper.notebook_test(function() {
     "use strict";
 
@@ -24,7 +21,11 @@ casper.notebook_test(function() {
     this.thenClick("#toggle_cell_references_bar");
 
     this.then(function() {
-        this.sendKeys(".referenceURL","https://cell-url.com/");
+    	this.evaluate(function() {
+    		//Put the URL directly into the cell's metadata. custom_cell_toolbar tests the UI.
+    		var cells = Jupyter.notebook.get_cells();
+    		cells[0].metadata.referenceURLs = ["https://cell-url.com/"];
+    	});
     });
 
     this.thenEvaluate(function () {
@@ -32,8 +33,7 @@ casper.notebook_test(function() {
         md.reportmetadata = {
             "citations": [
               "https://www.metadata-url.com/",
-              "invalid_url",
-              "https://cell-url.com/", //include this to check that we don't get repeats
+              "invalid_url"
             ]
         };
     });
