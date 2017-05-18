@@ -51,7 +51,7 @@ casper.notebook_test(function() {
         }
     });
 
-    var nbname = "publish_data.ipynb";
+    var nbname = "test_publish_data.ipynb";
 
     //fill in some dummy metadata
     this.thenEvaluate(function (nbname) {

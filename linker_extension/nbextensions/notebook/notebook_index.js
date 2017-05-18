@@ -2,7 +2,6 @@ var custom_contents = require("../custom_contents.js");
 require("../custom_utils.js");
 var add_metadata = require("./add_metadata.js");
 var setup_toolbars = require("./toolbars/setup_toolbars.js");
-var dataplot_toolbar = require("./toolbars/dataplot_toolbar.js");
 var modify_notebook_html = require("./modify_notebook_html.js");
 require("./upload_data.js");
 require("./upload_notebook.js");

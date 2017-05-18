@@ -107,7 +107,7 @@ define([
 	
 	
 	var generate_dataplot = function(cell) {
-		var script = code.generate_script(cell.metadata.inputfile,
+		var script = code.dataplot_script(cell.metadata.inputfile,
 										  cell.metadata.xaxis,
 										  cell.metadata.yaxis);
 		cell.set_text(script);

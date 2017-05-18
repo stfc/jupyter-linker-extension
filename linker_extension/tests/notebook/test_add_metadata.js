@@ -8,7 +8,7 @@ casper.notebook_test(function() {
 
     this.viewport(1024, 768);
 
-    var nbname = "add_metadata_test.ipynb";
+    var nbname = "test_add_metadata.ipynb";
     this.thenEvaluate(function(nbname) {
         Jupyter.notebook.set_notebook_name(nbname);
     }, {nbname:nbname});

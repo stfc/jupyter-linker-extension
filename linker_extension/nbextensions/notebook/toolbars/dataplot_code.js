@@ -2,9 +2,22 @@ define([
     "base/js/namespace",
     "base/js/dialog",
     "base/js/events"
-], function(Jupyter,dialog,events) {
+], function(Jupyter,dialog,events) {	
 
-var script = `
+/*
+ * We need to embed the text of a python script in javascript.
+ * 
+ * Multiline strings are supported using backticks, but not by the testing infrastructure.
+ * 
+ * A hack found at http://stackoverflow.com/questions/805107/creating-multiline-strings-in-javascript
+ * gets around this- you define a function with a multiline comment, then remove the comment tags.
+ */
+function comments_to_multiline_string(f) {
+	return f.toString().replace(/^[^\/]+\/\*!?/, '')
+                   .replace(/\*\/[^\/]+$/, '');
+}
+
+var script = comments_to_multiline_string(function() {/*!
 import matplotlib.pyplot as plt
 import re
 
@@ -12,14 +25,14 @@ with open('./data/' + filename) as f:
     data = f.read()
 
 data = data.rstrip()
-data = data.split('\\n')
+data = data.split('\n')
 
 x = list()
 y = list()
 
 for row in data:
-    xVar = re.split('\\s+', row)[0]
-    yVar = re.split('\\s+', row)[1]
+    xVar = re.split('\s+', row)[0]
+    yVar = re.split('\s+', row)[1]
 
     try:
         float(xVar)
@@ -40,9 +53,11 @@ ax1.plot(x,y, c='r', label=filename)
 
 leg = ax1.legend()
 
-plt.show()\n`
+plt.show()
+*/});
 	
-var generate_script = function(filename, xaxis, yaxis){
+	
+var dataplot_script = function(filename, xaxis, yaxis){
     var dataplot_code = "filename = '" + filename + "'\n" +
                         "xaxis = '" + xaxis + "'\n" +
                         "yaxis = '" + yaxis + "'\n" +
@@ -51,5 +66,5 @@ var generate_script = function(filename, xaxis, yaxis){
     return(dataplot_code);
 }
 
-module.exports = {generate_script: generate_script};
+module.exports = {dataplot_script: dataplot_script};
 });

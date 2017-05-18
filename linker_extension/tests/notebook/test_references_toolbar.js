@@ -369,7 +369,7 @@ casper.notebook_test(function() {
         );
     });
 
-    var nbname = "custom_cell_toolbar.ipynb";
+    var nbname = "test_references_toolbar.ipynb";
     this.thenEvaluate(function (nbname) {
         require(["base/js/events"], function (events) {
             Jupyter.notebook.set_notebook_name(nbname);
