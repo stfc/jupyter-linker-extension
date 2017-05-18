@@ -156,6 +156,7 @@ define([
     	var new_cell = Jupyter.notebook.insert_cell_at_index("code", index);
     	Jupyter.notebook.select(index, true);
     	new_cell.metadata.dataplot = true;
+    	new_cell.metadata.hide_code = true;
         new_cell.set_text("print('Please use the toolbar to generate an dataplot.');");
         new_cell.execute();
     	
@@ -190,7 +191,10 @@ define([
         
         cell.element.find("div.ctb_hideshow").addClass("ctb_show");
         cell.element.find("div.input").show();
-        cell.element.find("div.input_area").hide();
+        
+        if (cell.metadata.hide_code) {
+        	cell.element.find("div.input_area").hide();
+        } 
     }
    
     module.exports = {load: load};

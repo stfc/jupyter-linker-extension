@@ -84,12 +84,44 @@ define([
 	
 	    function setup_generate() {
 	    	//Button that generates and executes the code.
+	    	var generate_dataplot = function() {
+	    		var script = code.dataplot_script(cell.metadata.inputfile,
+						                          cell.metadata.xaxis,
+						                          cell.metadata.yaxis);
+	    		cell.set_text(script);
+	    		cell.execute();
+	    	}
+	    	
 	        var generate_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
-	                                          .text("Generate code")
-	                                          .click(function() {generate_dataplot(cell);});
+	                                          .text("Generate dataplot")
+	                                          .click(generate_dataplot);
+	        
+	        var show_hide_code = function() {
+	        	cell.metadata.hide_code = !cell.metadata.hide_code;
+	        	
+	        	if (cell.metadata.hide_code) {
+	        		cell.element.find("div.input_area").hide();
+	        	} else {
+	        		cell.element.find("div.input_area").show();
+	        	}
+	        }
+	        
+	        var show_hide_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+                                               .text("Show/hide code")
+                                               .click(show_hide_code);
+	        
+	        var close = function() {
+	        	cell.element.find("div.input").hide();
+	        }
+
+	        var close_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+                                               .text("Close toolbar")
+                                               .click(close);
 	
 	        var generate_container = $("<div/>").addClass("generate-code")
-	                                            .append(generate_button);
+	                                            .append(generate_button)
+	                                            .append(show_hide_button)
+	                                            .append(close_button);
 	        
 	        $(div).append(generate_container);  
 	    }    
