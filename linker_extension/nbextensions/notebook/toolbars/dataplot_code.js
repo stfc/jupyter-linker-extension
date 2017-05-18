@@ -53,16 +53,17 @@ ax1.set_ylabel(yaxis)
 
 ax1.plot(x,y, c='r', label=filename)
 
-leg = ax1.legend()
+fig.text(0.95,0.5,caption,fontsize=12);
 
 plt.show()
 */});
 	
 	
-var dataplot_script = function(filename, xaxis, yaxis){
+var dataplot_script = function(filename, xaxis, yaxis, caption){
     var dataplot_code = "filename = '" + filename + "'\n" +
                         "xaxis = '" + xaxis + "'\n" +
                         "yaxis = '" + yaxis + "'\n" +
+                        "caption = '" + caption + "'\n" +
                         script.replace(/\t/g, '');
 
     return(dataplot_code);

@@ -16,7 +16,7 @@ define([
 		$(div).addClass("generate-section");
 	    setup_title();
 	    setup_file_input();
-	    setup_axis();
+	    setup_details();
 	    setup_generate();
 		
 		function setup_title() {
@@ -51,45 +51,59 @@ define([
 	        
 	    }
 	
-	    function setup_axis() {
+	    function setup_details() {
 	    	//Customise labels for each axis.
-	        var xaxis_input = $("<input/>").addClass("xaxis xaxis_" + cell.cell_id)
-			                               .attr("name","xaxis")
-			                               .change(update_metadata)
-			                               .val(cell.metadata.xaxis)
-			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			
-			var xaxis_div = $("<div/>").addClass("generate-values")
-			                           .addClass("xaxis_div_" + cell.cell_id)
-			                           .append("x axis label:")
-			                           .append(xaxis_input);
-			
-			var yaxis_input = $("<input/>").addClass("yaxis yaxis_" + cell.cell_id)
+			var yaxis_label = $("<p/>").text("y label:");
+	    	var yaxis_input = $("<input/>").addClass("yaxis yaxis_" + cell.cell_id)
 			                               .attr("name","yaxis")
 			                               .change(update_metadata)
 			                               .val(cell.metadata.yaxis)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			
 			var yaxis_div = $("<div/>").addClass("generate-values")
 			                           .addClass("yaxis_div_" + cell.cell_id)
-			                           .append("y axis label:")
-			                           .append(yaxis_input);        
+			                           .append(yaxis_label)
+			                           .append(yaxis_input);    
 			
+			var xaxis_label = $("<p/>").text("x label:");
+		    var xaxis_input = $("<input/>").addClass("xaxis xaxis_" + cell.cell_id)
+			                               .attr("name","xaxis")
+			                               .change(update_metadata)
+			                               .val(cell.metadata.xaxis)
+			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+			var xaxis_div = $("<div/>").addClass("generate-values")
+			                           .addClass("xaxis_div_" + cell.cell_id)
+			                           .append(xaxis_label)
+			                           .append(xaxis_input);
+
+			var caption_label = $("<p/>").text("Caption:");
+	        var caption_input = $("<textarea/>").addClass("caption caption_" + cell.cell_id)
+	                                            .attr("name","caption")
+                                                .change(update_metadata)
+                                                .val(cell.metadata.caption)
+                                                .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+	        var caption_div = $("<div/>").addClass("generate-values")
+	                                     .addClass("caption_div_" + cell.cell_id)
+	                                     .append(caption_label)
+	                                     .append(caption_input);    
+		
 			function update_metadata() {
+			    cell.metadata.caption = $(".caption_" + cell.cell_id).val();
 			    cell.metadata.yaxis = $(".yaxis_" + cell.cell_id).val();
 			    cell.metadata.xaxis = $(".xaxis_" + cell.cell_id).val();
 			}
 			
+			$(div).append(yaxis_div);
 			$(div).append(xaxis_div);
-	        $(div).append(yaxis_div);
-	    }
+			$(div).append(caption_div)
+	    } 
 	
 	    function setup_generate() {
 	    	//Button that generates and executes the code.
 	    	var generate_dataplot = function() {
 	    		var script = code.dataplot_script(cell.metadata.inputfile,
 						                          cell.metadata.xaxis,
-						                          cell.metadata.yaxis);
+						                          cell.metadata.yaxis,
+						                          cell.metadata.caption);
 	    		cell.set_text(script);
 	    		cell.execute();
 	    	}
@@ -133,7 +147,8 @@ define([
 	var generate_dataplot = function(cell) {
 		var script = code.dataplot_script(cell.metadata.inputfile,
 										  cell.metadata.xaxis,
-										  cell.metadata.yaxis);
+										  cell.metadata.yaxis,
+										  cell.metadata.caption);
 		cell.set_text(script);
 	    cell.execute();
 	}
