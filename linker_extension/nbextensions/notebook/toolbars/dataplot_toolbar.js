@@ -32,7 +32,7 @@ define([
 	    			
 	        var find_file = $("<input>").text("Find file")
 	        							.attr("type","file")
-	                                    .attr("id","find_file")
+	                                    .attr("id","find_file_" + cell.cell_id)
 	                                    .attr("required","required")
 	                                    .attr("name","find_file[]");
 	        
@@ -56,6 +56,7 @@ define([
 	        var xaxis_input = $("<input/>").addClass("xaxis xaxis_" + cell.cell_id)
 			                               .attr("name","xaxis")
 			                               .change(update_metadata)
+			                               .val(cell.metadata.xaxis)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
 			
 			var xaxis_div = $("<div/>").addClass("generate-values")
@@ -66,6 +67,7 @@ define([
 			var yaxis_input = $("<input/>").addClass("yaxis yaxis_" + cell.cell_id)
 			                               .attr("name","yaxis")
 			                               .change(update_metadata)
+			                               .val(cell.metadata.yaxis)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
 			
 			var yaxis_div = $("<div/>").addClass("generate-values")
