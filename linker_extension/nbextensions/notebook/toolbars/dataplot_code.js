@@ -11,6 +11,8 @@ define([
  * 
  * A hack found at http://stackoverflow.com/questions/805107/creating-multiline-strings-in-javascript
  * gets around this- you define a function with a multiline comment, then remove the comment tags.
+ * 
+ * I'm not happy about this at all.
  */
 function comments_to_multiline_string(f) {
 	return f.toString().replace(/^[^\/]+\/\*!?/, '')

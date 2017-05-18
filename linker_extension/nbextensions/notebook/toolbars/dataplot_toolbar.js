@@ -23,17 +23,18 @@ define([
 			//The title for the toolbar.
 			var title_container = $("<div/>").addClass("generate-title")
 	                                         .append("Generate dataplot cell");
-	    		$(div).append(title_container);
-	    	}
+	    	$(div).append(title_container);
+	    }
 	   
-	        function setup_file_input() {
-	        	//Allows users to choose the datafile to be plotted.
+	    function setup_file_input() {
+	        //Allows users to choose the datafile to be plotted.
 	    	var input_container = $("<div/>").addClass("generate-code");
 	    			
-	        var find_file = $("<input>").attr("type","file")
+	        var find_file = $("<input>").text("Find file")
+	        							.attr("type","file")
 	                                    .attr("id","find_file")
 	                                    .attr("required","required")
-	                                     .attr("name","find_file[]");
+	                                    .attr("name","find_file[]");
 	        
 	        find_file.change(function() {
 	            var label = $(this).val().replace(/\\/g, "/").replace(/.*\//, "");
@@ -42,20 +43,9 @@ define([
 	
 	        find_file.on("fileselect", function(event, label) {
 	            cell.metadata.inputfile = label;
-	            find_file_feedback.val(label);
 	        });
-	        
-	        var find_file_button = $("<span/>").addClass("btn btn-sm btn-default btn-file")
-	                                           .text("Find file")
-	                                           .append(find_file);
-	       
-	        var find_file_feedback = $("<input/>").attr("readonly","readonly")
-	                                              .attr("type","text")
-	                                              .attr("id", "filename")
-	                                              .prop("disabled",true);
 	
-	        input_container.append(find_file_button)
-	                       .append(find_file_feedback);
+	        input_container.append(find_file);
 	        
 	        $(div).append(input_container);
 	        
@@ -68,7 +58,7 @@ define([
 			                               .change(update_metadata)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
 			
-			var xaxis_div = $("<div/>").addClass("xaxis_div")
+			var xaxis_div = $("<div/>").addClass("generate-values")
 			                           .addClass("xaxis_div_" + cell.cell_id)
 			                           .append("x axis label:")
 			                           .append(xaxis_input);
@@ -78,7 +68,7 @@ define([
 			                               .change(update_metadata)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
 			
-			var yaxis_div = $("<div/>").addClass("yaxis_div")
+			var yaxis_div = $("<div/>").addClass("generate-values")
 			                           .addClass("yaxis_div_" + cell.cell_id)
 			                           .append("y axis label:")
 			                           .append(yaxis_input);        

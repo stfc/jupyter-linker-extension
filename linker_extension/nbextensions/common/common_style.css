@@ -234,17 +234,21 @@ label[for=filename-collision-behaviour-overwrite] > span, label[for=filename-col
 
 .generate-section {
   width: 100%;
-  margin-left: 8px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .generate-title {
+  margin-left:5px;
   font-size: 17px;
-  margin: 5px;
 }
 
 .generate-code {
-  width: 100%;
-  margin-left: 8px;
+  margin: 8px;
+}
+
+.generate-values {
+  margin-left: 20px;
 }
 
 .referenceURL {
