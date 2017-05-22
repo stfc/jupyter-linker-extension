@@ -34,7 +34,7 @@ define([
         //Register the toolbars
         cell_toolbar.register_callback("linker_extension.reference_url_toolbar",
                                        references.reference_url_toolbar);
-        cell_toolbar.register_preset("Linker Extension",
+        cell_toolbar.register_preset("Linker Extension References",
                                      ["linker_extension.reference_url_toolbar"],
                                      Jupyter.notebook);
         
@@ -154,6 +154,8 @@ define([
     	//Create the new cell
     	var index = Jupyter.notebook.get_selected_index() + 1;
     	var new_cell = Jupyter.notebook.insert_cell_at_index("code", index);
+    	
+    	console.log("Number of cells: " + Jupyter.notebook.get_cells().length);
     	Jupyter.notebook.select(index, true);
     	new_cell.metadata.dataplot = true;
     	new_cell.metadata.hide_code = true;

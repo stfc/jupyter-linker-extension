@@ -13,7 +13,7 @@ casper.notebook_test(function() {
     //check that menu item exists
     this.then(function() {
         this.test.assertExists(
-            "li[data-name=\"Linker%20Extension\"] > a",
+            "li[data-name=\"Linker%20Extension%20References\"] > a",
             "Toolbar visible in toolbar menu"
         );
     });

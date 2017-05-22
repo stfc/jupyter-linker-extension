@@ -13,7 +13,7 @@ define([
 	 *  we just add all the required features.
 	 */ 
 	var dataplot_toolbar = function(div, cell) {
-		$(div).addClass("generate-section");
+		$(div).addClass("generate-section dataplot-toolbar");
 	    setup_title();
 	    setup_file_input();
 	    setup_details();
@@ -34,15 +34,18 @@ define([
 	        							.attr("type","file")
 	                                    .attr("id","find_file_" + cell.cell_id)
 	                                    .attr("required","required")
+	                                    .attr("multiple","multiple")
 	                                    .attr("name","find_file[]");
 	        
 	        find_file.change(function() {
-	            var label = $(this).val().replace(/\\/g, "/").replace(/.*\//, "");
-	            $(this).trigger("fileselect", [label]);
+	            var files = $(this).get(0).files;
+	            var length = files.length;
+	            $(this).trigger("fileselect", [files, length]);
 	        });
 	
-	        find_file.on("fileselect", function(event, label) {
-	            cell.metadata.inputfile = label;
+	        find_file.on("fileselect", function(event, files, length) {
+	            cell.metadata.inputfiles = files;
+	            cell.metadata.inputfiles_length = length;
 	        });
 	
 	        input_container.append(find_file);
@@ -100,7 +103,10 @@ define([
 	    function setup_generate() {
 	    	//Button that generates and executes the code.
 	    	var generate_dataplot = function() {
-	    		var script = code.dataplot_script(cell.metadata.inputfile,
+	    		console.log(cell.metadata.inputfiles);
+	    		console.log(cell.metadata.inputfiles_length);
+	    		var script = code.dataplot_script(cell.metadata.inputfiles,
+						                          cell.metadata.inputfiles_length,
 						                          cell.metadata.xaxis,
 						                          cell.metadata.yaxis,
 						                          cell.metadata.caption);
@@ -145,7 +151,8 @@ define([
 	
 	
 	var generate_dataplot = function(cell) {
-		var script = code.dataplot_script(cell.metadata.inputfile,
+		var script = code.dataplot_script(cell.metadata.inputfiles,
+				                          cell.metadata.inputfiles.length,
 										  cell.metadata.xaxis,
 										  cell.metadata.yaxis,
 										  cell.metadata.caption);

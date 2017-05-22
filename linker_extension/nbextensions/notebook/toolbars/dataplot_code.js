@@ -23,48 +23,66 @@ var script = comments_to_multiline_string(function() {/*!
 import matplotlib.pyplot as plt
 import re
 
-with open('./data/' + filename) as f:
-    data = f.read()
+datasets = list()
 
-data = data.rstrip()
-data = data.split('\n')
-
-x = list()
-y = list()
-
-for row in data:
-    xVar = re.split('\s+', row)[0]
-    yVar = re.split('\s+', row)[1]
-
-    try:
-        float(xVar)
-        float(yVar)
-        x.append(xVar)
-        y.append(yVar)
-    except Exception:
-        pass
-
+for name in filenames:
+    with open('./data/' + name) as f:
+        data = f.read()
+    
+    data = data.rstrip()
+    data = data.split('\n')
+    
+    x = list()
+    y = list()
+    
+    for row in data:
+        xVar = re.split('\s+', row)[0]
+        yVar = re.split('\s+', row)[1]
+    
+        try:
+            float(xVar)
+            float(yVar)
+            x.append(xVar)
+            y.append(yVar)
+        except Exception:
+            pass
+          
+    datasets.append((x,y,name))
+	
 fig = plt.figure()
 
-ax1 = fig.add_subplot(111)
+ax = fig.add_subplot(111)
+ax.set_xlabel(xaxis)
+ax.set_ylabel(yaxis)
 
-ax1.set_xlabel(xaxis)
-ax1.set_ylabel(yaxis)
+colourlist = ['r', 'b', 'y', 'g']
 
-ax1.plot(x,y, c='r', label=filename)
+for data in datasets:
+    ax.plot(data[0],data[1], label=data[2].replace(".dat", ""))
 
 fig.text(0.95,0.5,caption,fontsize=12);
+
+ax.legend()
 
 plt.show()
 */});
 	
+script = script.replace(/\t/g, '');
 	
-var dataplot_script = function(filename, xaxis, yaxis, caption){
-    var dataplot_code = "filename = '" + filename + "'\n" +
-                        "xaxis = '" + xaxis + "'\n" +
+var dataplot_script = function(files, num_files, xaxis, yaxis, caption){
+    var dataplot_code = "xaxis = '" + xaxis + "'\n" +
                         "yaxis = '" + yaxis + "'\n" +
                         "caption = '" + caption + "'\n" +
-                        script.replace(/\t/g, '');
+                        "filenames = list()" + "\n";
+    	
+    console.log(files);
+    console.log(num_files);
+    
+	for (var i = 0; i < num_files; i++) {
+        dataplot_code += "filenames.append('" + files[i].name + "')\n"
+    }
+    
+    dataplot_code += script;
 
     return(dataplot_code);
 }
