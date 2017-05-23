@@ -4,6 +4,7 @@ var add_metadata = require("./add_metadata.js");
 var setup_toolbars = require("./toolbars/setup_toolbars.js");
 var modify_notebook_html = require("./modify_notebook_html.js");
 require("./upload_data.js");
+require("./local_data.js");
 require("./upload_notebook.js");
 var publish_notebook = require("./publish_notebook.js");
 var generate_references = require("./generate_references.js");

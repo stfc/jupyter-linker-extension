@@ -2,8 +2,13 @@ define([
     "base/js/namespace",
     "base/js/dialog",
     "base/js/events",
-    "./dataplot_code"
-], function(Jupyter,dialog,events,code) {
+    "./dataplot_code",
+    "../local_data"
+], function(Jupyter,
+		    dialog,
+		    events,
+		    code,
+		    local_data) {
 "use strict";
 
 	/*  
@@ -27,28 +32,54 @@ define([
 	    }
 	   
 	    function setup_file_input() {
-	        //Allows users to choose the datafile to be plotted.
+	        //Allows users to choose the datafile to be plotted.    	
 	    	var input_container = $("<div/>").addClass("generate-code");
-	    			
-	        var find_file = $("<input>").text("Find file")
-	        							.attr("type","file")
-	                                    .attr("id","find_file_" + cell.cell_id)
-	                                    .attr("required","required")
-	                                    .attr("multiple","multiple")
-	                                    .attr("name","find_file[]");
+	    	
+	    	var open_input_modal = function() {
+	    		var modal = dialog.modal({
+		            title: "Input datafiles",
+		            body: local_data.data_form(),
+		            buttons: {
+		                Cancel: {},
+		                Select: { 
+		                    class : "btn-primary",
+		                    click: function() {
+		                    	cell.metadata.dataplot_files = 
+		                    		local_data.get_selected_values();
+		                    	$(".input-display").text(get_display_text());
+		                    	return true;
+		                    },
+		                }
+		            },
+		            notebook: Jupyter.notebook,
+		            keyboard_manager: Jupyter.notebook.keyboard_manager,
+		        });
+
+		        //stuff to do on modal load
+		        modal.on("shown.bs.modal", function () {
+		            //init tree
+		            local_data.init_tree(cell.metadata.dataplot_files);
+		        });
+	    	}
+	    	
+	    	function get_display_text() {
+	    		if (cell.metadata.dataplot_files.length == 0) {
+		    		return("No files selected");
+		    	} else if (cell.metadata.dataplot_files.length == 1) {
+		    		return("1 file selected");
+		    	} else {
+		    		return(cell.metadata.dataplot_files.length + " files selected");
+		    	}
+	    	}
+	    	
+	        var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+	                                       .text("Input files")
+	                                       .click(open_input_modal);
+	        var input_display = $("<span/>").addClass("input-display")
+	                                        .text(get_display_text());
 	        
-	        find_file.change(function() {
-	            var files = $(this).get(0).files;
-	            var length = files.length;
-	            $(this).trigger("fileselect", [files, length]);
-	        });
-	
-	        find_file.on("fileselect", function(event, files, length) {
-	            cell.metadata.inputfiles = files;
-	            cell.metadata.inputfiles_length = length;
-	        });
-	
-	        input_container.append(find_file);
+	        input_container.append(input_button);
+	        input_container.append(input_display);
 	        
 	        $(div).append(input_container);
 	        
@@ -103,10 +134,8 @@ define([
 	    function setup_generate() {
 	    	//Button that generates and executes the code.
 	    	var generate_dataplot = function() {
-	    		console.log(cell.metadata.inputfiles);
-	    		console.log(cell.metadata.inputfiles_length);
-	    		var script = code.dataplot_script(cell.metadata.inputfiles,
-						                          cell.metadata.inputfiles_length,
+	    		var script = code.dataplot_script(cell.metadata.dataplot_files,
+						                          cell.metadata.dataplot_files.length,
 						                          cell.metadata.xaxis,
 						                          cell.metadata.yaxis,
 						                          cell.metadata.caption);
@@ -148,17 +177,6 @@ define([
 	        $(div).append(generate_container);  
 	    }    
 	};
-	
-	
-	var generate_dataplot = function(cell) {
-		var script = code.dataplot_script(cell.metadata.inputfiles,
-				                          cell.metadata.inputfiles.length,
-										  cell.metadata.xaxis,
-										  cell.metadata.yaxis,
-										  cell.metadata.caption);
-		cell.set_text(script);
-	    cell.execute();
-	}
 	
 	//Is the cell a dataplot generator cell?
 	var is_dataplot = function(cell) {

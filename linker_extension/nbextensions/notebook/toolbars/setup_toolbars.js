@@ -149,16 +149,17 @@ define([
     
     //Insert a new dataplot cell
     var insert_dataplot_cell = function() {
-    	console.log("Inserting new dataplot cell")
+    	console.log("Inserting new dataplot cell");
         
     	//Create the new cell
     	var index = Jupyter.notebook.get_selected_index() + 1;
     	var new_cell = Jupyter.notebook.insert_cell_at_index("code", index);
-    	
+
     	console.log("Number of cells: " + Jupyter.notebook.get_cells().length);
     	Jupyter.notebook.select(index, true);
     	new_cell.metadata.dataplot = true;
     	new_cell.metadata.hide_code = true;
+    	new_cell.metadata.dataplot_files = [];
         new_cell.set_text("print('Please use the toolbar to generate an dataplot.');");
         new_cell.execute();
     	

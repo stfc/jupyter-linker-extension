@@ -26,7 +26,7 @@ import re
 datasets = list()
 
 for name in filenames:
-    with open('./data/' + name) as f:
+    with open(name) as f:
         data = f.read()
     
     data = data.rstrip()
@@ -76,10 +76,9 @@ var dataplot_script = function(files, num_files, xaxis, yaxis, caption){
                         "filenames = list()" + "\n";
     	
     console.log(files);
-    console.log(num_files);
     
-	for (var i = 0; i < num_files; i++) {
-        dataplot_code += "filenames.append('" + files[i].name + "')\n"
+	for (var i = 0; i < files.length; i++) {
+        dataplot_code += "filenames.append('" + files[i] + "')\n"
     }
     
     dataplot_code += script;

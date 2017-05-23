@@ -251,6 +251,10 @@ label[for=filename-collision-behaviour-overwrite] > span, label[for=filename-col
   margin-left: 20px;
 }
 
+.input-display {
+  margin-left: 10px;
+}
+
 .referenceURL {
   height: 26px;
   margin-bottom: 3px;
