@@ -58,12 +58,13 @@ define([
 		        //stuff to do on modal load
 		        modal.on("shown.bs.modal", function () {
 		            //init tree
-		            local_data.init_tree(cell.metadata.dataplot_files);
+		            local_data.init_data_form(cell.metadata.dataplot_files);
 		        });
 	    	}
 	    	
 	    	function get_display_text() {
-	    		if (cell.metadata.dataplot_files.length == 0) {
+	    		if (!cell.metadata.dataplot_files ||
+	    	        cell.metadata.dataplot_files.length == 0) {
 		    		return("No files selected");
 		    	} else if (cell.metadata.dataplot_files.length == 1) {
 		    		return("1 file selected");

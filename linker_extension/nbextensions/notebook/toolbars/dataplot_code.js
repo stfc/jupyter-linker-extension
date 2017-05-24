@@ -74,7 +74,8 @@ var dataplot_script = function(files, num_files, xaxis, yaxis, caption){
                         "yaxis = '" + yaxis + "'\n" +
                         "caption = '" + caption + "'\n" +
                         "filenames = list()" + "\n";
-    	
+    
+    console.log("Creating dataplot script (files below)");	
     console.log(files);
     
 	for (var i = 0; i < files.length; i++) {
