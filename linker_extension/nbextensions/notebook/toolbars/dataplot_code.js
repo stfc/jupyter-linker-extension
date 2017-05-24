@@ -69,7 +69,7 @@ plt.show()
 	
 script = script.replace(/\t/g, '');
 	
-var dataplot_script = function(files, num_files, xaxis, yaxis, caption){
+var dataplot_script = function(files, xaxis, yaxis, caption){
     var dataplot_code = "xaxis = '" + xaxis + "'\n" +
                         "yaxis = '" + yaxis + "'\n" +
                         "caption = '" + caption + "'\n" +
@@ -79,7 +79,7 @@ var dataplot_script = function(files, num_files, xaxis, yaxis, caption){
     console.log(files);
     
 	for (var i = 0; i < files.length; i++) {
-        dataplot_code += "filenames.append('" + files[i] + "')\n"
+        dataplot_code += "filenames.append('" + files[i].path + "')\n"
     }
     
     dataplot_code += script;

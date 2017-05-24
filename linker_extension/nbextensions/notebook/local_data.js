@@ -182,7 +182,7 @@ define([
                 
                 //Check if the new node (or a child) needs to be pre-checked.
                 for (var i = 0; i < init_files.length; i++) {
-                	var filename = init_files[i];
+                	var filename = init_files[i].path;
                 	if (filename.indexOf(treeNode.path) == 0 ) {
                 		if (!treeNode.isParent) {
                 			//This file needs to be checked.
@@ -276,7 +276,7 @@ define([
         all_files.forEach(function(file) {
         	//Don't return directories
         	if(!file.isParent) {
-                files.push(file.path);
+                files.push(file);
         	}
         });
         

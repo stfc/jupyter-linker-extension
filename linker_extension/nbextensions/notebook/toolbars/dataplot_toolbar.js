@@ -136,7 +136,6 @@ define([
 	    	//Button that generates and executes the code.
 	    	var generate_dataplot = function() {
 	    		var script = code.dataplot_script(cell.metadata.dataplot_files,
-						                          cell.metadata.dataplot_files.length,
 						                          cell.metadata.xaxis,
 						                          cell.metadata.yaxis,
 						                          cell.metadata.caption);
