@@ -138,7 +138,7 @@ define([
      *  Takes a list of files to be pre-checked as an argument.
      */ 
     var init_data_form = function(init_files) {
-    	console.log("Initialising file tree with input files: " + init_files);
+    	console.log("Initialising file tree with " + init_files.length + " input files");
     	
     	var zTreeObj;
     	
@@ -178,15 +178,13 @@ define([
         	var on_create = function() {
                 $("#files-loading").hide();
                 
-                console.log("New node created: " + treeNode.path);
-                
                 //Check if the new node (or a child) needs to be pre-checked.
                 for (var i = 0; i < init_files.length; i++) {
                 	var filename = init_files[i].path;
                 	if (filename.indexOf(treeNode.path) == 0 ) {
                 		if (!treeNode.isParent) {
                 			//This file needs to be checked.
-                			console.log("Checking " + treeNode.path);
+                			console.log("Found " + treeNode.path + " needs to be pre-checked");
                 			zTreeObj.checkNode(treeNode,true,false,true);
                 			break;
                 		} else {
@@ -282,11 +280,58 @@ define([
         
         return(files);
     }
+    
+    var reset_associated_data = function() {
+    	//Overwrite the associated data with the currently checked files.
+    	console.log("Resetting associated data")
+    	
+    	Jupyter.notebook.metadata.associated_data = get_selected_values();
+
+    	console.log("Associated data reset: " + 
+    			    Jupyter.notebook.metadata.associated_data.length +
+    			    " files associated");
+    }
+    
+    var update_associated_data = function() {
+    	//Add any checked files to the notebook's associated data.
+    	console.log("Updating associated data")
+    	
+    	var checked = get_selected_values();
+    	
+    	if (!Jupyter.notebook.metadata.hasOwnProperty("associated_data")) {
+    		Jupyter.notebook.metadata.associated_data = checked;
+    	} else {
+    		var associated_data = Jupyter.notebook.metadata.associated_data;
+    		
+    		function already_associated(path) {
+    			//Check if a path is already included in the associated data.
+    			for (var i = 0; i < associated_data.length; i++) {
+            		if (associated_data[i].path.indexOf(path) == 0) {
+            			return true;
+            		}
+            	}
+    			return false;
+    		}
+    		
+    		for (var i = 0; i < checked.length; i++) {
+        		if (!already_associated(checked[i].path)) {
+        			associated_data.push(checked[i]);
+        		}
+        	}
+    	}
+    	
+    	console.log("Associated data updated: " + 
+    			    Jupyter.notebook.metadata.associated_data.length +
+    			    " files associated");
+
+    }
 
     module.exports = {
         data_form: data_form,
         init_data_form: init_data_form,
         get_selected_values: get_selected_values,
         validate_files: validate_files,
+        update_associated_data: update_associated_data,
+        reset_associated_data: reset_associated_data
     };
 });

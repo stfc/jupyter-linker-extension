@@ -1,6 +1,7 @@
 var custom_contents = require("../custom_contents.js");
 require("../custom_utils.js");
 var add_metadata = require("./add_metadata.js");
+var associated_data = require("./associated_data.js");
 var setup_toolbars = require("./toolbars/setup_toolbars.js");
 var modify_notebook_html = require("./modify_notebook_html.js");
 require("./upload_data.js");
@@ -34,6 +35,7 @@ function load_ipython_extension(){
 
     modify_notebook_html.load();
     add_metadata.load();
+    associated_data.load();
     setup_toolbars.load();
     publish_notebook.load();
     generate_references.load();

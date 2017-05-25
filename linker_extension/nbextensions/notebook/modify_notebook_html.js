@@ -54,6 +54,8 @@ define([
                                              .attr("href","#")
                                              .text("Generate references")))
                                              
+                   .append($("<li/>").addClass("divider"))
+                                             
                    .append($("<li/>").attr("id","insert_dataplot_cell")
                                      .append($("<a/>")
                                              .attr("href","#")
@@ -65,6 +67,11 @@ define([
                                              .text("Edit current cell")))
 
                    .append($("<li/>").addClass("divider"))
+                   
+                   .append($("<li/>").attr("id","manage_associated_data")
+                                     .append($("<a/>")
+                                             .attr("href","#")
+                                             .text("Manage associated data")))
 
                    .append($("<li/>").attr("id","publish_notebook")
                                      .append($("<a/>")

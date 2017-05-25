@@ -141,6 +141,8 @@ define([
 						                          cell.metadata.caption);
 	    		cell.set_text(script);
 	    		cell.execute();
+	    		
+	    		local_data.update_associated_data();
 	    	}
 	    	
 	        var generate_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
