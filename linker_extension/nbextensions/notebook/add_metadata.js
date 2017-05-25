@@ -1572,6 +1572,7 @@ define(["base/js/namespace",
         validate_fields1: validate_fields1,
         validate_fields2: validate_fields2,
         create_fields: create_fields,
+        add_metadata: add_metadata,
         get_values_from_fields: get_values_from_fields,
         get_values_from_metadata: get_values_from_metadata
     };

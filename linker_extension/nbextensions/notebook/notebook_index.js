@@ -8,7 +8,7 @@ require("./upload_data.js");
 require("./local_data.js");
 require("./upload_notebook.js");
 var publish_notebook = require("./publish_notebook.js");
-var generate_references = require("./generate_references.js");
+var generate_references = require("./toolbars/generate_references.js");
 var download_data = require("./download_data.js");
 
 /*  

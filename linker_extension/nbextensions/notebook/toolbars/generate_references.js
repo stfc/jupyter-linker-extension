@@ -1,9 +1,7 @@
 define([
     "base/js/namespace",
     "base/js/utils",
-    "../custom_utils",
-    "../custom_contents",
-    "./modify_notebook_html"
+    "../../custom_utils",
 ],function(Jupyter,utils,custom_utils){
 
     /*  

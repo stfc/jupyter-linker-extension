@@ -23,6 +23,7 @@ define(["base/js/namespace",
 
         //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
+        	console.log("Managing associated data");
         	if (!Jupyter.notebook.metadata.hasOwnProperty("associated_data")) {
         		Jupyter.notebook.metadata.associated_data = [];
         	}

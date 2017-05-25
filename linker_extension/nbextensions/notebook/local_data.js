@@ -4,7 +4,6 @@ define([
     "base/js/dialog",
     "../custom_utils",
     "../custom_contents",
-    "./modify_notebook_html",
 ],function(
     Jupyter,
     utils,
