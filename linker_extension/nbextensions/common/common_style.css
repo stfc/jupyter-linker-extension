@@ -354,3 +354,9 @@ label.required:after {
   max-height: 400px;
   overflow: auto;
 }
+
+.fieldlabel {
+  margin-top: 5px;
+  margin-bottom: 2px;
+  display: block;
+}

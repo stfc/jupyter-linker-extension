@@ -3,7 +3,7 @@ define(["base/js/namespace",
         "base/js/dialog",
         "../custom_contents",
         "../custom_utils",
-        "./add_metadata",
+        "./metadata/add_metadata",
         "./upload_notebook",
         "./upload_data",
         "./modify_notebook_html"

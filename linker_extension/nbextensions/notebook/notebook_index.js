@@ -1,6 +1,6 @@
 var custom_contents = require("../custom_contents.js");
 require("../custom_utils.js");
-var add_metadata = require("./add_metadata.js");
+var add_metadata = require("./metadata/add_metadata.js");
 var associated_data = require("./associated_data.js");
 var setup_toolbars = require("./toolbars/setup_toolbars.js");
 var modify_notebook_html = require("./modify_notebook_html.js");
