@@ -113,12 +113,12 @@ define([
      */ 
     var toggle_cell_references_bar = function() {
     	// Toggles the visibility of the references toolbar.
-        if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension") {
+        if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension References") {
             cell_toolbar.global_show();
-
-            cell_toolbar.activate_preset("Linker Extension");
-            Jupyter.notebook.metadata.celltoolbar = "Linker Extension";
-
+        	
+            cell_toolbar.activate_preset("Linker Extension References");
+            Jupyter.notebook.metadata.celltoolbar = "Linker Extension References";
+            
             $("#toggle_cell_references_bar > a")
                 .text("Hide cell references toolbar");
             
