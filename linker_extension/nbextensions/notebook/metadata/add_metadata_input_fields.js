@@ -64,9 +64,11 @@ define(["base/js/namespace",
 	function abstract_field() {
 		var abstract_div = $("<div/>");
     	var abstract_label = $("<label/>").attr("for","nb-abstract")
-                                          .addClass("required")
                                           .addClass("fieldlabel")
                                           .text("Abstract: ");
+    	var abstract_note = $("<label/>").attr("for","nb-abstract")
+                                         .addClass("fieldnote")
+                                         .text("Note: This is taken from the first cell of the notebook, so cannot be edited here.");
 
         var abstract_input = $("<textarea/>").attr("name","abstract")
                                              .attr("id","nb-abstract")
@@ -79,7 +81,8 @@ define(["base/js/namespace",
         }
         
         abstract_div.append(abstract_label)
-                    .append(abstract_input);
+                    .append(abstract_input)
+                    .append(abstract_note);
             
         return(abstract_div);
 	}
@@ -201,14 +204,10 @@ define(["base/js/namespace",
             .attr("for","nb-citations")
             .text("Add citations for any third party resources that have been used in this notebook: ");
 
-        var citation_container = $("<div/>").addClass("nb-citation-div");
+        var citation_container = $("<div/>").addClass("nb-citation-container");
 
-        var citationCount = 1;
-        
-        var citation = $("<input/>")
-	        .addClass("nb-citation citation")
-	        .attr("name","citation")
-	        .attr("id","nb-citation-0");
+        var citationCount = 0;
+
 	    var addCitationButton = $("<button/>")
 	        .addClass("btn btn-xs btn-default btn-add add-citation-button")
 	        .attr("id","add-nb-citation-button")
@@ -216,55 +215,55 @@ define(["base/js/namespace",
 	        .attr("aria-label","Add citation")
 	        .click(addCitation)
 	        .append($("<i>").addClass("fa fa-plus"));
-        
-        citation_container.append(citation);
-        citation.append(addCitationButton);
 	    
-        function addCitation(previousCitation) {
-            var newCitation_div = ($("<div/>")).addClass("nb-citation-div");
+	    var lastCitation;
+        function addCitation() {
+            var newCitation_div = $("<div/>").addClass("nb-citation-div");
             var newCitation = $("<input/>")
                 .attr("class","nb-citation citation")
                 .attr("type","text")
                 .attr("id","nb-citation-" + citationCount);
 
-            if(previousCitation === undefined) {
-                previousCitation = $(".nb-citation-div").last();
-            }
-
             //detach from the previously last url input
             //so we can put it back on the new one
             addCitationButton.detach(); 
+            
             var deleteCitation = $("<button/>")
                 .addClass("btn btn-xs btn-default btn-remove remove-nb-citation-button remove-citation-button")
                 .attr("type","button")
-                .attr("aria-label","Remove citation");
+                .attr("aria-label","Remove citation")
+                .append($("<i>").addClass("fa fa-trash")
+                                .attr("aria-hidden","true"));
+           
+            if (lastCitation != undefined) {
+            	lastCitation.append(deleteCitation);
+            }
+            
+            citation_container.append(newCitation_div.append(newCitation)
+            		                                 .append(addCitationButton));
 
-            deleteCitation.append($("<i>")
-                             .addClass("fa fa-trash")
-                             .attr("aria-hidden","true"));
-            previousCitation.append(deleteCitation);
-            citations.append(newCitation_div.append(newCitation).append(addCitationButton));
+            lastCitation = newCitation_div;;
+            
             citationCount++;
 
-            return [newCitation,newCitation_div];
+            return newCitation;
         }
         
         citations_div.append(citationsLabel).append(citation_container);
         
         var citation_array = md.reportmetadata.citations;
-        var previousCitation;
-        citation_array.forEach(function(item,index) {
-            if(index === 0) {
-                citation.val(item);
-                previousCitation = newCitation_div;
-            } else {
-                var newCitation = addCitation(previousCitation);
-                newCitation[0].val(item);
-                previousCitation = newCitation[1];
-            }
-        });
-
         
+        if (citation_array == undefined || citation_array.length == 0) {
+        	addCitation();
+        }
+        
+        if (citation_array != undefined) {
+            citation_array.forEach(function(item,index) {
+                var newCitation = addCitation();
+                newCitation.val(item);
+            });
+        }
+
         return citations_div;
 	}
 	
@@ -281,7 +280,7 @@ define(["base/js/namespace",
             .attr("for","nb-referenced-bys")
             .text("Add URIs for items that reference this notebook or its data: ");
 
-        var referenced_by_count = 1;
+        var referenced_by_count = 0;
         
         var referenced_by = $("<input/>")
             .addClass("nb-referenced-by referenced-by")
@@ -290,24 +289,17 @@ define(["base/js/namespace",
 
         var referenced_by_container = $("<div/>").attr("id","nb-referenced-bys");
 
-        /*  
-         *  Similar to addAuthor, but for referenced_by. Again, returns the
-         *  actual new field and the container that hold both it and the button 
-         */ 
-        function add_referenced_by(previousreferenced_by) {
+        var last_referenced_by;
+        
+        function add_referenced_by() {
             var new_referenced_by_div = ($("<div/>")).addClass("nb-referenced_by_div");
             var new_referenced_by = $("<input/>")
                 .attr("class","nb-referenced-by referenced-by")
                 .attr("type","text")
                 .attr("id","nb-referenced-by-" + referenced_by_count);
 
-            if(previous_referenced_by === undefined) {
-                previous_referenced_by = $(".nb-referenced-by-div").last();
-            }
-
-            //detach from the previously last url input
-            //so we can put it back on the new one
             add_referenced_by_button.detach(); 
+            
             var delete_referenced_by = $("<button/>")
                 .addClass("btn btn-xs btn-default btn-remove remove-nb-referenced-by-button remove-referenced-by-button")
                 .attr("type","button")
@@ -316,12 +308,17 @@ define(["base/js/namespace",
             delete_referenced_by.append($("<i>")
                                 .addClass("fa fa-trash")
                                 .attr("aria-hidden","true"));
-            previous_referenced_by.append(deletereferenced_by);
+            
+            if (last_referenced_by != undefined) {
+            	last_referenced_by.append(delete_referenced_by);
+            }
+            
             new_referenced_by_div.append(new_referenced_by).append(add_referenced_by_button);
             referenced_by_container.append(new_referenced_by_div);
+            last_referenced_by = new_referenced_by_div;
             referenced_by_count++;
 
-            return [new_referenced_by,new_referenced_by_div];
+            return new_referenced_by;
         }
         
         var add_referenced_by_button = $("<button/>")
@@ -329,32 +326,23 @@ define(["base/js/namespace",
             .attr("id","add-nb-referenced-by-button")
             .attr("type","button")
             .attr("aria-label","Add referenced by URL")
-            .click(add_referenced_by);
+            .click(add_referenced_by)
+            .append($("<i>").addClass("fa fa-plus"));
 
-        add_referenced_by_button.append($("<i>").addClass("fa fa-plus"));
-
-        var first_referenced_by_div = $("<div/>").attr("id","nb-referenced-by");
-        
-        first_referenced_by_div.append(referenced_by);
-        first_referenced_by_div.append(add_referenced_by_button);
-
-        referenced_by_container.append(first_referenced_by_div);
-        
         referenced_by_div.append(referenced_by_label).append(referenced_by_container);
         
         var referencedByarr = md.reportmetadata.referencedBy;
-        var previousReferencedBy;
-        referencedByarr.forEach(function(item,index) {
-            if(index === 0) {
-                referencedBy.val(item);
-                previousReferencedBy = referencedBy_div;
-            } else {
-                var newReferencedBy = addReferencedBy(previousReferencedBy);
-                newReferencedBy[0].val(item);
-                previousReferencedBy = newReferencedBy[1];
-            }
-        });
         
+        if (referencedByarr == undefined || referencedByarr.length == 0) {
+        	add_referenced_by();
+        }
+        
+        if (referencedByarr != undefined) {
+            referencedByarr.forEach(function(item,index) {
+                add_referenced_by().val(item);
+            });
+        }
+
         return referenced_by_div;
 	}
 	
@@ -579,10 +567,10 @@ define(["base/js/namespace",
             }
         });
         
-        data.referenced_by = [];
+        data.referencedBy = [];
         $(".nb-referenced-by").each(function(i,e) {
             if($(e).val() !== "") {
-                data.referenced_by.push($(e).val());
+                data.referencedBy.push($(e).val());
             }
         });
 

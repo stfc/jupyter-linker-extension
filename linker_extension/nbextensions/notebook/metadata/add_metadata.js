@@ -1,8 +1,8 @@
 define(["base/js/namespace",
         "base/js/utils",
         "base/js/dialog",
-        "../custom_contents",
-        "./modify_notebook_html"
+        "../../custom_contents",
+        "../modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_contents){
 
     /*  

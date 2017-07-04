@@ -360,3 +360,10 @@ label.required:after {
   margin-bottom: 2px;
   display: block;
 }
+
+.fieldnote {
+  margin-bottom: 2px;
+  display: block;
+  color:grey;
+  font-style: italic;
+}

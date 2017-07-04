@@ -7,18 +7,14 @@ define(["base/js/namespace",
 	
 	function date_field() {
 		var date_div = $("<div/>");
-		
-		var dateLabel = $("<label/>").attr("for","date")
-                                     .addClass("required")
-                                     .addClass("fieldlabel")
-                                     .text("Date: ");
+
 	
 	    var date = $("<table/>").attr("id","date");
 	
 	    var yearLabel = $("<label/>")
 	        .attr("for","year")
 	        .addClass("required")
-	        .text("Year: ")
+	        .text("Issue Year: ")
 	        .attr("id","year-label");
 	    var year = $("<input/>")
 	        .attr("name","year")
@@ -99,7 +95,6 @@ define(["base/js/namespace",
             day.val(datearr[2]);
         }
 	    
-        date_div.append(dateLabel);
 	    date_div.append(date);
 	    
 	    return date_div;

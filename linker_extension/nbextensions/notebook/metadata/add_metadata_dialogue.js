@@ -7,14 +7,6 @@ define(["base/js/namespace",
 
     /*  
      *  Creates the modal that pops up when "Add Metadata" is clicked.
-     *  It uses the dialog module from the main notebook to create a dialog.
-     *  It creates the form body by running create_fields(), and adds some
-     *  labelling fluff. it also defines previous and next butttons and 
-     *  assigns the logic to these buttons that tells them when to change page,
-     *  which is done via toggling visibility using a class "hide-me" and also
-     *  calls the validator functions and uses them to dictate when a page is 
-     *  allowed to change. Also finally calls save metadata before the modal is
-     *  dismissed.
      */ 
     var add_metadata = function() {
         var form_fields = input_fields.create_forms();
@@ -27,7 +19,7 @@ define(["base/js/namespace",
                                     .append(form_fields.form2);
         
         var modal = dialog.modal({
-            title: "Add " + Jupyter.notebook.notebook_name + " Metadata",
+            title: "Add metadata for " + Jupyter.notebook.notebook_name,
             body: form_body,
             buttons: {
                 Cancel: {},
@@ -81,25 +73,6 @@ define(["base/js/namespace",
             $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
             $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
-
-//            //we can't store licence file info in metadata so disable it
-//            //only allow the option when publishing
-//            $("#licence-file-radio").prop("disabled",true);
-//            $("#licence-file").prop("disabled",true);
-//            $("#licence-file-button").attr("disabled","disabled");
-//
-//            //need to move the autocomplete widgets since they were generated
-//            //before the modal had fully loaded
-//            $(".author-first-name").each(function(index,item) {
-//                var full_id = $(item).attr("id");
-//                var id = full_id.split("-").pop(); //get the number at the end of the id
-//                $("#author-first-name-" + id).autocomplete("option","appendTo","#author-" + id);
-//            });
-//            $(".author-last-name").each(function(index,item) {
-//                var full_id = $(item).attr("id");
-//                var id = full_id.split("-").pop(); //get the number at the end of the id
-//                $("#author-last-name-" + id).autocomplete("option","appendTo","#author-" + id);
-//            });
         });
     };
 
