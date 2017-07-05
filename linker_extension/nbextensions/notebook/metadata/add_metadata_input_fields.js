@@ -467,7 +467,7 @@ define(["base/js/namespace",
 
         form1.append(title_field())
              .append(abstract_field())
-             //.append(authors.author_field())
+             .append(authors.author_fields())
              .append(expand_button_1)
              .append(extra_metadata_1);
  
@@ -516,8 +516,6 @@ define(["base/js/namespace",
         date.validate_date();
         
         $(".metadata-form-error").css("color", "red");
-        
-        
     };
     
     /*  
@@ -553,6 +551,8 @@ define(["base/js/namespace",
                 tags.push(split[i]);
             }
         }
+        
+        authors.save_authors_to_metadata();
         data.tags = tags;
         
         date.save_date_to_metadata();

@@ -26,9 +26,9 @@ define(["base/js/namespace",
 	}
 	
 	var author_fields = function() {
-        var defaultAuthorLastName = generate_author(0,"last");
+        var defaultAuthorLastName = generate_author(0,true);
         defaultAuthorLastName.attr("required","required");
-        var defaultAuthorFirstName = generate_author(0,"first");
+        var defaultAuthorFirstName = generate_author(0,false);
         defaultAuthorFirstName.attr("required","required");
 
         //we only have one spinner that is passed around, so we create it
@@ -43,13 +43,7 @@ define(["base/js/namespace",
             .addClass("sr-only")
             .attr("id","accessibility-spinner")
             .text("Searching for authors...");
-
-        var authorLabel = $("<label/>")
-            .attr("for","author")
-            .addClass("required")
-            .addClass("fieldlabel")
-            .text("Author: ");
-
+        
         var authorsFirstNameLabel = $("<label/>")
             .attr("for","author-first-name-0")
             .addClass("required")
@@ -70,9 +64,50 @@ define(["base/js/namespace",
             .append(authorsLastNameLabel)
             .append(authorsFirstNameLabel)
             .append(defaultAuthor);
-
+        
         defaultAuthorLastName.after(spinner).after(accessibility_spinner);
-
+        spinner.hide();
+        accessibility_spinner.hide();
+        
+        var authorsarr = md.reportmetadata.authors;
+        console.log(authorsarr);
+        if (authorsarr.length > 0 && authorsarr[0].length > 0) {
+        	console.log("Using name from metadata");
+        	console.log(authorsarr[0]);
+        	defaultAuthorFirstName.val(authorsarr[0][1]);
+            defaultAuthorLastName.val(authorsarr[0][0]);
+        } else {
+        	//Search LDAP for the logged in user's name
+            console.log("Searching LDAP for user's name");
+        	
+        	var config_username = "";
+            
+            var first_name = "";
+            var last_name = "";
+            
+            custom_contents.get_config().then(function(response){
+                config_username = response.username;
+                //activate ldap_search promise
+                return custom_contents.ldap_search({fedID: config_username});
+            }).catch(function(reason){
+                console.log(reason.message);
+            }).then(function(response) {
+                //resolve the ldap_search promise
+                var parsed = JSON.parse(response);
+                first_name = parsed.attributes.givenName;
+                last_name = parsed.attributes.sn;
+                defaultAuthorFirstName.val(first_name);
+                defaultAuthorLastName.val(last_name);
+            }).catch(function(reason) {
+            	console.log(reason.message);
+            });
+        }
+ 
+        return author;
+	}
+        
+	var additional_authors = function() {    
+        
         var additionalAuthorsLabel = $("<label/>")
             .attr("for","additional-authors")
             .addClass("fieldlabel")
@@ -157,6 +192,8 @@ define(["base/js/namespace",
             authorcount++;
             return [lastName,firstName,newAuthor];
         }
+        
+        return additional_authors;
     }
 	
 	
@@ -180,10 +217,11 @@ define(["base/js/namespace",
             if(ln !== "" || fn !== "") {
                 authorarr.push(ln);
                 authorarr.push(fn);
+                console.log("Saving the metadata");
+                console.log(authorarr);
                 md.reportmetadata.authors.push(authorarr);
             }
         });
-
 	}
 	
 	/*  
@@ -192,7 +230,14 @@ define(["base/js/namespace",
      *  Takes an id and a boolean (true implies surname, false firstname)
      */ 
     var generate_author = function(id,lastname_search) {
-    	function complete_function(request, response) {
+    	console.log("Preparing generate author for id: " + id);
+    	var first_or_last = (lastname_search ? "last" : "first");
+    	var generated_author = $("<input/>")
+            .attr("class","author-" + first_or_last + "-name")
+            .attr("type","text")
+            .attr("id","author-" + first_or_last + "-name-" + id);
+    	
+        function complete_function(request, response) {
             var query;
             if(lastname_search) {
                 query = custom_contents.ldap_search(
@@ -225,87 +270,26 @@ define(["base/js/namespace",
                     .css("color","red");
                 $("label[for=\"author\"]").after(ldap_error);
             });
-        }
+        };
     	
-        if(id === 0) {
-            generated_author.autocomplete({
-                select: function( event, ui ) {
-                    var person = ui.item.value;
-                    var person_split = person.split(" ");
-                    var sn = person_split[0].slice(0,-1);
-                    var fn = person_split[1];
-                    var department = person_split[2].split(",")[2].slice(0,-1);
-
-                    if (lastname_search) {
-                        $(this).val(sn);
-                        $(this).siblings(".author-first-name").val(fn);
-                    } else {
-                        $(this).val(fn);
-                        $(this).siblings(".author-last-name").val(sn);
-                    }
-                    
-                    /*  
-                     *  departments in LDAP have different names to DSpace
-                     *  repositories, so to convert we try and match the start
-                     *  of the string (no whitespace) with the dropdown value
-                     *  if this doesn't work - we cut down on the letters
-                     *  mostly based on when we had DIA in there as DLS.
-                     *  TODO: can we just match on start of string?
-                     */ 
-                    communities_promise.then(function() {
-                        var deps = []; 
-                        $("#department option").each(function () {
-                            deps.push($(this).text());
-                        });
-                        department = department.replace(/\s/g,""); //remove whitespace
-                        var len = department.length;
-                        while(len > 0) {
-                            var break_loop = false;
-                            var short_dep = department.slice(0,len);
-                            for(var i = 0; i < deps.length; i++) {
-                                var re = new RegExp("^" + short_dep,"i");
-                                if(deps[i].search(re) !== -1) {
-                                    department = deps[i];
-                                    break_loop = true;
-                                    break;
-                                } 
-                            }
-                            if (break_loop) {
-                                break;
-                            } else {
-                                len -= 1;
-                            }
-                        }
-                        $("#department").val($("#department option").filter(function() {
-                            return $(this).text() === department;
-                        }).val());
-                        populate_repositories($("#department").val());
-                    });
-
-                    return false;
-                }
-            });
-        } else {
-            generated_author.autocomplete({
-                select: function( event, ui ) {
-                    var person = ui.item.value;
-                    var person_split = person.split(" ");
-                    var sn = person_split[0].slice(0,-1);
-                    var fn = person_split[1];
-                    if(first_or_last === "last") {
-                        $(this).val(sn);
-                        $(this).siblings(".author-first-name").val(fn);
-                    } else {
-                        $(this).val(fn);
-                        $(this).siblings(".author-last-name").val(sn);
-                    }
-                    return false;
-                }
-            });
-        }
+    	function select_function(event, ui) {
+            var person = ui.item.value;
+            var person_split = person.split(" ");
+            var sn = person_split[0].slice(0,-1);
+            var fn = person_split[1];
+            if(first_or_last === "last") {
+                $(this).val(sn);
+                $(this).siblings(".author-first-name").val(fn);
+            } else {
+                $(this).val(fn);
+                $(this).siblings(".author-last-name").val(sn);
+            }
+            return false;
+        };
         
     	var autocomplete_details = {
             source: complete_function,
+            select: select_function,
             focus: function() {
                 // prevent value inserted on focus
                 return false;
@@ -332,18 +316,14 @@ define(["base/js/namespace",
             delay: 750,
         };
     	
-    	var first_or_last = (lastname_search ? "last" : "first");
-        
-        var generated_author = $("<input/>")
-	        .attr("class","author-" + first_or_last + "-name")
-	        .attr("type","text")
-	        .attr("id","author-" + first_or_last + "-name-" + id)
-	        .autocomplete(autocomplete_details);
+    	generated_author.autocomplete(autocomplete_details);
         
         return generated_author;
     };
     
     module.exports = {
-        generate_author: generate_author,
+        author_fields: author_fields,
+        additional_authors: additional_authors,
+        save_authors_to_metadata: save_authors_to_metadata,
     };
 });

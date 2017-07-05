@@ -115,7 +115,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         };
         return utils.promising_ajax(url, settings);
     };
-
+    
     //downloads data from dspace. 
     var download_data = function(data) {
         var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
