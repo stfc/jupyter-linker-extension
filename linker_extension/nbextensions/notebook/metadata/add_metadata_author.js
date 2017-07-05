@@ -5,26 +5,6 @@ define(["base/js/namespace",
 ],function(Jupyter,utils,dialog,custom_contents){
 	var md = Jupyter.notebook.metadata;
 	
-	var autofill_authors = function () {
-        var authorsarr = md.reportmetadata.authors;
-        var previousAuthor;
-        authorsarr.forEach(function(item,index) {
-            if(index === 0) {
-                defaultAuthorLastName.val(item[0]);
-                defaultAuthorFirstName.val(item[1]);
-            } else if(index === 1) {
-                additionalLastName.val(item[0]);
-                additionalFirstName.val(item[1]);
-                previousAuthor = additionalAuthor;
-            } else {
-                var auth = addAuthor(previousAuthor);
-                auth[0].val(item[0]);
-                auth[1].val(item[1]);
-                previousAuthor = auth[2];
-            }
-        });
-	}
-	
 	var author_fields = function() {
         var defaultAuthorLastName = generate_author(0,true);
         defaultAuthorLastName.attr("required","required");
@@ -44,6 +24,11 @@ define(["base/js/namespace",
             .attr("id","accessibility-spinner")
             .text("Searching for authors...");
         
+        var authorLabel = $("<label/>")
+            .attr("for","author")
+            .addClass("fieldlabel")
+            .text("Author:");
+        
         var authorsFirstNameLabel = $("<label/>")
             .attr("for","author-first-name-0")
             .addClass("required")
@@ -61,6 +46,7 @@ define(["base/js/namespace",
             .append(defaultAuthorFirstName);
 
         var author = $("<div/>").attr("id","author")
+            .append(authorLabel)
             .append(authorsLastNameLabel)
             .append(authorsFirstNameLabel)
             .append(defaultAuthor);
@@ -121,34 +107,21 @@ define(["base/js/namespace",
             .attr("for","author-last-name-1")
             .text("Last name, e.g. Smith: ");
 
-        var additionalLastName = generate_author(1,"last");
-        var additionalFirstName = generate_author(1,"first");
-
-        var additionalAuthor = ($("<div/>"))
-            .addClass("author additional-author")
-            .attr("id","author-1")
-            .append(additionalLastName)
-            .append(additionalFirstName);
-
         var addAuthorButton = $("<button/>")
             .addClass("btn btn-xs btn-default btn-add")
             .attr("id","add-author-button")
             .attr("type","button")
             .attr("aria-label","Add author")
+            .append($("<i>").addClass("fa fa-plus")
+                            .attr("aria-hidden","true"))
             .click(function() {
                 addAuthor();
             });
 
-        addAuthorButton.append($("<i>")
-                       .addClass("fa fa-plus")
-                       .attr("aria-hidden","true"));
-        additionalAuthor.append(addAuthorButton);
-
         var additionalAuthors = $("<div/>").attr("id","additional-authors")
+            .append(additionalAuthorsLabel)
             .append(additionalAuthorsLastNameLabel)
-            .append(additionalAuthorsFirstNameLabel)
-            .append(additionalAuthor);
-
+            .append(additionalAuthorsFirstNameLabel);
 
         /*  
          *  Creates a new additional author, adds the add button to the new
@@ -161,41 +134,60 @@ define(["base/js/namespace",
          *  Returns an array containing the  last name field, the first name field 
          *  and the container that contains the entire author (both fields and the button)
          */ 
-        var authorcount = 2;
-        function addAuthor(previousAuthor) {
+        var authorcount = 1;
+        var lastAuthor;
+        
+        function addAuthor() {
             var newAuthor = ($("<div/>"));
             
-            var firstName = generate_author(authorcount,"first");
-            var lastName = generate_author(authorcount,"last");
+            var firstName = generate_author(authorcount,false);
+            var lastName = generate_author(authorcount,true);
 
             newAuthor.addClass("author additional-author")
                 .attr("id","author-" + authorcount)
                 .append(lastName)
                 .append(firstName);
-            if(previousAuthor === undefined) {
-                previousAuthor = $(".additional-author").last();
-            } 
 
             //detach from the previously last author input
             //so we can put it back on the new one
             addAuthorButton.detach(); 
-            var deleteAuthor = $("<button/>")
+            newAuthor.append(addAuthorButton);
+            
+            if (lastAuthor != undefined) {
+                var deleteAuthor = $("<button/>")
                 .addClass("btn btn-xs btn-default btn-remove remove-author-button")
                 .attr("type","button")
                 .attr("aria-label","Remove author");
 
-            deleteAuthor.append($("<i>")
+                deleteAuthor.append($("<i>")
                         .addClass("fa fa-trash")
                         .attr("aria-hidden","true"));
-            previousAuthor.append(deleteAuthor);
-            additionalAuthors.append(newAuthor.append(addAuthorButton));
+                lastAuthor.append(deleteAuthor);
+            }
+
             authorcount++;
-            return [lastName,firstName,newAuthor];
+            additionalAuthors.append(newAuthor);
+            lastAuthor = newAuthor;
+            
+            return([lastName, firstName]);
         }
         
-        return additional_authors;
+        var authorsarr = md.reportmetadata.authors;
+        
+        if (authorsarr.length <= 1) {
+        	addAuthor();
+        } else {
+        	authorsarr.forEach(function(item,index) {
+                if(index > 0) {
+                	newAuthor = addAuthor();
+                    newAuthor[0].val(item[0]);
+                    newAuthor[1].val(item[1]);
+                } 
+            });
+        }
+        
+        return additionalAuthors;
     }
-	
 	
 	var validate_authors = function() {
         if($("#author-first-name-0").val() === "" || $("#author-last-name-0").val() === "") {
@@ -206,6 +198,19 @@ define(["base/js/namespace",
 
             $("label[for=\"author\"]").after(author_error);
         }
+        
+        $(".additional-author").each(function(i,e) {
+            var ln = $(e).children(".author-last-name").val();
+            var fn = $(e).children(".author-first-name").val();
+            if((ln === "") != (fn === "")) {
+                var author_error = $("<div/>")
+                    .attr("id","author-missing-error")
+                    .addClass("metadata-form-error")
+                    .text("Missing information detected in additional authors");
+
+                $("label[for=\"additional-authors\"]").after(author_error);
+            }
+        });
 	}
 	
 	var save_authors_to_metadata = function() {
@@ -217,8 +222,6 @@ define(["base/js/namespace",
             if(ln !== "" || fn !== "") {
                 authorarr.push(ln);
                 authorarr.push(fn);
-                console.log("Saving the metadata");
-                console.log(authorarr);
                 md.reportmetadata.authors.push(authorarr);
             }
         });
@@ -230,7 +233,6 @@ define(["base/js/namespace",
      *  Takes an id and a boolean (true implies surname, false firstname)
      */ 
     var generate_author = function(id,lastname_search) {
-    	console.log("Preparing generate author for id: " + id);
     	var first_or_last = (lastname_search ? "last" : "first");
     	var generated_author = $("<input/>")
             .attr("class","author-" + first_or_last + "-name")
@@ -325,5 +327,6 @@ define(["base/js/namespace",
         author_fields: author_fields,
         additional_authors: additional_authors,
         save_authors_to_metadata: save_authors_to_metadata,
+        validate_authors: validate_authors,
     };
 });

@@ -460,7 +460,7 @@ define(["base/js/namespace",
         var extra_metadata_1 = $("<div/>")
             .addClass("collapse")
             .attr("id","extra_metadata_1")
-            //.append(authors.additional_authors())
+            .append(authors.additional_authors())
             .append(tags_field())
             .append(date.date_field())
             .append(language_field());
@@ -511,8 +511,7 @@ define(["base/js/namespace",
         
         validate_title();
         validate_abstract();
-        //author.validate_author();
-        //author.validate_additional_authors();
+        authors.validate_authors();
         date.validate_date();
         
         $(".metadata-form-error").css("color", "red");
