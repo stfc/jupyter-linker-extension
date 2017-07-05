@@ -6,7 +6,9 @@ define(["base/js/namespace",
 	var md = Jupyter.notebook.metadata;
 	
 	var department_fields = function() {
-        var departmentLabel = $("<label/>")
+        var dept_container = $("<div/>");
+		
+		var departmentLabel = $("<label/>")
 	        .attr("for","department")
 	        .addClass("required")
             .addClass("fieldlabel")
@@ -37,7 +39,7 @@ define(["base/js/namespace",
             //only search if we're not on the default blank option as otherwise
             //this displays the communities
             if($(this).val()) {
-                populate_repositories($(this).val()).then(function() {
+                populate_repository_options($(this).val(), repository).then(function() {
                     if($("#repository").children().length === 0) {
                         $("#repository").prop("disabled",true);
                     }
@@ -45,10 +47,23 @@ define(["base/js/namespace",
             } else {
                 $("#repository").prop("disabled",true);
             }
-        });   
+        }); 
+        
+        dept_container.append(departmentLabel)
+                      .append(department)
+                      .append(repositoryLabel)
+                      .append(repository);
+        
+        populate_department(department);
+        
+        if (md.reportmetadata.department != undefined) {
+        	set_dept_from_metadata(department, repository)
+        }
+        
+        return dept_container;
     }
 	
-	var validate_department = function() {
+	var validate_dept_and_repo = function() {
         if(!$("#department").val()) {
             var department_error = $("<div/>")
                 .attr("id","department-missing-error")
@@ -57,9 +72,7 @@ define(["base/js/namespace",
 
             $("label[for=\"department\"]").after(department_error);
         }
-	}
-	
-	var validate_repository = function() {
+        
         if(!$("#repository").val()) {
             var repository_error = $("<div/>")
                 .attr("id","repository-missing-error")
@@ -68,11 +81,6 @@ define(["base/js/namespace",
 
             $("label[for=\"repository\"]").after(repository_error);
         }
-	}
-	
-	var save_department_to_metadata = function () {
-        md.reportmetadata.department = $("#department").val();
-        md.reportmetadata.repository = $("#repository").val();
 	}
 	
 	/*  
@@ -94,15 +102,24 @@ define(["base/js/namespace",
         $("label[for=\"department\"]").after(department_fetch_error);
     });
     
-    var populate_repository_options = function(community) {
+    var populate_repository_options = function(community, container, set_repo) {
+    	console.log("Populating repository options for " + community)
         return custom_contents.get_collections({"community": community}).then(function(response) {
             var collections = response.children;
+            console.log("Found " + collections.length + " collections");
             collections.forEach(function(collection) {
+            	console.log("Adding " + collection.name);
                 var collection_option = $("<option/>");
                 collection_option.attr("value",collection.handle);
                 collection_option.text(collection.name);
-                repository.append(collection_option);
+                container.append(collection_option);
+                if (collection.name == "Default") {
+                	container.val(collection.handle);
+                }
             });
+            if (set_repo != undefined) {
+            	container.val(set_repo);
+            }            
         }).catch(function(reason) {
             var repository_fetch_error = $("<div/>")
                 .addClass("repository-fetch-error")
@@ -113,55 +130,85 @@ define(["base/js/namespace",
         });
     };
     
-    function set_dept_options() {
+    function check_dept_name(option_name, dept_name) {
+    	dept_name = dept_name.replace(/\s/g,""); //remove whitespace
+        var len = dept_name.length;
+        while(len > 0) {
+            var short_dep = dept_name.slice(0,len);
+            var re = new RegExp("^" + short_dep,"i");
+            if(option_name.search(re) !== -1) {
+                return true;
+            }
+            len -= 1;
+        }
+        
+        return false;
+    }
+    
+    function set_dept_options(name_to_set, container) {
+    	console.log("Setting department options");
     	communities_promise.then(function(dept_list) {
+    		console.log("Found " + dept_list.length + " departments")
     		dept_list.forEach(function(dept) {
                 var dept_option = $("<option/>");
                 dept_option.attr("value",dept.id);
                 dept_option.text(dept.name);
-                $("#department").append(communities_option);
+                console.log("Adding " + dept_option.text());
+                container.append(dept_option);
+                if (check_dept_name(dept.name, name_to_set)) {
+                	console.log("Setting department value to " + dept.name);
+                	container.val(dept_option.val());
+                }
             });
+    		
+    		if (md.reportmetadata.department != undefined) {
+    			container.val(md.reportmetadata.department);
+    		}
     	});
     }
     
-    /*  
-     *  Convert a department name into an option recognised by DSpace.
-     */
-    function set_dept_from_name(dept_name) {
-    	communities_promise.then(function(dept_list) {
-            dept_name = dept_name.replace(/\s/g,""); //remove whitespace
-            var len = dept_name.length;
-            var found = false;
-            while(len > 0 && !found) {
-                var short_dep = dept_name.slice(0,len);
-                for(var i = 0; i < dept_list.length; i++) {
-                    var re = new RegExp("^" + short_dep,"i");
-                    if(dept_list[i].name.search(re) !== -1) {
-                        dept_name = dept_list[i].name;
-                        found = true;
-                        break;
-                    } 
-                }
-                len -= 1;
-            }
-            $("#department").val($("#department option").filter(function() {
-                return $(this).text() === dept_name;
-            }).val());
-            populate_repositories($("#department").val());
+    function populate_department(department_container) {
+        var config_username = "";
+        var user_department = "";
+        
+        console.log("Populating department selector");
+        
+        custom_contents.get_config().then(function(response){
+            config_username = response.username;
+            console.log("Found username: " + config_username);
+            //activate ldap_search promise
+            return custom_contents.ldap_search({fedID: config_username});
+        }).catch(function(reason){
+            console.log("Error: " + reason.message);
+        }).then(function(response) {
+            //resolve the ldap_search promise
+            var parsed = JSON.parse(response);
+            department_to_set = parsed.attributes.department[0].toUpperCase();
+            console.log("Found department: " + department_to_set);
+            set_dept_options(department_to_set, department_container);
+        }).catch(function(reason) {
+        	console.log("Error: " + reason.message);
         });
     }
+	
+	var save_department_to_metadata = function () {
+		console.log("Saving metadata");
+        md.reportmetadata.department = $("#department").val();
+        console.log("Department set to " + md.reportmetadata.department)
+        md.reportmetadata.repository = $("#repository").val();
+	}
     
-    function set_dept_from_metadata() {
-    	var metadata = Jupyter.notebook.metadata;
-        communities_promise.then(function(dept_list) {
-            department.val(metadata.reportmetadata.department);
-            return populate_repositories(metadata.reportmetadata.department);
-        }).then(function() {
-            repository.val(metadata.reportmetadata.repository);
-        });
+    function set_dept_from_metadata(dept_col, repo_col) {
+        dept_col.val(md.reportmetadata.department);
+        console.log("Setting department to " + md.reportmetadata.department);
+        populate_repository_options(md.reportmetadata.department, 
+        		                    repo_col, 
+        		                    md.reportmetadata.repository);
     }
     
     module.exports = {
-
+        department_fields: department_fields,
+        validate_dept_and_repo: validate_dept_and_repo,
+        save_department_to_metadata: save_department_to_metadata,
     };
 });
