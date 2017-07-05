@@ -51,10 +51,7 @@ define(["base/js/namespace",
                             input_fields.validate_fields2();
                             if($(".metadata-form-error").length === 0) {
                                 input_fields.save_metadata();
-//                            	get_values_from_fields().then(function(result) {
-//                                    Jupyter.notebook.metadata.reportmetadata = result;
-//                                    Jupyter.notebook.save_notebook();
-//                                });
+//                            	Jupyter.notebook.save_notebook();
                             } else {
                                 return false;
                             }

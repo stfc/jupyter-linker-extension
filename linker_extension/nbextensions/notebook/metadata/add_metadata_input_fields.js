@@ -490,11 +490,10 @@ define(["base/js/namespace",
             .append(referenced_by_field())
             .append(funders_field());
 
-        form2.append(expand_button_2)
-             //.append(licence.licence_field())
+        form2.append(licences.licence_field())
              //.append(department.department_field())
              //.append(department.repository_field())
-             //.append(expand_button_2)
+             .append(expand_button_2)
              .append(extra_metadata_2);
 
         return {form1: form1, form2: form2};
@@ -527,7 +526,7 @@ define(["base/js/namespace",
         $(".metadata-form-error").remove(); //clear errors
         
         //department.validate_dept_and_repo();
-        //licence.validate_licence();
+        licences.validate_licence();
         
         $(".metadata-form-error").css("color", "red");
     };
@@ -558,6 +557,8 @@ define(["base/js/namespace",
         
         data.language = $("#language").val();
         data.publisher = $("#publisher").val();
+        
+        licences.save_licence_to_metadata();
         
         data.citations = [];
         $(".nb-citation").each(function(i,e) {
