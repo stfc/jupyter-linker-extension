@@ -5,7 +5,8 @@ define(["base/js/namespace",
         "./add_metadata_author",
         "./add_metadata_date",
         "./add_metadata_department",
-        "./add_metadata_licences"
+        "./add_metadata_licences",
+        "./add_metadata_tos"
 ],function(Jupyter,
 		   utils,
 		   dialog,
@@ -13,7 +14,8 @@ define(["base/js/namespace",
 		   authors,
 		   date,
 		   department,
-		   licences){	
+		   licences,
+		   tos){	
 	var md = Jupyter.notebook.metadata;
 	
 	/*  
@@ -492,6 +494,7 @@ define(["base/js/namespace",
 
         form2.append(licences.licence_field())
              .append(department.department_fields())
+             .append(tos.tos_field())
              .append(expand_button_2)
              .append(extra_metadata_2);
 
@@ -526,6 +529,7 @@ define(["base/js/namespace",
         
         department.validate_dept_and_repo();
         licences.validate_licence();
+        tos.validate_tos();
         
         $(".metadata-form-error").css("color", "red");
     };
@@ -575,6 +579,8 @@ define(["base/js/namespace",
 
         data.funders = $("#funders").val();
         data.sponsors = $("#sponsors").val();
+        
+        tos.save_tos_to_metadata();
         
     };
     

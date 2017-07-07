@@ -35,53 +35,20 @@ define([
 	        //Allows users to choose the datafile to be plotted.    	
 	    	var input_container = $("<div/>").addClass("generate-code");
 	    	
-	    	var open_input_modal = function() {
-	    		var modal = dialog.modal({
-		            title: "Input datafiles",
-		            body: local_data.data_form(),
-		            buttons: {
-		                Cancel: {},
-		                Select: { 
-		                    class : "btn-primary",
-		                    click: function() {
-		                    	cell.metadata.dataplot_files = 
-		                    		local_data.get_selected_values();
-		                    	$(".input-display").text(get_display_text());
-		                    	return true;
-		                    },
-		                }
-		            },
-		            notebook: Jupyter.notebook,
-		            keyboard_manager: Jupyter.notebook.keyboard_manager,
-		        });
-
-		        modal.on("shown.bs.modal", function () {
-		            local_data.init_data_form(cell.metadata.dataplot_files);
-		        });
+	    	var file_list = cell.metadata.dataplot_files;
+	    	var onclick = function () {
+	    		local_data.open_modal(file_list, $(".input-display"));
 	    	}
-	    	
-	    	function get_display_text() {
-	    		if (!cell.metadata.dataplot_files ||
-	    	        cell.metadata.dataplot_files.length == 0) {
-		    		return("No files selected");
-		    	} else if (cell.metadata.dataplot_files.length == 1) {
-		    		return("1 file selected");
-		    	} else {
-		    		return(cell.metadata.dataplot_files.length + " files selected");
-		    	}
-	    	}
-	    	
 	        var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
 	                                       .text("Input files")
-	                                       .click(open_input_modal);
+	                                       .click(onclick);
 	        var input_display = $("<span/>").addClass("input-display")
-	                                        .text(get_display_text());
+	                                        .text(local_data.get_display_text(file_list));
 	        
 	        input_container.append(input_button);
 	        input_container.append(input_display);
 	        
 	        $(div).append(input_container);
-	        
 	    }
 	
 	    function setup_details() {

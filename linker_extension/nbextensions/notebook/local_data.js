@@ -266,26 +266,27 @@ define([
         $(".data-form-error").css("color", "red");
     };
     
-    var get_selected_values = function() {
+    var get_selected_values = function(list_to_fill) {
         var tree = $.fn.zTree.getZTreeObj("file-tree");
 
         var all_files = tree.getCheckedNodes();
-        var files = [];
+        while(list_to_fill.length > 0) {
+        	list_to_fill.pop();
+        }
         all_files.forEach(function(file) {
         	//Don't return directories
         	if(!file.isParent) {
-                files.push(file);
+                list_to_fill.push(file);
         	}
         });
-        
-        return(files);
     }
     
     var reset_associated_data = function() {
     	//Overwrite the associated data with the currently checked files.
     	console.log("Resetting associated data")
     	
-    	md.files = get_selected_values();
+    	md.files = [];
+    	get_selected_values(md.files);
 
     	console.log("Associated data reset: " + 
     			    md.files.length +
@@ -296,7 +297,8 @@ define([
     	//Add any checked files to the notebook's associated data.
     	console.log("Updating associated data")
     	
-    	var checked = get_selected_values();
+    	var checked = [];
+    	get_selected_values(checked);
     	
     	if (!md.hasOwnProperty("files")) {
     		md.files = checked;
@@ -324,13 +326,48 @@ define([
     			    md.files.length +
     			    " files associated");
     }
+    
+    var get_display_text = function (file_list) {
+		if (!file_list || file_list.length == 0) {
+    		return("No files selected");
+    	} else if (file_list.length == 1) {
+    		return("1 file selected");
+    	} else {
+    		return(file_list.length + " files selected");
+    	}
+    }
+    
+    var open_modal = function(file_list, display) {   	
+    	var modal = dialog.modal({
+            title: "Input datafiles",
+            body: data_form(),
+            buttons: {
+                Cancel: {},
+                Select: { 
+                    class : "btn-primary",
+                    click: function() {
+                    	get_selected_values(file_list);
+                    	display.text(get_display_text(file_list));
+                    	return true;
+                    },
+                }
+            },
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.notebook.keyboard_manager,
+        });
+
+        modal.on("shown.bs.modal", function () {
+            init_data_form(file_list);
+        });
+	}
 
     module.exports = {
         data_form: data_form,
         init_data_form: init_data_form,
-        get_selected_values: get_selected_values,
         validate_files: validate_files,
         update_associated_data: update_associated_data,
         reset_associated_data: reset_associated_data,
+        get_display_text: get_display_text,
+        open_modal: open_modal,
     };
 });
