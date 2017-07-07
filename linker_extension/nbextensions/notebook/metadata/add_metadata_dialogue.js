@@ -25,8 +25,8 @@ define(["base/js/namespace",
                 Cancel: {},
                 Previous: { 
                     click: function() {
-                        $("#fields2").addClass("hide-me");
-                        $("#fields1").removeClass("hide-me");
+                        $("#md_fields2").addClass("hide-me");
+                        $("#md_fields1").removeClass("hide-me");
                         $("#next").text("Next"); 
                         $("#previous").prop("disabled",true);
                         
@@ -39,8 +39,8 @@ define(["base/js/namespace",
                         if($("#next").text() === "Next") {
                             input_fields.validate_fields1();
                             if($(".metadata-form-error").length === 0) {
-                                $("#fields1").addClass("hide-me");
-                                $("#fields2").removeClass("hide-me");
+                                $("#md_fields1").addClass("hide-me");
+                                $("#md_fields2").removeClass("hide-me");
                                 $("#previous").prop("disabled",false);
 
                                 //we want button text to be save on the last page
@@ -85,7 +85,7 @@ define(["base/js/namespace",
 
     var load = function () {
         Jupyter.notebook.keyboard_manager.actions.register(action,action_name,prefix);
-        $("#add_metadata").click(function () {
+        $("#manage_metadata").click(function () {
             add_metadata();
         });
     };

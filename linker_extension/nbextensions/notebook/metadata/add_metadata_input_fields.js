@@ -446,7 +446,7 @@ define(["base/js/namespace",
             $(this).parent().remove();
         });
 
-        var form1 = $("<fieldset/>").attr("id","fields1");
+        var form1 = $("<fieldset/>").attr("id","md_fields1");
         
         var expand_button_1 = $("<button/>")
             .addClass("btn btn-info btn-sm btn-collapse")
@@ -471,7 +471,7 @@ define(["base/js/namespace",
              .append(expand_button_1)
              .append(extra_metadata_1);
  
-        var form2 = $("<fieldset/>").addClass("hide-me").attr("id","fields2");
+        var form2 = $("<fieldset/>").addClass("hide-me").attr("id","md_fields2");
 
         var expand_button_2 = $("<button/>")
             .addClass("btn btn-info btn-sm btn-collapse")

@@ -3,6 +3,7 @@ define(["base/js/namespace",
         "base/js/dialog",
         "./local_data"
 ],function(Jupyter,utils,dialog,local_data){
+	var md = Jupyter.notebook.metadata.reportmetadata;
     var manage_associated_data = function() {
 		var modal = dialog.modal({
             title: "Manage datafiles associated with this notebook",
@@ -24,11 +25,11 @@ define(["base/js/namespace",
         //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
         	console.log("Managing associated data");
-        	if (!Jupyter.notebook.metadata.hasOwnProperty("associated_data")) {
-        		Jupyter.notebook.metadata.associated_data = [];
+        	if (!md.hasOwnProperty("files")) {
+        		md.files = [];
         	}
         	
-            local_data.init_data_form(Jupyter.notebook.metadata.associated_data);
+            local_data.init_data_form(md.files);
         });
     };
                

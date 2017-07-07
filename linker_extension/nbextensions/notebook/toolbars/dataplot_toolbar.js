@@ -55,9 +55,7 @@ define([
 		            keyboard_manager: Jupyter.notebook.keyboard_manager,
 		        });
 
-		        //stuff to do on modal load
 		        modal.on("shown.bs.modal", function () {
-		            //init tree
 		            local_data.init_data_form(cell.metadata.dataplot_files);
 		        });
 	    	}

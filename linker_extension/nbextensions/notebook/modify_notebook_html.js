@@ -25,26 +25,7 @@ define([
 
         $(Jupyter.toolbar.selector).append(publish_dropdown);
         
-        publish_dropdown_ul.append($("<li/>").attr("id","add_metadata")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Add Metadata")))
-
-                   .append($("<li/>").addClass("divider"))
-
-                   /*.append($("<li/>").attr("id","select_data")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Select associated data")))
-
-                   .append($("<li/>").attr("id","view_data")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("View associated data")))
- 
-                   .append($("<li/>").addClass("divider"))*/
-
-                   .append($("<li/>").attr("id","toggle_cell_references_bar")
+        publish_dropdown_ul.append($("<li/>").attr("id","toggle_cell_references_bar")
                                      .append($("<a/>")
                                              .attr("href","#")
                                              .text("Show/Hide cell references toolbar")))
@@ -68,25 +49,20 @@ define([
 
                    .append($("<li/>").addClass("divider"))
                    
+                   .append($("<li/>").attr("id","manage_metadata")
+                                     .append($("<a/>")
+                                             .attr("href","#")
+                                             .text("Manage Metadata")))
+                   
                    .append($("<li/>").attr("id","manage_associated_data")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Manage associated data")))
+                                             .text("Manage Associated Data")))
 
-                   .append($("<li/>").attr("id","publish_notebook")
+                   .append($("<li/>").attr("id","publish")
                                      .append($("<a/>")
                                              .attr("href","#")
-                                             .text("Publish Notebook")))
-
-                   .append($("<li/>").attr("id","publish_bundle")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Publish associated data")));
-
-                   /*.append($("<li/>").attr("id","publish_notebook_and_bundle")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Publish Notebook and associated data")));*/
+                                             .text("Publish")));
 
         var data_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","data-menu");
         var data_button  = $("<button/>")

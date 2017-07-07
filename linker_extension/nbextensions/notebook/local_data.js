@@ -16,6 +16,7 @@ define([
     var base_path_split = notebook_path.split("/");
     base_path_split.pop(); //Remove the filename
     var base_path = base_path_split.join("/");
+    var md = Jupyter.notebook.metadata.reportmetadata;
 	  
     /*  
      * Create the form for selecting files.
@@ -284,10 +285,10 @@ define([
     	//Overwrite the associated data with the currently checked files.
     	console.log("Resetting associated data")
     	
-    	Jupyter.notebook.metadata.associated_data = get_selected_values();
+    	md.files = get_selected_values();
 
     	console.log("Associated data reset: " + 
-    			    Jupyter.notebook.metadata.associated_data.length +
+    			    md.files.length +
     			    " files associated");
     }
     
@@ -297,10 +298,10 @@ define([
     	
     	var checked = get_selected_values();
     	
-    	if (!Jupyter.notebook.metadata.hasOwnProperty("associated_data")) {
-    		Jupyter.notebook.metadata.associated_data = checked;
+    	if (!md.hasOwnProperty("files")) {
+    		md.files = checked;
     	} else {
-    		var associated_data = Jupyter.notebook.metadata.associated_data;
+    		var associated_data = md.files;
     		
     		function already_associated(path) {
     			//Check if a path is already included in the associated data.
@@ -320,9 +321,8 @@ define([
     	}
     	
     	console.log("Associated data updated: " + 
-    			    Jupyter.notebook.metadata.associated_data.length +
+    			    md.files.length +
     			    " files associated");
-
     }
 
     module.exports = {
@@ -331,6 +331,6 @@ define([
         get_selected_values: get_selected_values,
         validate_files: validate_files,
         update_associated_data: update_associated_data,
-        reset_associated_data: reset_associated_data
+        reset_associated_data: reset_associated_data,
     };
 });
