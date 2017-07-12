@@ -56,7 +56,7 @@ define(["base/js/namespace",
         accessibility_spinner.hide();
         
         var authorsarr = md.reportmetadata.authors;
-        console.log(authorsarr);
+
         if (authorsarr.length > 0 && authorsarr[0].length > 0) {
         	console.log("Using name from metadata");
         	console.log(authorsarr[0]);

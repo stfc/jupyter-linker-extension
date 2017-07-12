@@ -20,8 +20,8 @@ define(["base/js/namespace",
 
 	    tos_list = [];
     	if (md.TOS != undefined) {
-    		for (var file in md.TOS) {
-    			tos_list.push(file);
+    		for (var i = 0; i < md.TOS.length; i++) {
+    			tos_list.push(md.TOS[i]);
     		}
     	} 
     	

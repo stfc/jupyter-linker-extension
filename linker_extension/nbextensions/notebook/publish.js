@@ -214,7 +214,7 @@ define(["base/js/namespace",
                                     .css("color","red");
 
                                 error.text(reason.message);
-                                login.after(error);
+                                $("#login-fields-upload-data").after(error);
                             });
                         }
                         return false;
@@ -230,7 +230,7 @@ define(["base/js/namespace",
             $(".modal-footer > button.btn-sm").eq(1).attr("id","previous")
                                                     .prop("disabled",true);
             $(".modal-footer > button.btn-sm").eq(2).attr("id","next");
-
+            
             //init tree
             if (!md.reportmetadata.hasOwnProperty("files")) {
         		md.reportmetadata.files = [];
