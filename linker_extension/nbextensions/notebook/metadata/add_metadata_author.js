@@ -4,6 +4,17 @@ define(["base/js/namespace",
         "../../custom_contents",
 ],function(Jupyter,utils,dialog,custom_contents){
 	var md = Jupyter.notebook.metadata;
+	var authorsarr;
+	
+	function setup_authorsarr() {
+		if (authorsarr == undefined) {
+	        if (md.reportmetadata.hasOwnProperty("authors")) {
+	        	authorsarr = md.reportmetadata.authors;
+	        } else {
+	        	authorsarr = [];
+	        }
+		}
+	}
 	
 	var author_fields = function() {
         var defaultAuthorLastName = generate_author(0,true);
@@ -55,7 +66,7 @@ define(["base/js/namespace",
         spinner.hide();
         accessibility_spinner.hide();
         
-        var authorsarr = md.reportmetadata.authors;
+        setup_authorsarr();
 
         if (authorsarr.length > 0 && authorsarr[0].length > 0) {
         	console.log("Using name from metadata");
@@ -136,6 +147,7 @@ define(["base/js/namespace",
          */ 
         var authorcount = 1;
         var lastAuthor;
+        setup_authorsarr();
         
         function addAuthor() {
             var newAuthor = ($("<div/>"));
@@ -171,8 +183,6 @@ define(["base/js/namespace",
             
             return([lastName, firstName]);
         }
-        
-        var authorsarr = md.reportmetadata.authors;
         
         if (authorsarr.length <= 1) {
         	addAuthor();
@@ -216,13 +226,13 @@ define(["base/js/namespace",
 	var save_authors_to_metadata = function() {
         md.reportmetadata.authors = [];
         $(".author").each(function(i,e) {
-            var authorarr = [];
+            var author_to_save = [];
             var ln = $(e).children(".author-last-name").val();
             var fn = $(e).children(".author-first-name").val();
             if(ln !== "" || fn !== "") {
-                authorarr.push(ln);
-                authorarr.push(fn);
-                md.reportmetadata.authors.push(authorarr);
+                author_to_save.push(ln);
+                author_to_save.push(fn);
+                md.reportmetadata.authors.push(author_to_save);
             }
         });
 	}

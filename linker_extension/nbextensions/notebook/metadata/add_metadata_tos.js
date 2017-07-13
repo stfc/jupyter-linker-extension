@@ -4,7 +4,7 @@ define(["base/js/namespace",
         "../local_data",
         "../../custom_contents"
 ],function(Jupyter,utils,dialog,local_data,custom_contents){
-	var md = Jupyter.notebook.metadata.reportmetadata;
+	var md = Jupyter.notebook.metadata;
 	var tos_list;
 	
 	var tos_field = function() {
@@ -19,9 +19,9 @@ define(["base/js/namespace",
 	        .attr("id","tos");
 
 	    tos_list = [];
-    	if (md.TOS != undefined) {
-    		for (var i = 0; i < md.TOS.length; i++) {
-    			tos_list.push(md.TOS[i]);
+    	if (md.reportmetadata.hasOwnProperty("TOS")) {
+    		for (var i = 0; i < md.reportmetadata.TOS.length; i++) {
+    			tos_list.push(md.reportmetadata.TOS[i]);
     		}
     	} 
     	
@@ -30,7 +30,8 @@ define(["base/js/namespace",
     	var onclick = function () {
     		local_data.open_modal(tos_list, $(".tos-display"));
     	}
-        var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+        var input_button = $("<button/>").addClass("btn btn-sm btn-default btn-add")
+                                       .attr("id", "tos-select")
                                        .text("Select terms of service files")
                                        .click(onclick);
         var input_display = $("<span/>").addClass("tos-display")
@@ -57,7 +58,7 @@ define(["base/js/namespace",
 	}
 	
 	var save_tos_to_metadata = function() {
-        md.TOS = tos_list;
+        md.reportmetadata.TOS = tos_list;
 	}
 	
     module.exports = {

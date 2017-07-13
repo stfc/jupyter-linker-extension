@@ -68,7 +68,7 @@ define(["base/js/namespace",
     	var abstract_label = $("<label/>").attr("for","nb-abstract")
                                           .addClass("fieldlabel")
                                           .text("Abstract: ");
-    	var abstract_note = $("<label/>").attr("for","nb-abstract")
+    	var abstract_note = $("<span/>").attr("for","nb-abstract")
                                          .addClass("fieldnote")
                                          .text("Note: This is taken from the first cell of the notebook, so cannot be edited here.");
 
@@ -90,7 +90,8 @@ define(["base/js/namespace",
 	}
 	
 	function validate_abstract() {
-        if(Jupyter.notebook.get_cell(0).cell_type !== "markdown") {
+        if(Jupyter.notebook.get_cell(0).cell_type !== "markdown" ||
+           $("#nb-abstract").val() === "") {
             var abstract_invalid_error = $("<div/>")
                 .attr("id","nb-abstract-invalid-error")
                 .addClass("metadata-form-error")
@@ -98,14 +99,6 @@ define(["base/js/namespace",
                       "at the top of the notebook to be used as an abstract");
 
             $("label[for=\"nb-abstract\"]").after(abstract_invalid_error);
-        }
-        if($("#nb-abstract").val() === "") {
-            var abstract_missing_error = $("<div/>")
-                .attr("id","nb-abstract-missing-error")
-                .addClass("metadata-form-error")
-                .text("Please exit this dialog and enter an abstract");
-
-            $("label[for=\"nb-abstract\"]").after(abstract_missing_error);
         }
 	}
 	
@@ -122,9 +115,11 @@ define(["base/js/namespace",
 
     	var tags_input = $("<textarea/>").attr("name","tags").attr("id","tags");
         
-    	md.reportmetadata.tags.forEach(function(item) {
-            tags_input.val(tags_input.val() + item + "\n");
-        });
+    	if (md.reportmetadata.hasOwnProperty("tags")) {
+    		md.reportmetadata.tags.forEach(function(item) {
+                tags_input.val(tags_input.val() + item + "\n");
+            });
+    	}
     	
         tags_div.append(tags_label)
                 .append(tags_input);
@@ -536,9 +531,6 @@ define(["base/js/namespace",
 
     
     var save_metadata = function(){
-    	if (!md.hasOwnProperty("reportmetadata")) {
-    		md.reportmetadata = {};
-    	}
     	data = md.reportmetadata;
     	
     	data.title = $("#title").val();

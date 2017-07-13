@@ -78,8 +78,8 @@ casper.notebook_test(function() {
     });
 
     //Click on menu item
-    this.waitForSelector("#add_metadata > a");
-    this.thenClick("#add_metadata > a");
+    this.waitForSelector("#manage_metadata > a");
+    this.thenClick("#manage_metadata > a");
 
     // Wait for the dialog to be shown
     this.waitUntilVisible(".modal-body");
@@ -90,12 +90,18 @@ casper.notebook_test(function() {
     this.thenClick("#next");
 
     this.then(function() {
-        this.test.assertExists("#nb-abstract-missing-error",
-                               "Abstract missing error exists");
         this.test.assertExists("#nb-abstract-invalid-error",
                                "Abstract invalid error exists");
     });
+    
+    this.capture("not_in_wait.png");
+    
+    this.waitUntilVisible('#next', function () {
+        this.capture("modal_should_appear.png");
+    });
 
+    this.capture("after_wait.png");
+    
     //recreate valid abstract cell
 
     this.thenClick(".close");
@@ -113,8 +119,8 @@ casper.notebook_test(function() {
     });
 
     //Click on menu item
-    this.waitForSelector("#add_metadata > a");
-    this.thenClick("#add_metadata > a");
+    this.waitForSelector("#manage_metadata > a");
+    this.thenClick("#manage_metadata > a");
 
     // Wait for the dialog to be shown
     this.waitUntilVisible(".modal-body");
@@ -152,6 +158,8 @@ casper.notebook_test(function() {
             return $("#department").children().length > 0;
         });
     });
+    
+    this.capture("screenshots/sanitycheck.png");
 
     this.waitFor(function check() {
         return this.evaluate(function() {
@@ -163,18 +171,14 @@ casper.notebook_test(function() {
         this.test.assert(false,"Author and department unsuccessfully filled from username in config");
     }, 10000);
 
-    //test the clear date and set to current date buttons
-    this.thenClick("#clear-date");
     this.then(function() {
-        this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields1 > div#author > div#author-0", {
             "#author-last-name-0": "",
             "#author-first-name-0": "",
         });
     });
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertExists("#year-missing-error",
-                               "Year missing error exists");
         this.test.assertExists("#author-missing-error",
                                "Author missing error exists");
     });
@@ -201,7 +205,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields1", {
             "#author-last-name-0": "",
             "#author-first-name-0": "",
         });
@@ -244,43 +248,26 @@ casper.notebook_test(function() {
         this.test.assertEquals(date,test_date,"Current date has been reinserted right");
     });
 
-    this.thenClick("#clear-date");
-
     //testing the date validation
     this.then(function() {
-        this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
-            "#title": "My Title",
-            "#year": "4000",
+        this.fill("form#add_metadata_form > fieldset#md_fields1 > div#extra_metadata_1", {
+            "year": "0",
+            "month": "0",
+            "day": "31",
         });
+    });
+    this.thenClick("#next");
+    this.then(function() {
+        this.test.assertExists(
+            "#year-missing-error",
+            "Year missing error exists"
+        );
     });
     
-
-    this.thenClick("#next");
     this.then(function() {
-        this.test.assertExists(
-            "#invalid-year-error",
-            "Upper bound on year limit working"
-        );
-    });
-
-    this.then(function() {
-        this.fill("form#add_metadata_form > fieldset#fields1", {
-            "title": "My Title",
-            "year": "1000",
-        });
-    });
-    this.thenClick("#next");
-    this.then(function() {
-        this.test.assertExists(
-            "#invalid-year-error",
-            "Lower bound on year limit working"
-        );
-    });
-
-    this.then(function() {
-        this.fill("form#add_metadata_form > fieldset#fields1", {
-            "title": "My Title",
+        this.fill("form#add_metadata_form > fieldset#md_fields1", {
             "year": "2000",
+            "month": "0",
             "day": "31",
         });
     });
@@ -293,8 +280,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fill("form#add_metadata_form > fieldset#fields1", {
-            "title": "My Title",
+        this.fill("form#add_metadata_form > fieldset#md_fields1", {
             "year": "2000",
             "month": "2",
             "day": "31",
@@ -309,9 +295,9 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fill("form#add_metadata_form > fieldset#fields1", {
+        this.fill("form#add_metadata_form > fieldset#md_fields1", {
             "title": "My Title",
-            "year": "1900", //not a leap year
+            "year": "1997", //not a leap year
             "month": "2",
             "day": "29",
         });
@@ -325,7 +311,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fill("form#add_metadata_form > fieldset#fields1", {
+        this.fill("form#add_metadata_form > fieldset#md_fields1", {
             "title": "My Title",
             "year": "2000", //is a leap year!
             "month": "2",
@@ -335,7 +321,7 @@ casper.notebook_test(function() {
     this.thenClick("#next");
     this.then(function() {
         this.test.assertVisible(
-            "#fields2",
+            "#md_fields2",
             "Leap year logic working for accepting valid combos"
         );
     });
@@ -349,7 +335,7 @@ casper.notebook_test(function() {
     //Add some test metadata
     this.then(function() {
         //need to use fillSelectors over fill to fill in the authors
-        this.fillSelectors("form#add_metadata_form > fieldset#fields1", { 
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields1", { 
             "#title": "My Title",
             "#year": "1995",
             "#month": "8",
@@ -364,7 +350,7 @@ casper.notebook_test(function() {
     }); 
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertVisible("#fields2","Valid data has been accepted");
+        this.test.assertVisible("#md_fields2","Valid data has been accepted");
     });
 
     this.thenClick("#next");
@@ -396,40 +382,10 @@ casper.notebook_test(function() {
                                "Repository missing error exists");
     });
 
+    this.capture("screenshots/check3.png");
+    
     this.then(function(){
-        this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
-            "#department": "",
-            "#nb-licence-dropdown": "Other"
-        });
-    });
-
-    //test that the licence file upload is disabled on add metadata
-    this.then(function() {
-        var disabled = this.evaluate(function() {
-            return ($("#licence-file").prop("disabled") && $("#licence-file-radio").prop("disabled"));
-        });
-        this.test.assert(disabled,"Licence file selection is correctly disabled");
-    });
-
-    this.thenClick("#next");
-    this.then(function() {
-        this.test.assertExists("#department-missing-error",
-                               "Department missing error exists");
-        this.test.assertExists("#repository-missing-error",
-                               "Repository missing error exists");
-        this.test.assertExists("#no-licence-error",
-                               "No checkbox selected error exists");
-    });
-
-    this.thenClick("#licence-url-radio");
-    this.thenClick("#next");
-    this.then(function() {
-        this.test.assertExists("#no-licence-url-error",
-                               "URL empty error exists");
-    });
-
-    this.then(function(){
-        this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
             "#nb-licence-dropdown": "CC0",
             "#department": department,
         });
@@ -449,33 +405,39 @@ casper.notebook_test(function() {
         var repository = this.evaluate(function() {
             return $("#repository").children().eq(1).val(); //get first non-empty option
         });
-        this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
             "#repository": repository,
         });
     });
+    this.capture("screenshots/check2.png");
 
-
-    this.waitForSelector("#add-nb-referencedBy-button");
+    this.waitForSelector("#add-nb-referenced-by-button");
     //again, create two extra boxes but we'll only use one
-    this.thenClick("#add-nb-referencedBy-button");
-    this.thenClick("#add-nb-referencedBy-button");
+    this.thenClick("#add-nb-referenced-by-button");
+    this.thenClick("#add-nb-referenced-by-button");
 
     this.waitForSelector("#add-nb-citation-button");
     //again, create two extra boxes but we'll only use one
     this.thenClick("#add-nb-citation-button");
     this.thenClick("#add-nb-citation-button");
 
+    this.capture("screenshots/check1.png");
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
-        this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
             "#publisher": "test publisher",
             "#nb-citation-0": "Citation 1",
             "#nb-citation-2": "Citation 2",
-            "#nb-referencedBy-0": "URL1",
-            "#nb-referencedBy-2": "URL2"
+            "#nb-referenced-by-0": "URL1",
+            "#nb-referenced-by-2": "URL2"
         });
     }); //TODO: add funders and sponsors if we can use them
 
+    this.capture("screenshots/tos-select-before.png");
+    this.thenClick("#tos-select");
+    this.capture("screenshots/tos-select-after.png");
+    
+    
     this.thenClick("#next");
     this.waitWhileVisible(".modal",function(){},function() {
         this.capture("screenshots/modal_lingering.png");
@@ -901,7 +863,7 @@ casper.notebook_test(function() {
 
     //Add some test metadata
     this.then(function() {
-        this.fillSelectors("form#add_metadata_form > fieldset#fields1", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields1", {
             "#author-last-name-3": "McCoy",
             "#author-first-name-3": "Leonard",
         });
@@ -925,7 +887,7 @@ casper.notebook_test(function() {
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
-        this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
             "#nb-citation-2": "Citation 3",
             "#nb-citation-3": "Citation 4",
             "#nb-referencedBy-2": "URL3",
@@ -935,7 +897,7 @@ casper.notebook_test(function() {
     });
 
     this.then(function() {
-        this.fillSelectors("form#add_metadata_form > fieldset#fields2", {
+        this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
             "#licence-url": "Test"
         });
     });
