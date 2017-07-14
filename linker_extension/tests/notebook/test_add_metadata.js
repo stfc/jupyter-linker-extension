@@ -1,5 +1,6 @@
 var system = require("system");
 var fs = require("fs");
+var screenshot_dir = "screenshots/add_metadata/";
 
 casper.notebook_test(function() {
     "use strict";
@@ -19,6 +20,18 @@ casper.notebook_test(function() {
     var test_path = path_parts.join("/") + "/";
 
     var username = "";
+    
+    var screenshot_index = 1;
+    
+    function take_screenshot(name) {
+    	var index_string = screenshot_index.toString();
+        casper.waitUntilVisible('#next', function () {
+            casper.capture(screenshot_dir + index_string +
+            		       ". " + name + ".png");
+        });
+        
+        screenshot_index++;
+    }
 
     //we need username to test autofill
     //so either read the info via the login_credentials text file
@@ -84,31 +97,25 @@ casper.notebook_test(function() {
     // Wait for the dialog to be shown
     this.waitUntilVisible(".modal-body");
     this.wait(200);
+    
+    take_screenshot("open-modal");
 
     //check that certain fields are required 
     this.waitForSelector("#next");
     this.thenClick("#next");
-
+    
+    take_screenshot("abstract-error");
+    
     this.then(function() {
         this.test.assertExists("#nb-abstract-invalid-error",
                                "Abstract invalid error exists");
     });
     
-    this.capture("not_in_wait.png");
-    
-    this.waitUntilVisible('#next', function () {
-        this.capture("modal_should_appear.png");
-    });
-
-    this.capture("after_wait.png");
-    
     //recreate valid abstract cell
-
     this.thenClick(".close");
     this.waitWhileVisible(".modal-body");
     this.waitWhileVisible(".modal-backdrop");
     this.then(function() {
-        this.capture("screenshots/1.png");
         this.evaluate(function() {
             Jupyter.notebook.get_cell(0).cell_type = "markdown";
             Jupyter.notebook.cells_to_markdown();
@@ -129,12 +136,17 @@ casper.notebook_test(function() {
     //check that certain fields are required 
     this.waitForSelector("#next");
     this.thenClick("#next");
+    
+    
+    take_screenshot("title-error");
 
+    this.thenClick("#expand_1");
+    
+    take_screenshot("expand-page-1");
+    
     this.then(function() {
         this.test.assertExists("#title-missing-error",
                                "Title missing error exists");
-        this.test.assertDoesntExist("#nb-abstract-missing-error",
-                                    "Abstract missing error does not exist");
         this.test.assertDoesntExist("#nb-abstract-invalid-error",
                                     "Abstract invalid error does not exist");
         var date = [];
@@ -158,8 +170,6 @@ casper.notebook_test(function() {
             return $("#department").children().length > 0;
         });
     });
-    
-    this.capture("screenshots/sanitycheck.png");
 
     this.waitFor(function check() {
         return this.evaluate(function() {
@@ -182,15 +192,20 @@ casper.notebook_test(function() {
         this.test.assertExists("#author-missing-error",
                                "Author missing error exists");
     });
+    
+    
+    take_screenshot("missing-author");
 
     //test autocomplete
     this.then(function() {
         this.sendKeys("#author-first-name-0","Lou");
         this.sendKeys("#author-last-name-0","Davie",{keepFocus: true});
-        this.capture("screenshots/0.png");
     });
     this.waitUntilVisible(".ui-autocomplete");
 
+    
+    take_screenshot("autocomplete-appears");
+    
     this.thenClick(".ui-autocomplete li.ui-menu-item:first-child a");
 
     this.then(function() {
@@ -203,6 +218,9 @@ casper.notebook_test(function() {
         this.test.assertEquals(first,"Louise","Autocomplete first name using last name field working");
         this.test.assertEquals(last,"Davies","Autocomplete last name using last name field working");
     });
+    
+    
+    take_screenshot("autocomplete-working");
 
     this.then(function() {
         this.fillSelectors("form#add_metadata_form > fieldset#md_fields1", {
@@ -247,6 +265,9 @@ casper.notebook_test(function() {
         });
         this.test.assertEquals(date,test_date,"Current date has been reinserted right");
     });
+    
+    
+    take_screenshot("set-current-date");
 
     //testing the date validation
     this.then(function() {
@@ -264,6 +285,8 @@ casper.notebook_test(function() {
         );
     });
     
+    take_screenshot("year-error");
+    
     this.then(function() {
         this.fill("form#add_metadata_form > fieldset#md_fields1", {
             "year": "2000",
@@ -278,6 +301,9 @@ casper.notebook_test(function() {
             "Month missing error exists"
         );
     });
+    
+    
+    take_screenshot("month-error");
 
     this.then(function() {
         this.fill("form#add_metadata_form > fieldset#md_fields1", {
@@ -293,6 +319,8 @@ casper.notebook_test(function() {
             "Date logic working for rejecting invalid combos"
         );
     });
+    
+    take_screenshot("day-error");
 
     this.then(function() {
         this.fill("form#add_metadata_form > fieldset#md_fields1", {
@@ -332,6 +360,9 @@ casper.notebook_test(function() {
     this.thenClick("#add-author-button");
     this.thenClick("#add-author-button");
 
+    
+    take_screenshot("added-authors");
+    
     //Add some test metadata
     this.then(function() {
         //need to use fillSelectors over fill to fill in the authors
@@ -348,10 +379,15 @@ casper.notebook_test(function() {
             "#author-first-name-3": "James",
         });
     }); 
+    
+    take_screenshot("page-1-filled");
     this.thenClick("#next");
     this.then(function() {
         this.test.assertVisible("#md_fields2","Valid data has been accepted");
     });
+    
+    take_screenshot("page-2");
+    
 
     this.thenClick("#next");
     this.then(function() {
@@ -360,6 +396,13 @@ casper.notebook_test(function() {
         this.test.assertExists("#repository-missing-error",
                                "Repository missing error exists");
     });
+    
+    take_screenshot("repository-error");
+    
+    this.thenClick("#expand_2");
+    
+    take_screenshot("expand-page-2");
+    
 
     //keep track of the autofilled department so that we can refill it
     //later - this ensures that whoever's user credentials are used for the
@@ -381,8 +424,8 @@ casper.notebook_test(function() {
         this.test.assertExists("#repository-missing-error",
                                "Repository missing error exists");
     });
-
-    this.capture("screenshots/check3.png");
+    
+    take_screenshot("licence-error");
     
     this.then(function(){
         this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
@@ -390,6 +433,8 @@ casper.notebook_test(function() {
             "#department": department,
         });
     });
+    
+    take_screenshot("filled-licence-and-dept");
 
     //TODO: when communities finalised make it so we always test to the default
     //repository
@@ -409,7 +454,7 @@ casper.notebook_test(function() {
             "#repository": repository,
         });
     });
-    this.capture("screenshots/check2.png");
+    take_screenshot("repository-filled");
 
     this.waitForSelector("#add-nb-referenced-by-button");
     //again, create two extra boxes but we'll only use one
@@ -421,7 +466,8 @@ casper.notebook_test(function() {
     this.thenClick("#add-nb-citation-button");
     this.thenClick("#add-nb-citation-button");
 
-    this.capture("screenshots/check1.png");
+    take_screenshot("citations-and-references-added");
+    
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
         this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
@@ -433,11 +479,16 @@ casper.notebook_test(function() {
         });
     }); //TODO: add funders and sponsors if we can use them
 
-    this.capture("screenshots/tos-select-before.png");
+    take_screenshot("filled-page-2");
+    
     this.thenClick("#tos-select");
-    this.capture("screenshots/tos-select-after.png");
+    this.waitForSelector("#select");
+    take_screenshot("click-tos-select");
     
+    this.waitForSelector("#cancel");
+    this.thenClick("#cancel");
     
+    this.waitForSelector("#next");
     this.thenClick("#next");
     this.waitWhileVisible(".modal",function(){},function() {
         this.capture("screenshots/modal_lingering.png");
