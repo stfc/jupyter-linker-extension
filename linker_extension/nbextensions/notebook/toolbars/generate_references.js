@@ -20,7 +20,8 @@ define([
         if("databundle_url" in Jupyter.notebook.metadata) {
             reference_urls[Jupyter.notebook.metadata.databundle_url] = true;
         }
-        if("reportmetadata" in Jupyter.notebook.metadata) {
+        if("reportmetadata" in Jupyter.notebook.metadata &&
+           "citations" in Jupyter.notebook.metadata.reportmetadata) {
             Jupyter.notebook.metadata.reportmetadata.citations.forEach(
                 function(item) {
                     reference_urls[item] = true;
