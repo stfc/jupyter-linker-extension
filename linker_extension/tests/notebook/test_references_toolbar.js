@@ -172,7 +172,7 @@ casper.notebook_test(function() {
 
     this.waitWhileSelector(".modal");
 
-    selector = "li[data-name=\"Linker%20Extension\"] > a";
+    selector = "li[data-name=\"Linker%20Extension%20References\"] > a";
     this.thenClick(selector);
 
     //Check that inputs were refilled in correctly
@@ -297,7 +297,7 @@ casper.notebook_test(function() {
 
     this.waitWhileSelector(".modal");
 
-    selector = "li[data-name=\"Linker%20Extension\"] > a";
+    selector = "li[data-name=\"Linker%20Extension%20References\"] > a";
     this.thenClick(selector);
 
     //Check that inputs were refilled in correctly
