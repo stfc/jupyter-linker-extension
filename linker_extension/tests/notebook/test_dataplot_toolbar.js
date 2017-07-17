@@ -37,24 +37,33 @@ casper.notebook_test(function() {
         this.test.assertVisible(selector, "Toolbar is visible");
     });
     
-    this.wait(10000);
-    cell_count = this.evaluate(function () {
-    	var cells = Jupyter.notebook.get_cells(); 	
-    	console.log(cells);
-        return (cells.length);
+    
+    this.waitFor(function() {
+        return this.evaluate(function() {
+        	return Jupyter.notebook.get_cells().length == 2;
+        });
     });
     
+    this.waitFor(function() {
+        cell_count = this.evaluate(function () {
+        	var cells = Jupyter.notebook.get_cells(); 	
+        	console.log(cells);
+            return (cells.length);
+        });
+        
+        return true;
+    });
+
     this.then(function () {
     	this.test.assertEquals(cell_count, 2, "New cell created");
     });
     
-    this.wait(10000);
     cell_count = this.evaluate(function () {
     	var cells = Jupyter.notebook.get_cells(); 	
     	console.log(cells);
         return (cells.length);
     });
 
-    //TODO: Finish this test. Currently fails because the new cell is only generated once the test completes.
+    //TODO: Finish this test.
 
 });
