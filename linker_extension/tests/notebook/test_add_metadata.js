@@ -25,7 +25,7 @@ casper.notebook_test(function() {
     
     function take_screenshot(name) {
     	var index_string = screenshot_index.toString();
-        casper.waitUntilVisible('#next', function () {
+        casper.then(function () {
             casper.capture(screenshot_dir + index_string +
             		       ". " + name + ".png");
         });
@@ -483,17 +483,45 @@ casper.notebook_test(function() {
     
     this.thenClick("#tos-select");
     this.waitForSelector("#select");
+    
+    this.then(function() {
+        this.test.assertVisible("#data-form",
+                               "Select TOS file modal exists");
+    });
+    
     take_screenshot("click-tos-select");
     
-    this.waitForSelector("#cancel");
-    this.thenClick("#cancel");
+    this.waitForSelector("#file-tree_1_check");
+    this.thenClick("#file-tree_1_check");
+    
+    take_screenshot("file-clicked");
+    
+    this.waitForSelector("#select");
+    this.thenClick("#select");
+    
+    this.waitFor(function() {
+        return this.evaluate(function() {
+        	tos_text = $("#tos-display").text();
+        	console.log("TOS display text is: " + tos_text);
+            return tos_text != "No files selected";
+        });
+    });
+    
+    take_screenshot("click-tos-chosen");
+
+    this.then(function() {
+    	var tos_text = this.evaluate(function() {
+    		return $("#tos-display").text();
+    	});
+    	
+    	this.test.assertEquals(tos_text, "2 files selected", "Terms of service file successfully uploaded");
+    });
     
     this.waitForSelector("#next");
     this.thenClick("#next");
-    this.waitWhileVisible(".modal",function(){},function() {
-        this.capture("screenshots/modal_lingering.png");
-    });
-
+    
+    take_screenshot("submitted-all");
+    
     //hook into the notebook saved event
     this.evaluate(function() {
         require(['base/js/events'], function (events) {
@@ -533,7 +561,7 @@ casper.notebook_test(function() {
                     referencedBy: [],
                     department: "",
                     repository: "",
-                    licence_preset: "",
+                    licence: "",
                 };
             } else {
                 return {
@@ -548,7 +576,7 @@ casper.notebook_test(function() {
                     referencedBy: md.reportmetadata.referencedBy,
                     department: md.reportmetadata.department,
                     repository: md.reportmetadata.repository,
-                    licence_preset: md.reportmetadata.licence_preset,
+                    licence: md.reportmetadata.licence,
                 };
             }
             
@@ -609,7 +637,7 @@ casper.notebook_test(function() {
             "Repository has been set correctly"
         );
         this.test.assertEquals(
-            metadata.licence_preset,
+            metadata.licence,
             "CC0",
             "Licence has been set correctly"
         );
@@ -694,7 +722,7 @@ casper.notebook_test(function() {
                     referencedBy: [],
                     department: "",
                     repository: "",
-                    licence_preset: "",
+                    licence: "",
                 };
             } else {
                 return {
@@ -709,7 +737,7 @@ casper.notebook_test(function() {
                     referencedBy: md.reportmetadata.referencedBy,
                     department: md.reportmetadata.department,
                     repository: md.reportmetadata.repository,
-                    licence_preset: md.reportmetadata.licence_preset,
+                    licence: md.reportmetadata.licence,
                 };
             }
             
@@ -770,15 +798,15 @@ casper.notebook_test(function() {
             "Repository has been saved correctly"
         );
         this.test.assertEquals(
-            metadata.licence_preset,
+            metadata.licence,
             "CC0",
             "Licence has been saved correctly"
         );
     });
 
     // Click on menuitem
-    this.waitForSelector("#add_metadata > a");
-    this.thenClick("#add_metadata > a");
+    this.waitForSelector("#manage_metadata > a");
+    this.thenClick("#manage_metadata > a");
 
     // Wait for the dialog to be shown
     this.waitUntilVisible(".modal-body");
@@ -803,8 +831,8 @@ casper.notebook_test(function() {
                 publisherval: $("#publisher").val(),
                 citation0val: $("#nb-citation-0").val(),
                 citation1val: $("#nb-citation-1").val(),
-                reference0val: $("#nb-referencedBy-0").val(),
-                reference1val: $("#nb-referencedBy-1").val(),
+                reference0val: $("#nb-referenced-by-0").val(),
+                reference1val: $("#nb-referenced-by-1").val(),
                 departmentval: $("#department").val(),
                 repositoryval: $("#repository").val(),
                 licenceval: $("#nb-licence-dropdown").val(),
@@ -926,38 +954,29 @@ casper.notebook_test(function() {
 
     this.thenClick("#next");
 
-    this.waitForSelector("#add-nb-referencedBy-button");
-    this.thenClick("#add-nb-referencedBy-button");
-    this.thenClick("#add-nb-referencedBy-button");
+    this.waitForSelector("#add-nb-referenced-by-button");
+    this.thenClick("#add-nb-referenced-by-button");
+    this.thenClick("#add-nb-referenced-by-button");
 
     this.waitForSelector("#add-nb-citation-button");
     this.thenClick("#add-nb-citation-button");
     this.thenClick("#add-nb-citation-button");
-
-    this.thenClick("#licence-url-radio");
 
     this.then(function() {
         //need to use fillSelectors for the referencedBy urls
         this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
             "#nb-citation-2": "Citation 3",
             "#nb-citation-3": "Citation 4",
-            "#nb-referencedBy-2": "URL3",
-            "#nb-referencedBy-3": "URL4",
-            "#nb-licence-dropdown": "Other"
-        });
-    });
-
-    this.then(function() {
-        this.fillSelectors("form#add_metadata_form > fieldset#md_fields2", {
-            "#licence-url": "Test"
+            "#nb-referenced-by-2": "URL3",
+            "#nb-referenced-by-3": "URL4",
         });
     });
 
     this.thenEvaluate(function() {
         $("#nb-citation-1").parent().find("button").click();
         $("#nb-citation-2").parent().find("button").click();
-        $("#nb-referencedBy-1").parent().find("button").click();
-        $("#nb-referencedBy-2").parent().find("button").click();
+        $("#nb-referenced-by-1").parent().find("button").click();
+        $("#nb-referenced-by-2").parent().find("button").click();
     });
 
     this.thenClick("#next");
@@ -973,16 +992,12 @@ casper.notebook_test(function() {
                     authors: [],
                     citations: [],
                     referencedBy: [],
-                    licence_preset: "",
-                    licence_url: "",
                 };
             } else {
                 return {
                     authors: md.reportmetadata.authors,
                     citations: md.reportmetadata.citations,
                     referencedBy: md.reportmetadata.referencedBy,
-                    licence_preset: md.reportmetadata.licence_preset,
-                    licence_url: md.reportmetadata.licence_url
                 };
             }
             
@@ -1001,16 +1016,6 @@ casper.notebook_test(function() {
             metadata.referencedBy,
             ["URL1","URL4"],
             "ReferencedBy have been set correctly after deleting some"
-        );
-        this.test.assertEquals(
-            metadata.licence_preset,
-            "Other",
-            "Licence_preset has been changed properly"
-        );
-        this.test.assertEquals(
-            metadata.licence_url,
-            "Test",
-            "Licence_url has been saved to the metadata"
         );
     });
 });

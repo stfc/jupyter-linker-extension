@@ -30,11 +30,12 @@ define(["base/js/namespace",
     	var onclick = function () {
     		local_data.open_modal(tos_list, $(".tos-display"));
     	}
-        var input_button = $("<button/>").addClass("btn btn-sm btn-default btn-add")
+        var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
                                        .attr("id", "tos-select")
                                        .text("Select terms of service files")
                                        .click(onclick);
         var input_display = $("<span/>").addClass("tos-display")
+                                        .attr("id", "tos-display")
                                         .text(local_data.get_display_text(tos_list));
         
         input_container.append(input_button);

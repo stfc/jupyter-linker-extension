@@ -342,9 +342,12 @@ define([
             title: "Input datafiles",
             body: data_form(),
             buttons: {
-                Cancel: {},
+                Cancel: {
+                	id: "cancel"
+                },
                 Select: { 
                     class : "btn-primary",
+                    id : "select",
                     click: function() {
                     	get_selected_values(file_list);
                     	display.text(get_display_text(file_list));
