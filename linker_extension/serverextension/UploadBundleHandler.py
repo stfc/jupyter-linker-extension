@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 from tempfile import TemporaryDirectory
 import base64
-from shutil import copy, copytree
+from shutil import copy, copytree, copyfile
 
 from tornado import web, gen, escape
 
@@ -199,16 +199,12 @@ class UploadBundleHandler(IPythonHandler):
         # for each TOS file, write to a file. They're named TOS [ID].[extension]
         try:
             for index, file in enumerate(TOS_files):
-                base64_data = file["file_contents"].split(",")[1]
-
-                encoding_info = file["file_contents"].split(",")[0]
-                encoding_info = encoding_info.split(";")[0]
-                encoding_info = encoding_info.split(":")[1]
-                TOS_file_name = file["file_name"]
+                TOS_file_name = file["name"]
                 index_of_dot = TOS_file_name.index(".")
                 TOS_file_extension = TOS_file_name[index_of_dot:]
-                with open("TOS " + str(index) + TOS_file_extension, "wb") as f:
-                    f.write(base64.decodestring(base64_data.encode("utf-8")))
+                new_name = "TOS " + str(index) + TOS_file_extension
+                copyfile(original_cwd + "/" + file["path"], tempdir + "/" + new_name)
+
         except OSError:
             os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when writing the TOS files")
@@ -248,13 +244,13 @@ class UploadBundleHandler(IPythonHandler):
                         i += 1
 
             for i in list(range(0, len(TOS_files))):
-                TOS_file_name = TOS_files[i]["file_name"]
+                TOS_file_name = TOS_files[i]["name"]
                 index_of_dot = TOS_file_name.index(".")
                 TOS_file_extension = TOS_file_name[index_of_dot:]
 
                 file_attr = {"GROUPID": "TOS-File-" + str(i),
                              "ID": "TOS " + str(i) + TOS_file_extension,
-                             "MIMETYPE": TOS_files[i]["file_mimetype"]}
+                             "MIMETYPE": TOS_files[i]["mimetype"]}
                 files_xml = ET.Element('file', file_attr)
 
                 FLocat_attr = {"LOCTYPE": "URL",
@@ -263,6 +259,7 @@ class UploadBundleHandler(IPythonHandler):
 
                 files_xml.append(FLocat_xml)
                 files.append(files_xml)
+                print("New file appended: " + str(files_xml))
 
             licence_attr = {"GROUPID": "licence",
                             "ID": "licence",
@@ -303,7 +300,7 @@ class UploadBundleHandler(IPythonHandler):
                                    "DMDID": "sword-mets-dmd-2",
                                    "TYPE": "TOS"}
             for i in list(range(0, len(TOS_files))):
-                TOS_file_name = TOS_files[i]["file_name"]
+                TOS_file_name = TOS_files[i]["name"]
                 index_of_dot = TOS_file_name.index(".")
                 TOS_file_extension = TOS_file_name[index_of_dot:]
 
@@ -341,6 +338,7 @@ class UploadBundleHandler(IPythonHandler):
         try:
             # write our tree to mets.xml in preparation to be uploaded
             tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
+            print("Writing tree " + str(tree))
         except OSError:
             os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when writing tree to mets.xml")
@@ -360,7 +358,7 @@ class UploadBundleHandler(IPythonHandler):
 
 
             for i in list(range(0, len(TOS_files))):
-                TOS_file_name = TOS_files[i]["file_name"]
+                TOS_file_name = TOS_files[i]["name"]
                 index_of_dot = TOS_file_name.index(".")
                 TOS_file_extension = TOS_file_name[index_of_dot:]
                 created_zip_file.write("TOS " + str(i) + TOS_file_extension)

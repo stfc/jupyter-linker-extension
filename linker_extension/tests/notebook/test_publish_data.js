@@ -100,8 +100,8 @@ casper.notebook_test(function() {
                 ],
                 "licence": "CC0",
                 "TOS": [{
-                	"name": "Test.txt",
-                	"path": "Test.txt",
+                	"name": "TestTOS.txt",
+                	"path": "TestTOS.txt",
                 	"mimetype": "text/plain"
                 }],
             };
@@ -174,8 +174,8 @@ casper.notebook_test(function() {
         $("#file-tree li > a[title=\"sub ∂ir1\"]").prev(".button.chk").click();
     });
 
-    //this.waitForSelector("#files-loading");
-    //this.waitWhileVisible("#files-loading");
+    this.waitForSelector("#files-loading");
+    this.waitWhileVisible("#files-loading");
     
     take_screenshot("files-selected");
 
@@ -365,7 +365,7 @@ casper.notebook_test(function() {
 
     this.waitForSelector("#test-item-id");
 
-    take_screenshot("dspace-page");
+    take_screenshot("success");
 
     this.then(function() {
         id = this.getElementAttribute("#test-item-id","item-id");
@@ -404,7 +404,6 @@ casper.notebook_test(function() {
     });
 
     this.waitForSelector(".test-bitstream-id");
-    take_screenshot("dspace-bitstreams");
     
     //get the content from the bitstreams
 
@@ -445,6 +444,7 @@ casper.notebook_test(function() {
     this.then(function() {
         var bitstream_data = this.getElementsAttribute(".test-bitstream-content",
                                                        "bitstream-content");
+        
         this.test.assertNotEquals(
             bitstream_data.indexOf("Text in file_in_nbdir.txt"),
             -1,
@@ -461,33 +461,22 @@ casper.notebook_test(function() {
             "file_in_sub_dir1a.txt has correct content"
         );
         this.test.assertNotEquals(
-            bitstream_data.indexOf("This is a test file\n"),
+            bitstream_data.indexOf("Test terms of service file to upload to DSpace"),
             -1,
             "TOS 0.txt has correct content"
         );
-
-        var MIT = 
-            "Copyright (c) <year> <copyright holders>\n\n"+
-            "Permission is hereby granted, free of charge, to any person obtaining a copy\n"+
-            "of this software and associated documentation files (the \"Software\"), to deal\n"+
-            "in the Software without restriction, including without limitation the rights\n"+
-            "to use, copy, modify, merge, publish, distribute, sublicense, and\/or sell\n"+
-            "copies of the Software, and to permit persons to whom the Software is\n"+
-            "furnished to do so, subject to the following conditions:\n\n"+
-            "The above copyright notice and this permission notice shall be included in all\n"+
-            "copies or substantial portions of the Software.\n\n"+
-            "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"+
-            "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"+
-            "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"+
-            "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"+
-            "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"+
-            "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"+
-            "SOFTWARE.\n";
-
+        
+        var licence = bitstream_data[bitstream_data.length - 1];
         this.test.assertNotEquals(
-            bitstream_data.indexOf(MIT),
+            licence.indexOf("CC0 1.0 Universal"),
             -1,
-            "LICENSE.txt has correct content"
+            "LICENSE.txt has correct title"
+        );
+        
+        this.test.assertNotEquals(
+            licence.indexOf("statutory or otherwise, including without limitation warranties of"),
+            -1,
+            "LICENSE.txt has sample text present"
         );
     });
 
@@ -530,42 +519,4 @@ casper.notebook_test(function() {
             );
         });
     }
-
-    take_screenshot("item-deleted");
-    
-    selector = "#publish_bundle > a";
-    this.waitForSelector(selector);
-    this.thenClick(selector);
-    this.wait(1000);
-    this.then(function() {
-        //button should have been disabled - so clicking shouldn't do anything
-        this.test.assertNotVisible(".modal");
-    });
-
-    /* 
-     * test that username is refilled from config - this tests both the
-     * saving of username to config after a successful request and refilling
-     * from config when trying to send a new request. need to click publish_notebook
-     * since publish_data should have been disabled
-     */
-
-    //Click on menu item
-    selector = "#publish_notebook > a";
-    this.waitForSelector(selector);
-    this.thenClick(selector);
-
-    this.waitForSelector(".modal");
-    this.wait(1000); //need to wait for modal to be fully visible
-
-    this.then(function() {
-        var config_username = this.evaluate(function() {
-            return $("#username").val();
-        });
-
-        this.test.assertEquals(
-            config_username,
-            username,
-            "Username refilled from config"
-        );
-    });
 });

@@ -282,6 +282,13 @@ class JSController(TestController):
         os.write(f3, b"Text in file_in_sub_dir1a.txt")
         os.close(f3)
 
+
+        f4 = os.open(os.path.join(self.nbdir.name, u'TestTOS.txt'),
+                     os.O_CREAT | os.O_RDWR)
+
+        os.write(f4, b"Test terms of service file to upload to DSpace")
+        os.close(f4)
+
         if self.xunit:
             self.add_xunit()
 
