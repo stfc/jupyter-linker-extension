@@ -77,15 +77,21 @@ define(["base/js/namespace",
             //activate ldap_search promise
             return custom_contents.ldap_search({fedID: config_username});
         }).catch(function(reason){
-            console.log("Error: " + reason.message);
+            console.log("Couldn't get username: " + reason.message);
+            config_username = "";
         }).then(function(response) {
-            //resolve the ldap_search promise
-            var parsed = JSON.parse(response);
-            department_to_set = parsed.attributes.department[0].toUpperCase();
-            console.log("Found department: " + department_to_set);
+        	var department_to_set = "";
+        	
+        	if (response != undefined) {
+            	//resolve the ldap_search promise
+                var parsed = JSON.parse(response);
+                department_to_set = parsed.attributes.department[0].toUpperCase();
+                console.log("Found department: " + department_to_set);
+        	}
+
             set_dept_options(department_to_set);
         }).catch(function(reason) {
-        	console.log("Error: " + reason.message);
+        	console.log("Failed to populate department list: " + reason.message);
         });
     }
 	
@@ -93,8 +99,6 @@ define(["base/js/namespace",
 	/*  
      *  Find the options for department.
      */ 
-	
-	
     var communities_promise = custom_contents.get_collections().then(function(response) {
         var communities = response.children;
         var comm_list = [];

@@ -188,6 +188,7 @@ define(["base/js/namespace",
                             }
                         } else if (!$("#final-page").hasClass("hide-me")) {
                             $(".login-error").remove();
+                            console.log("Submitting metadata: " + JSON.stringify(md.reportmetadata));
                             var username_field_val = $("#username").val();
                             var password_field_val = $("#password").val();
                             var login_details = {

@@ -1,11 +1,24 @@
 var system = require("system");
 var fs = require("fs");
+var screenshot_dir = "screenshots/publish/";
 
 casper.notebook_test(function() {
     "use strict";
 
     casper.test.info("Testing the publish data button and dialog");
 
+    var screenshot_index = 1;
+    
+    function take_screenshot(name) {
+    	var index_string = screenshot_index.toString();
+        casper.then(function () {
+            casper.capture(screenshot_dir + index_string +
+            		       ". " + name + ".png");
+        });
+        
+        screenshot_index++;
+    }
+    
     this.viewport(1024, 768);
 
     var path_parts = fs.absolute(this.test.currentTestFile).split("/");
@@ -63,7 +76,8 @@ casper.notebook_test(function() {
                             "If you can see this then the delete part of the " +
                             "test isn't working",
                 "referencedBy": [
-                  "Test"
+                  "Test1",
+                  "Test2"
                 ],
                 "tags": [
                   "Test"
@@ -84,10 +98,12 @@ casper.notebook_test(function() {
                   "citation1",
                   "citation2",
                 ],
-                "licence": {
-                  "preset":"CCO",
-                  "url": ""
-                }
+                "licence": "CC0",
+                "TOS": [{
+                	"name": "Test.txt",
+                	"path": "Test.txt",
+                	"mimetype": "text/plain"
+                }],
             };
             Jupyter._save_success = Jupyter._save_failed = false;
             events.on("notebook_saved.Notebook", function () {
@@ -115,14 +131,20 @@ casper.notebook_test(function() {
     });
 
     //Click on menu item
-    var selector = "#publish_bundle > a";
+    var selector = "#publish > a";
     this.waitForSelector(selector);
     this.thenClick(selector);
+    
+    // Wait for the dialog to be shown
+    this.waitUntilVisible(".modal-body");
+    this.wait(200);
 
     //add check here for dialog correctness, also to wait for files to be loaded
     this.waitForSelector("#files-loading");
     this.waitWhileVisible("#files-loading");
 
+    take_screenshot("open-dialogue");
+    
     //check that validation works
     this.thenClick("#next");
     this.then(function() {
@@ -130,6 +152,8 @@ casper.notebook_test(function() {
                                 "Data files missing error showing correctly");
     });
 
+    take_screenshot("data-missing-error");
+    
     //check that validation works, even after uploading a file then deleting
     this.thenEvaluate(function() {
         $("#file-tree li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
@@ -150,77 +174,28 @@ casper.notebook_test(function() {
         $("#file-tree li > a[title=\"sub ∂ir1\"]").prev(".button.chk").click();
     });
 
-    this.waitForSelector("#files-loading");
-    this.waitWhileVisible("#files-loading");
-
-    this.then(function() {
-        this.capture("screenshots/files.png");
-    });
-
-    this.thenClick("#next");
+    //this.waitForSelector("#files-loading");
+    //this.waitWhileVisible("#files-loading");
     
-    //check that the default abstract is correct
-    this.then(function() {
-        var test_textarea_val = this.evaluate(function() {
-            return $("#data-abstract").val();
-        });
-        var correct_textarea_str = "file_in_sub_∂ir1a.txt\n\n" +
-                                   "file_in_sub_∂ir1.txt\n\n" +
-                                   "file_in_nbdir.txt\n\n";
-        this.test.assertEquals(test_textarea_val,
-                               correct_textarea_str,
-                               "Default string in abstract form field correct");
-    });
-
-    //check that validation works
-    this.thenClick(".btn-primary");
-    this.then(function() {
-        this.capture("screenshots/metadata.png");
-        this.test.assertExists("#TOS-missing-error",
-                               "TOS missing error showing correctly");
-        this.test.assertExists("#copyright-missing-error",
-                               "Copyright missing error showing correctly");
-        this.test.assertDoesntExist("#licence-missing-error",
-                                    "Licence default selected");
-    });
-
-    //this.thenClick("#add-data-referencedBy-button");
-    this.then(function() {
-        this.evaluate(function() {
-            //$("#data-referencedBy-0").val("URL1");
-            //$("#data-referencedBy-1").val("URL2");
-            $("#data-citation-0").val("Citation");
-            $("#copyright").val("Copyright");
-            $("#data-licence-dropdown").val("");
-        });
-    });
-
-    this.then(function() {
-        this.page.uploadFile("#TOS",test_path + "Test.txt");
-    });
+    take_screenshot("files-selected");
 
     this.thenClick("#next");
-
-    this.then(function() {
-        this.test.assertExists("#licence-missing-error",
-                               "Licence missing error showing correctly");
-    });
-
-    this.then(function() {
-        this.evaluate(function() {
-            $("#data-licence-dropdown").val("MIT");
-        });
-    });
-
+    this.waitUntilVisible("#nb-abstract");
+    take_screenshot("second-page");
+    
+    this.thenClick("#next");  
+    take_screenshot("third-page");
+    
     this.thenClick("#next");
-
     this.waitForSelector("#username");
-
+    take_screenshot("fourth-page");
+    
     //test login errors
 
     this.thenClick("#next");
     this.waitUntilVisible(".login-error");
-
+    take_screenshot("missing-details-error");
+    
     this.then(function() {
         var msg = this.evaluate(function() {
             return $(".login-error").text();
@@ -240,6 +215,8 @@ casper.notebook_test(function() {
     this.thenClick("#next");
     this.waitUntilVisible(".login-error");
 
+    take_screenshot("missing-password-error");
+    
     this.then(function() {
         var msg = this.evaluate(function() {
             return $(".login-error").text();
@@ -259,6 +236,7 @@ casper.notebook_test(function() {
 
     this.thenClick("#next");
     this.waitUntilVisible(".login-error");
+    take_screenshot("missing-username-error");
 
     this.then(function() {
         var msg = this.evaluate(function() {
@@ -289,6 +267,8 @@ casper.notebook_test(function() {
             "Invalid username. If the error persists, please contact the developers",
             "Invalid username error correct");
     });
+    
+    take_screenshot("invalid-username-error");
 
     this.then(function() {
         this.evaluate(function() {
@@ -312,6 +292,8 @@ casper.notebook_test(function() {
             "contact the developers",
             "Invalid login error correct");
     });
+    
+    take_screenshot("incorrect-username-error");
 
     this.then(function() {
         this.evaluate(function(un,pw) {
@@ -325,6 +307,8 @@ casper.notebook_test(function() {
     this.then(function() {
         this.test.assertNotVisible(".login-error","Login validation correct");
     });
+    
+    take_screenshot("successful-submit");
 
     //check that we see the success alert
     var alert = ".alert";
@@ -333,6 +317,8 @@ casper.notebook_test(function() {
         this.test.assertExists(".data-upload-success-alert",
                                "Data upload success alert seen");
     });
+    
+    take_screenshot("success-alert");
 
     //check that we got the url reference back
     this.then(function() {
@@ -379,6 +365,7 @@ casper.notebook_test(function() {
 
     this.waitForSelector("#test-item-id");
 
+    take_screenshot("dspace-page");
 
     this.then(function() {
         id = this.getElementAttribute("#test-item-id","item-id");
@@ -417,7 +404,8 @@ casper.notebook_test(function() {
     });
 
     this.waitForSelector(".test-bitstream-id");
-
+    take_screenshot("dspace-bitstreams");
+    
     //get the content from the bitstreams
 
     this.then(function() {
@@ -543,6 +531,8 @@ casper.notebook_test(function() {
         });
     }
 
+    take_screenshot("item-deleted");
+    
     selector = "#publish_bundle > a";
     this.waitForSelector(selector);
     this.thenClick(selector);

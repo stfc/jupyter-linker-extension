@@ -283,7 +283,9 @@ define([
     
     var reset_associated_data = function() {
     	//Overwrite the associated data with the currently checked files.
-    	console.log("Resetting associated data")
+    	console.log("Resetting associated data");
+    	
+    	md = Jupyter.notebook.metadata.reportmetadata;
     	
     	md.files = [];
     	get_selected_values(md.files);

@@ -33,7 +33,8 @@ function load_ipython_extension(){
         Jupyter.notebook.get_cell(0).execute();
     }    
 
-    if (!Jupyter.notebook.metadata.hasOwnProperty("reportmetadata")) {
+    if (!Jupyter.notebook.metadata.hasOwnProperty("reportmetadata") ||
+    	Jupyter.notebook.metadata.reportmetadata == undefined) {
     	Jupyter.notebook.metadata.reportmetadata = {};
 	}
     

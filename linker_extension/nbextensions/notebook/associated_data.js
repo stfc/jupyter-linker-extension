@@ -25,6 +25,7 @@ define(["base/js/namespace",
         //stuff to do on modal load
         modal.on("shown.bs.modal", function () {
         	console.log("Managing associated data");
+        	md = Jupyter.notebook.metadata.reportmetadata;
         	if (!md.hasOwnProperty("files")) {
         		md.files = [];
         	}
