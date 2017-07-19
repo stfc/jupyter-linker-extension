@@ -283,11 +283,17 @@ class JSController(TestController):
         os.close(f3)
 
 
-        f4 = os.open(os.path.join(self.nbdir.name, u'TestTOS.txt'),
+        f4 = os.open(os.path.join(self.nbdir.name, u'TestTOS1.txt'),
                      os.O_CREAT | os.O_RDWR)
 
         os.write(f4, b"Test terms of service file to upload to DSpace")
         os.close(f4)
+
+        f5 = os.open(os.path.join(self.nbdir.name, u'TestTOS2.txt'),
+                     os.O_CREAT | os.O_RDWR)
+
+        os.write(f5, b"Second test terms of service file to upload to DSpace")
+        os.close(f5)
 
         if self.xunit:
             self.add_xunit()

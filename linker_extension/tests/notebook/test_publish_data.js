@@ -99,11 +99,18 @@ casper.notebook_test(function() {
                   "citation2",
                 ],
                 "licence": "CC0",
-                "TOS": [{
-                	"name": "TestTOS.txt",
-                	"path": "TestTOS.txt",
-                	"mimetype": "text/plain"
-                }],
+                "TOS": [
+                    {
+                	    "name": "TestTOS1.txt",
+                	    "path": "TestTOS1.txt",
+                	    "mimetype": "text/plain"
+                    },
+                    {
+                	    "name": "TestTOS2.txt",
+                	    "path": "TestTOS2.txt",
+                	    "mimetype": null
+                    },
+                ],
             };
             Jupyter._save_success = Jupyter._save_failed = false;
             events.on("notebook_saved.Notebook", function () {
@@ -464,6 +471,12 @@ casper.notebook_test(function() {
             bitstream_data.indexOf("Test terms of service file to upload to DSpace"),
             -1,
             "TOS 0.txt has correct content"
+        );
+        
+        this.test.assertNotEquals(
+            bitstream_data.indexOf("Second test terms of service file to upload to DSpace"),
+            -1,
+            "TOS 1.txt has correct content"
         );
         
         var licence = bitstream_data[bitstream_data.length - 1];

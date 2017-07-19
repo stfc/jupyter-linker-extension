@@ -191,6 +191,7 @@ class UploadBundleHandler(IPythonHandler):
         try:
             t = TemporaryDirectory()
             tempdir = t.name
+            print ("Creating temporary directory at " + tempdir)
         except OSError:
             raise web.HTTPError(500, "OSError when opening temp dir")
 
@@ -244,6 +245,9 @@ class UploadBundleHandler(IPythonHandler):
                 TOS_file_name = TOS_files[i]["name"]
                 index_of_dot = TOS_file_name.index(".")
                 TOS_file_extension = TOS_file_name[index_of_dot:]
+
+                if(TOS_files[i]["mimetype"] == None):
+                    TOS_files[i]["mimetype"] = "application/octet-stream"
 
                 file_attr = {"GROUPID": "TOS-File-" + str(i),
                              "ID": "TOS " + str(i) + TOS_file_extension,
