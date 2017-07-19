@@ -12,6 +12,7 @@ define(["base/js/namespace",
                 Cancel: {},
                 Select: { 
                     class : "btn-primary",
+                    id: "select",
                     click: function() {
                     	local_data.reset_associated_data("associated");
                     	return true;
