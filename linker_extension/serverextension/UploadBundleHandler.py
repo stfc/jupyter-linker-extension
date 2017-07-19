@@ -154,8 +154,6 @@ class UploadBundleHandler(IPythonHandler):
         #if funders is not None:
         #    metadata.append({"key": "dc.description.sponsorship", "value": sponsors})
 
-        original_cwd = os.getcwd()
-
         # split notebook path into file name and base directory
         try:
             notebook_path = arguments['notebookpath']
@@ -188,12 +186,12 @@ class UploadBundleHandler(IPythonHandler):
 
         # make a temporary directory for us to play around in since we're
         # creating files
+
+        tempdir = ""
         try:
             t = TemporaryDirectory()
             tempdir = t.name
-            os.chdir(tempdir)
         except OSError:
-            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when opening temp dir")
 
         # for each TOS file, write to a file. They're named TOS [ID].[extension]
@@ -203,10 +201,9 @@ class UploadBundleHandler(IPythonHandler):
                 index_of_dot = TOS_file_name.index(".")
                 TOS_file_extension = TOS_file_name[index_of_dot:]
                 new_name = "TOS " + str(index) + TOS_file_extension
-                copyfile(original_cwd + "/" + file["path"], tempdir + "/" + new_name)
+                copyfile(os.getcwd() + "/" + file["path"], tempdir + "/" + new_name)
 
         except OSError:
-            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when writing the TOS files")
 
         # set licence file path to the relevant licence preset
@@ -274,7 +271,6 @@ class UploadBundleHandler(IPythonHandler):
             files.append(licence_xml)
 
         except IndexError:
-            os.chdir(original_cwd)
             raise web.HTTPError(500, "IndexError when getting"
                                      "'files' root node")
 
@@ -331,29 +327,26 @@ class UploadBundleHandler(IPythonHandler):
             struct.append(licence_struct_xml)
 
         except IndexError:
-            os.chdir(original_cwd)
             raise web.HTTPError(500, "IndexError when getting "
                                      "'struct' root node")
 
         try:
             # write our tree to mets.xml in preparation to be uploaded
-            tree.write("mets.xml", encoding='UTF-8', xml_declaration=True)
-            print("Writing tree " + str(tree))
+            tree.write(tempdir + "/mets.xml", encoding='UTF-8', xml_declaration=True)
         except OSError:
-            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when writing tree to mets.xml")
 
         # create a zip file for our sword submission. Write mets.xml,
         # our data files, TOS files and the licence file to the zip.
         # TODO: might need to zip all the stuff except mets.xml together
         try:
-            created_zip_file = zipfile.ZipFile("data_bundle.zip", "w")
-            created_zip_file.write("mets.xml")
+            created_zip_file = zipfile.ZipFile(tempdir + "/data_bundle.zip", "w")
+            created_zip_file.write(tempdir + "/mets.xml", "mets.xml")
 
             if file_paths is not []:
                 if len(file_paths) > 0:
                     for file_path in file_paths:
-                        path = os.path.join(original_cwd,notebook_dir,file_path)
+                        path = os.path.join(os.getcwd(),notebook_dir,file_path)
                         created_zip_file.write(path, file_path)
 
 
@@ -361,13 +354,13 @@ class UploadBundleHandler(IPythonHandler):
                 TOS_file_name = TOS_files[i]["name"]
                 index_of_dot = TOS_file_name.index(".")
                 TOS_file_extension = TOS_file_name[index_of_dot:]
-                created_zip_file.write("TOS " + str(i) + TOS_file_extension)
+                name_to_write = "TOS " + str(i) + TOS_file_extension
+                created_zip_file.write(tempdir + "/" + name_to_write, name_to_write)
 
             created_zip_file.write(licence_file_path, "LICENSE.txt")
 
 
         except:  # dunno what exceptions we might encounter here
-            os.chdir(original_cwd)
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
             # close the zip either way
@@ -376,15 +369,11 @@ class UploadBundleHandler(IPythonHandler):
         # reading the newly created zip file as binary so we can send it via
         # a http request
         try:
-            with open("data_bundle.zip", "rb") as f:
+            with open(tempdir + "/data_bundle.zip", "rb") as f:
                 binary_zip_file = f.read()
         except OSError:
-            os.chdir(original_cwd)
             raise web.HTTPError(500, "OSError when reading zip file"
                                      "as binary data")
-
-        # get out of our temp directory and back to the notebook directory
-        os.chdir(original_cwd)
 
         # set up some variables needed for the request
         notebook_name_no_extension = notebook_name.split(".")[0]

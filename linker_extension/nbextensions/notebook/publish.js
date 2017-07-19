@@ -106,11 +106,10 @@ define(["base/js/namespace",
                                               .attr("item-id", md.databundle_url);
                 },
                 function(reason) {
+                	console.log("Failed to upload data: " + reason.message);
                     custom_utils.create_alert("alert-danger",
-                                              "Error! " + reason.message + 
-                                              ", please try again. If it " + 
-                                              "continues to fail please " + 
-                                              "contact the support team.");
+                                              "Failed to upload data. Please try " +
+                    		                  "again, or contact the support team.");
                 }
             );
         }
