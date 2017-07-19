@@ -147,15 +147,15 @@ casper.notebook_test(function() {
     this.wait(200);
 
     //add check here for dialog correctness, also to wait for files to be loaded
-    this.waitForSelector("#files-loading");
-    this.waitWhileVisible("#files-loading");
+    this.waitForSelector("#files-loading-publish");
+    this.waitWhileVisible("#files-loading-publish");
 
     take_screenshot("open-dialogue");
     
     //check that validation works
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertVisible("#data-files-missing-error",
+        this.test.assertVisible("#data-files-missing-error-publish",
                                 "Data files missing error showing correctly");
     });
 
@@ -163,26 +163,26 @@ casper.notebook_test(function() {
     
     //check that validation works, even after uploading a file then deleting
     this.thenEvaluate(function() {
-        $("#file-tree li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
+        $("#file-tree-publish li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
     });
 
     this.thenEvaluate(function() {
-        $("#file-tree li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
+        $("#file-tree-publish li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
     });
     this.thenClick("#next");
     this.then(function() {
-        this.test.assertVisible("#data-files-missing-error",
+        this.test.assertVisible("#data-files-missing-error-publish",
                                 "Data files missing error showing correctly after file upload and delete");
     });
 
     //select files for test
     this.thenEvaluate(function() {
-        $("#file-tree li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
-        $("#file-tree li > a[title=\"sub ∂ir1\"]").prev(".button.chk").click();
+        $("#file-tree-publish li > a[title=\"file_in_nbdir.txt\"]").prev(".button.chk").click();
+        $("#file-tree-publish li > a[title=\"sub ∂ir1\"]").prev(".button.chk").click();
     });
 
-    this.waitForSelector("#files-loading");
-    this.waitWhileVisible("#files-loading");
+    this.waitForSelector("#files-loading-publish");
+    this.waitWhileVisible("#files-loading-publish");
     
     take_screenshot("files-selected");
 

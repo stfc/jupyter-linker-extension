@@ -485,14 +485,14 @@ casper.notebook_test(function() {
     this.waitForSelector("#select");
     
     this.then(function() {
-        this.test.assertVisible("#data-form",
+        this.test.assertVisible("#data-form-tos",
                                "Select TOS file modal exists");
     });
     
     take_screenshot("click-tos-select");
     
-    this.waitForSelector("#file-tree_1_check");
-    this.thenClick("#file-tree_1_check");
+    this.waitForSelector("#file-tree-tos_1_check");
+    this.thenClick("#file-tree-tos_1_check");
     
     take_screenshot("file-clicked");
     

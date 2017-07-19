@@ -28,7 +28,7 @@ define(["base/js/namespace",
     	var input_container = $("<div/>").addClass("tos-input");
     	
     	var onclick = function () {
-    		local_data.open_modal(tos_list, $(".tos-display"));
+    		local_data.open_modal(tos_list, $(".tos-display"), "tos");
     	}
         var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
                                        .attr("id", "tos-select")

@@ -37,7 +37,7 @@ define([
 	    	
 	    	var file_list = cell.metadata.dataplot_files;
 	    	var onclick = function () {
-	    		local_data.open_modal(file_list, $(".input-display"));
+	    		local_data.open_modal(file_list, $(".input-display"), "dataplot");
 	    	}
 	        var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
 	                                       .text("Input files")
@@ -107,7 +107,7 @@ define([
 	    		cell.set_text(script);
 	    		cell.execute();
 	    		
-	    		local_data.update_associated_data();
+	    		local_data.update_associated_data("dataplot");
 	    	}
 	    	
 	        var generate_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")

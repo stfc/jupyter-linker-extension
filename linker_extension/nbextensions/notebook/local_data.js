@@ -25,10 +25,10 @@ define([
      * 
      * After the user has finished using the form, get_selected_values returns the chosen file names.
      */
-    var data_form = function() {
-        var form = $("<form/>").attr("id","data-form")
+    var data_form = function(id) {
+        var form = $("<form/>").attr("id","data-form-" + id);
     	
-    	var files_page = $("<fieldset/>").attr("id","files-page");
+    	var files_page = $("<fieldset/>").attr("id","files-page-" + id);
 
         var spinner = $("<i/>")
             .attr("id","file-loading-spinner")
@@ -36,14 +36,14 @@ define([
             .attr("aria-label","Loading files...");
 
         var loading_text = $("<span/>")
-            .attr("id","files-loading")
+            .attr("id","files-loading-" + id)
             .text("Loading files...")
             .prepend(spinner);
 
-        var file_tree_container = $("<div/>").attr("id","file-tree-container");
+        var file_tree_container = $("<div/>").attr("id","file-tree-container-" + id);
 
         var file_tree = $("<ul>")
-            .attr("id","file-tree")
+            .attr("id","file-tree-" + id)
             .addClass("ztree");
 
         var warning = $("<p/>")
@@ -53,19 +53,19 @@ define([
 
         var select_all_button = $("<button/>")
             .addClass("btn btn-default btn-sm")
-            .attr("id","select-all")
+            .attr("id","select-all-" + id)
             .text("Select all loaded files")
             .click(function() {
-                var tree = $.fn.zTree.getZTreeObj("file-tree");
+                var tree = $.fn.zTree.getZTreeObj("file-tree-" + id);
                 tree.checkAllNodes(true);
             });
 
         var deselect_all_button = $("<button/>")
             .addClass("btn btn-default btn-sm")
-            .attr("id","deselect-all")
+            .attr("id","deselect-all-" + id)
             .text("Deselect all loaded files")
             .click(function() {
-                var tree = $.fn.zTree.getZTreeObj("file-tree");
+                var tree = $.fn.zTree.getZTreeObj("file-tree-" + id);
                 tree.checkAllNodes(false);
             });
 
@@ -137,8 +137,9 @@ define([
      *  
      *  Takes a list of files to be pre-checked as an argument.
      */ 
-    var init_data_form = function(init_files) {
-    	console.log("Initialising file tree with " + init_files.length + " input files");
+    var init_data_form = function(init_files, id) {
+    	console.log("Initialising " + id + " file tree with " + 
+    			    init_files.length + " input files");
     	
     	var zTreeObj;
     	
@@ -146,7 +147,7 @@ define([
     	var expand_callback = function(event, treeId, treeNode) {
     		//When a node is expanded, show all child nodes, and check them if necessary.
             if(treeNode.isParent && !treeNode.loaded) {
-                $("#files-loading").show();
+                $("#files-loading-" + id).show();
 
                 get_nodes(treeNode.path).then(function(data) {
                     zTreeObj.addNodes(treeNode,0,data);
@@ -175,8 +176,8 @@ define([
         	//Only way to detect that creation finished is 
         	//to call this function after a short timeout.
 
-        	var on_create = function() {
-                $("#files-loading").hide();
+        	var on_create = function() {    
+        		$("#files-loading-" + id).hide();
                 
                 //Check if the new node (or a child) needs to be pre-checked.
                 for (var i = 0; i < init_files.length; i++) {
@@ -226,9 +227,9 @@ define([
                     onNodeCreated: creation_callback
                 }
             };
-            zTreeObj = $.fn.zTree.init($("#file-tree"), setting, data);
-            
-            $("#files-loading").hide();
+            zTreeObj = $.fn.zTree.init($("#file-tree-" + id), setting, data);
+
+            $("#files-loading-" + id).hide();
         });
     };   
 
@@ -236,18 +237,18 @@ define([
      *  Validates data files. Clears errors when run and adds
      *  errors above the file selector
      */ 
-    var validate_files = function() {
+    var validate_files = function(id) {
         $(".data-form-error").remove();
 
-        var tree = $.fn.zTree.getZTreeObj("file-tree");
+        var tree = $.fn.zTree.getZTreeObj("file-tree-" + id);
         var files = tree.getCheckedNodes();
         if(files.length === 0) {
             var files_error = $("<div/>")
-                .attr("id","data-files-missing-error")
+                .attr("id","data-files-missing-error-" + id)
                 .addClass("data-form-error")
                 .text("Please select at least one file");
 
-            $("#file-tree").before(files_error);
+            $("#file-tree-" + id).before(files_error);
         }
         //this shouldn't happen due to out checkbox logic, but juuuust in case
         files.forEach(function(file) {
@@ -258,7 +259,7 @@ define([
                 .text(file.name + " has not been expanded yet has been selected, " +
                       "please expand it to load its children");
 
-                $("#file-tree").before(directory_error);
+                $("#file-tree-" + id).before(directory_error);
             }
         });
 
@@ -266,8 +267,8 @@ define([
         $(".data-form-error").css("color", "red");
     };
     
-    var get_selected_values = function(list_to_fill) {
-        var tree = $.fn.zTree.getZTreeObj("file-tree");
+    var get_selected_values = function(list_to_fill, id) {
+        var tree = $.fn.zTree.getZTreeObj("file-tree-" + id);
 
         var all_files = tree.getCheckedNodes();
         while(list_to_fill.length > 0) {
@@ -281,26 +282,26 @@ define([
         });
     }
     
-    var reset_associated_data = function() {
+    var reset_associated_data = function(id) {
     	//Overwrite the associated data with the currently checked files.
     	console.log("Resetting associated data");
     	
     	md = Jupyter.notebook.metadata.reportmetadata;
     	
     	md.files = [];
-    	get_selected_values(md.files);
+    	get_selected_values(md.files, id);
 
     	console.log("Associated data reset: " + 
     			    md.files.length +
     			    " files associated");
     }
     
-    var update_associated_data = function() {
+    var update_associated_data = function(id) {
     	//Add any checked files to the notebook's associated data.
     	console.log("Updating associated data")
     	
     	var checked = [];
-    	get_selected_values(checked);
+    	get_selected_values(checked, id);
     	
     	if (!md.hasOwnProperty("files")) {
     		md.files = checked;
@@ -339,10 +340,10 @@ define([
     	}
     }
     
-    var open_modal = function(file_list, display) {   	
+    var open_modal = function(file_list, display, id) {   	
     	var modal = dialog.modal({
             title: "Input datafiles",
-            body: data_form(),
+            body: data_form(id),
             buttons: {
                 Cancel: {
                 	id: "cancel"
@@ -351,8 +352,8 @@ define([
                     class : "btn-primary",
                     id : "select",
                     click: function() {
-                    	get_selected_values(file_list);
-                    	display.text(get_display_text(file_list));
+                    	get_selected_values(file_list, id);
+                    	display.text(get_display_text(file_list, id));
                     	return true;
                     },
                 }
@@ -362,7 +363,7 @@ define([
         });
 
         modal.on("shown.bs.modal", function () {
-            init_data_form(file_list);
+            init_data_form(file_list, id);
         });
 	}
 

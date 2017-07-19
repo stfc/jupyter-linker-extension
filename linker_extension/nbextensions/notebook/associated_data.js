@@ -7,13 +7,13 @@ define(["base/js/namespace",
     var manage_associated_data = function() {
 		var modal = dialog.modal({
             title: "Manage datafiles associated with this notebook",
-            body: local_data.data_form(),
+            body: local_data.data_form("associated"),
             buttons: {
                 Cancel: {},
                 Select: { 
                     class : "btn-primary",
                     click: function() {
-                    	local_data.reset_associated_data();
+                    	local_data.reset_associated_data("associated");
                     	return true;
                     },
                 }
@@ -30,7 +30,7 @@ define(["base/js/namespace",
         		md.files = [];
         	}
         	
-            local_data.init_data_form(md.files);
+            local_data.init_data_form(md.files, "associated");
         });
     };
                

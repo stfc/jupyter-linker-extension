@@ -122,7 +122,7 @@ define(["base/js/namespace",
 
         instructions.text("Confirm data to be published");
 
-        var data_fields = local_data.data_form();
+        var data_fields = local_data.data_form("publish");
         var metadata_fields = add_metadata.create_forms();
         metadata_fields.form1.addClass("hide-me");
         metadata_fields.form2.addClass("hide-me");
@@ -144,7 +144,8 @@ define(["base/js/namespace",
                         if (!($("#md_fields1").hasClass("hide-me"))) {
                             $("#md_fields1").addClass("hide-me");
                             instructions.text("Confirm data to be published");
-                            $("#files-page").removeClass("hide-me");
+                            local_data.init_data_form(md.reportmetadata.files, "publish");
+                            $("#files-page-publish").removeClass("hide-me");
                             $("#previous").prop("disabled",true);
                         } else if (!($("#md_fields2").hasClass("hide-me"))) {
                             $("#md_fields2").addClass("hide-me");
@@ -161,11 +162,11 @@ define(["base/js/namespace",
                 Next: { 
                     class : "btn-primary",
                     click: function() {
-                        if(!$("#files-page").hasClass("hide-me")) {
-                            local_data.validate_files();
+                        if(!$("#files-page-publish").hasClass("hide-me")) {
+                            local_data.validate_files("publish");
                             if($(".data-form-error").length === 0) {
-                            	local_data.reset_associated_data();
-                                $("#files-page").addClass("hide-me");
+                            	local_data.reset_associated_data("publish");
+                                $("#files-page-publish").addClass("hide-me");
                                 $("#md_fields1").removeClass("hide-me");
                                 $("#previous").prop("disabled",false);
                                 instructions.text("Add metadata to the file bundle.");
@@ -175,6 +176,7 @@ define(["base/js/namespace",
                             if($(".metadata-form-error").length === 0) {
                                 $("#md_fields1").addClass("hide-me");
                                 $("#md_fields2").removeClass("hide-me");
+                                add_metadata.save_metadata();
                             }
                         } else if(!$("#md_fields2").hasClass("hide-me")) {
                         	add_metadata.validate_fields2();
@@ -236,7 +238,7 @@ define(["base/js/namespace",
         		md.reportmetadata.files = [];
         	}
             
-            local_data.init_data_form(md.reportmetadata.files);
+            local_data.init_data_form(md.reportmetadata.files, "publish");
         });
 
     };
