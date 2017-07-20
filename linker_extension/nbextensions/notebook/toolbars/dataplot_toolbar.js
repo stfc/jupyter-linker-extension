@@ -19,7 +19,9 @@ define([
 	 */ 
 	var dataplot_toolbar = function(div, cell) {
 		$(div).addClass("generate-section dataplot-toolbar");
-	    setup_title();
+	    
+		var cell_index = Jupyter.notebook.find_cell_index(cell);
+		setup_title();
 	    setup_file_input();
 	    setup_details();
 	    setup_generate();
@@ -40,9 +42,11 @@ define([
 	    		local_data.open_modal(file_list, $(".input-display"), "dataplot");
 	    	}
 	        var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+	                                       .attr("id", "dataplot-input-" + cell_index)
 	                                       .text("Input files")
 	                                       .click(onclick);
 	        var input_display = $("<span/>").addClass("input-display")
+                                            .attr("id", "input-display-" + cell_index)
 	                                        .text(local_data.get_display_text(file_list));
 	        
 	        input_container.append(input_button);
@@ -54,42 +58,42 @@ define([
 	    function setup_details() {
 	    	//Customise labels for each axis.
 			var yaxis_label = $("<p/>").text("y label:");
-	    	var yaxis_input = $("<input/>").addClass("yaxis yaxis_" + cell.cell_id)
+	    	var yaxis_input = $("<input/>").addClass("yaxis yaxis_" + cell_index)
 			                               .attr("name","yaxis")
 			                               .change(update_metadata)
 			                               .val(cell.metadata.yaxis)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
 			var yaxis_div = $("<div/>").addClass("generate-values")
-			                           .addClass("yaxis_div_" + cell.cell_id)
+			                           .addClass("yaxis_div_" + cell_index)
 			                           .append(yaxis_label)
 			                           .append(yaxis_input);    
 			
 			var xaxis_label = $("<p/>").text("x label:");
-		    var xaxis_input = $("<input/>").addClass("xaxis xaxis_" + cell.cell_id)
+		    var xaxis_input = $("<input/>").addClass("xaxis xaxis_" + cell_index)
 			                               .attr("name","xaxis")
 			                               .change(update_metadata)
 			                               .val(cell.metadata.xaxis)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
 			var xaxis_div = $("<div/>").addClass("generate-values")
-			                           .addClass("xaxis_div_" + cell.cell_id)
+			                           .addClass("xaxis_div_" + cell_index)
 			                           .append(xaxis_label)
 			                           .append(xaxis_input);
 
 			var caption_label = $("<p/>").text("Caption:");
-	        var caption_input = $("<textarea/>").addClass("caption caption_" + cell.cell_id)
+	        var caption_input = $("<textarea/>").addClass("caption caption_" + cell_index)
 	                                            .attr("name","caption")
                                                 .change(update_metadata)
                                                 .val(cell.metadata.caption)
                                                 .focus(function(){Jupyter.keyboard_manager.edit_mode()});
 	        var caption_div = $("<div/>").addClass("generate-values")
-	                                     .addClass("caption_div_" + cell.cell_id)
+	                                     .addClass("caption_div_" + cell_index)
 	                                     .append(caption_label)
 	                                     .append(caption_input);    
 		
 			function update_metadata() {
-			    cell.metadata.caption = $(".caption_" + cell.cell_id).val();
-			    cell.metadata.yaxis = $(".yaxis_" + cell.cell_id).val();
-			    cell.metadata.xaxis = $(".xaxis_" + cell.cell_id).val();
+			    cell.metadata.caption = $(".caption_" + cell_index).val();
+			    cell.metadata.yaxis = $(".yaxis_" + cell_index).val();
+			    cell.metadata.xaxis = $(".xaxis_" + cell_index).val();
 			}
 			
 			$(div).append(yaxis_div);
@@ -111,20 +115,25 @@ define([
 	    	}
 	    	
 	        var generate_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+	                                          .attr("id", "generate-plot-" + cell_index)
 	                                          .text("Generate dataplot")
 	                                          .click(generate_dataplot);
 	        
 	        var show_hide_code = function() {
+	        	console.log("Show/hide button clicked for dataplot toolbar");
 	        	cell.metadata.hide_code = !cell.metadata.hide_code;
 	        	
 	        	if (cell.metadata.hide_code) {
+	        		console.log("Hiding code");
 	        		cell.element.find("div.input_area").hide();
 	        	} else {
+	        		console.log("Showing code");
 	        		cell.element.find("div.input_area").show();
 	        	}
 	        }
 	        
 	        var show_hide_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+	                                           .attr("id", "show-hide-" + cell_index)
                                                .text("Show/hide code")
                                                .click(show_hide_code);
 	        
@@ -133,6 +142,7 @@ define([
 	        }
 
 	        var close_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+                                           .attr("id", "close-toolbar-" + cell_index)
                                                .text("Close toolbar")
                                                .click(close);
 	

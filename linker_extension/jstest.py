@@ -22,6 +22,7 @@ import subprocess
 import time
 from io import BytesIO
 from threading import Thread, Lock, Event
+from shutil import copyfile
 
 try:
     from unittest.mock import patch
@@ -294,6 +295,11 @@ class JSController(TestController):
 
         os.write(f5, b"Second test terms of service file to upload to DSpace")
         os.close(f5)
+
+        copyfile(os.getcwd() + "/linker_extension/resources/data1.dat", 
+                 os.path.join(self.nbdir.name, u'data1.dat'))
+        copyfile(os.getcwd() + "/linker_extension/resources/data2.dat", 
+                 os.path.join(self.nbdir.name, u'data2.dat'))
 
         if self.xunit:
             self.add_xunit()

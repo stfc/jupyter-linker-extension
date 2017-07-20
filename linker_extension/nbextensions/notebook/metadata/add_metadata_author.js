@@ -70,7 +70,6 @@ define(["base/js/namespace",
 
         if (authorsarr.length > 0 && authorsarr[0].length > 0) {
         	console.log("Using name from metadata");
-        	console.log(authorsarr[0]);
         	defaultAuthorFirstName.val(authorsarr[0][1]);
             defaultAuthorLastName.val(authorsarr[0][0]);
         } else {

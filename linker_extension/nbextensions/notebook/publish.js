@@ -66,7 +66,6 @@ define(["base/js/namespace",
 	
 	function extract_id(response) {
 		console.log("Attempting to extract ID");
-		console.log(response);
         var id = "";
         var xml_str = response.split("\n");
         xml_str.forEach(function(item) {

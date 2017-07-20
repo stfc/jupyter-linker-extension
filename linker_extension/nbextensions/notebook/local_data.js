@@ -303,6 +303,7 @@ define([
     	var checked = [];
     	get_selected_values(checked, id);
     	
+    	md = Jupyter.notebook.metadata.reportmetadata;
     	if (!md.hasOwnProperty("files")) {
     		md.files = checked;
     	} else {

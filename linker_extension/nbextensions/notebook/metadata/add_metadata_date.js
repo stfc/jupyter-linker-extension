@@ -123,8 +123,6 @@ define(["base/js/namespace",
             
             return day <= monthLength[month - 1];
         };
-        
-        console.log("Validating date: " + $("#year").val() + " " + $("#month").val() + " " + $("#day").val());
 
         if($("#year").val() == 0) {
             var no_year_error = $("<div/>")
