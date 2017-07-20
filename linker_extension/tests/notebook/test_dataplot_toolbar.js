@@ -144,7 +144,6 @@ casper.notebook_test(function() {
     });
     
     take_screenshot("labels-set");
-    
     this.thenClick("#generate-plot-1");
     
     this.waitUntilVisible(".output_png");

@@ -55,6 +55,12 @@ define([
 	        $(div).append(input_container);
 	    }
 	
+		function update_metadata() {
+		    cell.metadata.caption = $(".caption_" + cell_index).val();
+		    cell.metadata.yaxis = $(".yaxis_" + cell_index).val();
+		    cell.metadata.xaxis = $(".xaxis_" + cell_index).val();
+		}
+	    
 	    function setup_details() {
 	    	//Customise labels for each axis.
 			var yaxis_label = $("<p/>").text("y label:");
@@ -89,13 +95,7 @@ define([
 	                                     .addClass("caption_div_" + cell_index)
 	                                     .append(caption_label)
 	                                     .append(caption_input);    
-		
-			function update_metadata() {
-			    cell.metadata.caption = $(".caption_" + cell_index).val();
-			    cell.metadata.yaxis = $(".yaxis_" + cell_index).val();
-			    cell.metadata.xaxis = $(".xaxis_" + cell_index).val();
-			}
-			
+
 			$(div).append(yaxis_div);
 			$(div).append(xaxis_div);
 			$(div).append(caption_div)
@@ -104,6 +104,7 @@ define([
 	    function setup_generate() {
 	    	//Button that generates and executes the code.
 	    	var generate_dataplot = function() {
+	    		update_metadata();
 	    		var script = code.dataplot_script(cell.metadata.dataplot_files,
 						                          cell.metadata.xaxis,
 						                          cell.metadata.yaxis,
