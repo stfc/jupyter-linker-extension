@@ -59,6 +59,11 @@ define([
 		    cell.metadata.caption = $(".caption_" + cell_index).val();
 		    cell.metadata.yaxis = $(".yaxis_" + cell_index).val();
 		    cell.metadata.xaxis = $(".xaxis_" + cell_index).val();
+		    cell.metadata.ymin = $(".ymin_" + cell_index).val();
+		    cell.metadata.ymax = $(".ymax_" + cell_index).val();
+		    cell.metadata.xmin = $(".xmin_" + cell_index).val();
+		    cell.metadata.xmax = $(".xmax_" + cell_index).val();
+		    
 		}
 	    
 	    function setup_details() {
@@ -84,6 +89,50 @@ define([
 			                           .addClass("xaxis_div_" + cell_index)
 			                           .append(xaxis_label)
 			                           .append(xaxis_input);
+			
+			var ymin_label = $("<p/>").text("y minimum:");
+	    	var ymin_input = $("<input/>").addClass("ymin ymin_" + cell_index)
+			                               .attr("name","ymin")
+			                               .change(update_metadata)
+			                               .val(cell.metadata.ymin)
+			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+			var ymin_div = $("<div/>").addClass("generate-values")
+			                           .addClass("ymin_div_" + cell_index)
+			                           .append(ymin_label)
+			                           .append(ymin_input);   
+			
+			var xmin_label = $("<p/>").text("x minimum:");
+	    	var xmin_input = $("<input/>").addClass("xmin xmin_" + cell_index)
+			                               .attr("name","xmin")
+			                               .change(update_metadata)
+			                               .val(cell.metadata.xmin)
+			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+			var xmin_div = $("<div/>").addClass("generate-values")
+			                           .addClass("xmin_div_" + cell_index)
+			                           .append(xmin_label)
+			                           .append(xmin_input);   
+			
+			var ymax_label = $("<p/>").text("y maximum:");
+	    	var ymax_input = $("<input/>").addClass("ymax ymax_" + cell_index)
+			                               .attr("name","ymax")
+			                               .change(update_metadata)
+			                               .val(cell.metadata.ymax)
+			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+			var ymax_div = $("<div/>").addClass("generate-values")
+			                           .addClass("ymax_div_" + cell_index)
+			                           .append(ymax_label)
+			                           .append(ymax_input);   
+			
+			var xmax_label = $("<p/>").text("x maximum:");
+	    	var xmax_input = $("<input/>").addClass("xmax xmax_" + cell_index)
+			                               .attr("name","xmax")
+			                               .change(update_metadata)
+			                               .val(cell.metadata.xmax)
+			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+			var xmax_div = $("<div/>").addClass("generate-values")
+			                           .addClass("xmax_div_" + cell_index)
+			                           .append(xmax_label)
+			                           .append(xmax_input);   
 
 			var caption_label = $("<p/>").text("Caption:");
 	        var caption_input = $("<textarea/>").addClass("caption caption_" + cell_index)
@@ -98,6 +147,10 @@ define([
 
 			$(div).append(yaxis_div);
 			$(div).append(xaxis_div);
+			$(div).append(ymax_div);
+			$(div).append(ymin_div);
+			$(div).append(xmax_div);
+			$(div).append(xmin_div);
 			$(div).append(caption_div)
 	    } 
 	
@@ -108,6 +161,10 @@ define([
 	    		var script = code.dataplot_script(cell.metadata.dataplot_files,
 						                          cell.metadata.xaxis,
 						                          cell.metadata.yaxis,
+						                          cell.metadata.xmin,
+						                          cell.metadata.xmax,
+						                          cell.metadata.ymin,
+						                          cell.metadata.ymax,
 						                          cell.metadata.caption);
 	    		cell.set_text(script);
 	    		cell.execute();

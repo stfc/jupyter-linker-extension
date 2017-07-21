@@ -16,7 +16,8 @@ define([
  */
 function comments_to_multiline_string(f) {
 	return f.toString().replace(/^[^\/]+\/\*!?/, '')
-                   .replace(/\*\/[^\/]+$/, '');
+                       .replace(/\*\/[^\/]+$/, '')
+                       .replace(/\t/g, '');
 }
 
 var script = comments_to_multiline_string(function() {/*!
@@ -24,6 +25,8 @@ import matplotlib.pyplot as plt
 import re
 
 datasets = list()
+
+limits_set = False;
 
 for name in filenames:
     with open(name) as f:
@@ -42,6 +45,7 @@ for name in filenames:
         try:
             float(xVar)
             float(yVar)
+            
             x.append(xVar)
             y.append(yVar)
         except Exception:
@@ -64,14 +68,21 @@ fig.text(0.95,0.5,caption,fontsize=12);
 
 ax.legend()
 
+if (y_max != ""): plt.ylim(ymax=float(y_max))
+if (y_min != ""): plt.ylim(ymin=float(y_min))
+if (x_max != ""): plt.xlim(xmax=float(x_max))
+if (x_min != ""): plt.xlim(xmin=float(x_min))
+
 plt.show()
 */});
 	
-script = script.replace(/\t/g, '');
-	
-var dataplot_script = function(files, xaxis, yaxis, caption){
+var dataplot_script = function(files, xaxis, yaxis, xmin, xmax, ymin, ymax, caption){
     var dataplot_code = "xaxis = '" + xaxis + "'\n" +
                         "yaxis = '" + yaxis + "'\n" +
+                        "x_min = '" + xmin + "'\n" +
+                        "x_max = '" + xmax + "'\n" +
+                        "y_min = '" + ymin + "'\n" +
+                        "y_max = '" + ymax + "'\n" +
                         "caption = '" + caption + "'\n" +
                         "filenames = list()" + "\n";
     
