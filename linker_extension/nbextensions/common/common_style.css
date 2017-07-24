@@ -187,6 +187,26 @@ span#login_widget {
   margin-left: 8px;
 }
 
+.section-label {
+	font-weight: bold;
+	margin-top: 5px;
+}
+
+.axis {
+	margin-right: 20px;
+	width: 300px;
+}
+
+.min {
+	margin-right: 20px;
+	width: 80px;
+}
+
+.max {
+	margin-right: 20px;
+	width: 80px;
+}
+
 
 textarea {
   width: 600px;
@@ -245,10 +265,14 @@ label[for=filename-collision-behaviour-overwrite] > span, label[for=filename-col
 
 .generate-code {
   margin: 8px;
+  
 }
 
 .generate-values {
-  margin-left: 20px;
+  margin: 10px;
+  border: solid #DADCE0 1px;
+  background-color: #F8F9FA;
+  padding : 4px 7px 9px 7px; 
 }
 
 .input-display {

@@ -29,18 +29,23 @@ define([
 		function setup_title() {
 			//The title for the toolbar.
 			var title_container = $("<div/>").addClass("generate-title")
-	                                         .append("Generate dataplot cell");
+	                                         .append("Generate Dataplot Cell");
 	    	$(div).append(title_container);
 	    }
 	   
 	    function setup_file_input() {
 	        //Allows users to choose the datafile to be plotted.    	
-	    	var input_container = $("<div/>").addClass("generate-code");
+	    	var input_container = $("<div/>").addClass("generate-values");
+	    	var input_label = $("<label/>").attr("for","input-button")
+                                           .addClass("fieldlabel")
+                                           .addClass("section-label")
+                                           .text("Dataset:");
 	    	
 	    	var file_list = cell.metadata.dataplot_files;
 	    	var onclick = function () {
 	    		local_data.open_modal(file_list, $(".input-display"), "dataplot");
 	    	}
+	    	
 	        var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
 	                                       .attr("id", "dataplot-input-" + cell_index)
 	                                       .text("Input files")
@@ -49,6 +54,7 @@ define([
                                             .attr("id", "input-display-" + cell_index)
 	                                        .text(local_data.get_display_text(file_list));
 	        
+	        input_container.append(input_label)
 	        input_container.append(input_button);
 	        input_container.append(input_display);
 	        
@@ -56,86 +62,112 @@ define([
 	    }
 	
 		function update_metadata() {
-		    cell.metadata.caption = $(".caption_" + cell_index).val();
-		    cell.metadata.yaxis = $(".yaxis_" + cell_index).val();
-		    cell.metadata.xaxis = $(".xaxis_" + cell_index).val();
-		    cell.metadata.ymin = $(".ymin_" + cell_index).val();
-		    cell.metadata.ymax = $(".ymax_" + cell_index).val();
-		    cell.metadata.xmin = $(".xmin_" + cell_index).val();
-		    cell.metadata.xmax = $(".xmax_" + cell_index).val();
+		    cell.metadata.caption = $("#caption_" + cell_index).val();
+		    cell.metadata.yaxis = $("#yaxis_" + cell_index).val();
+		    cell.metadata.xaxis = $("#xaxis_" + cell_index).val();
+		    cell.metadata.ymin = $("#ymin_" + cell_index).val();
+		    cell.metadata.ymax = $("#ymax_" + cell_index).val();
+		    cell.metadata.xmin = $("#xmin_" + cell_index).val();
+		    cell.metadata.xmax = $("#xmax_" + cell_index).val();
 		    
 		}
 	    
 	    function setup_details() {
 	    	//Customise labels for each axis.
-			var yaxis_label = $("<p/>").text("y label:");
-	    	var yaxis_input = $("<input/>").addClass("yaxis yaxis_" + cell_index)
+	    	var y_label = $("<label/>").attr("for","y_section")
+                                       .addClass("fieldlabel")
+                                       .addClass("section-label")
+                                       .text("Y Axis:");
+	    	var y_div = $("<div/>").attr("id", "y_section").addClass("generate-values");
+	    	var y_table = $("<table/>");
+	    	
+	        var y_label_container = $("<tr/>").attr("id","y-label-container");
+	        var y_input_container = $("<tr/>").attr("id","y-input-container");
+	    	
+			var yaxis_label = $("<label/>").text("Label:").attr("for","yaxis_" + cell_index);
+	    	var yaxis_input = $("<input/>").addClass("axis")
+	    	                               .attr("id", "yaxis_" + cell_index)
 			                               .attr("name","yaxis")
 			                               .change(update_metadata)
 			                               .val(cell.metadata.yaxis)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			var yaxis_div = $("<div/>").addClass("generate-values")
-			                           .addClass("yaxis_div_" + cell_index)
-			                           .append(yaxis_label)
-			                           .append(yaxis_input);    
 			
-			var xaxis_label = $("<p/>").text("x label:");
-		    var xaxis_input = $("<input/>").addClass("xaxis xaxis_" + cell_index)
+			var ymin_label = $("<label/>").text("Minimum:").attr("for","ymin_" + cell_index);
+	    	var ymin_input = $("<input/>").addClass("min")
+	    	                              .attr("id", "ymin_" + cell_index)
+			                              .attr("name","ymin")
+			                              .change(update_metadata)
+			                              .val(cell.metadata.ymin)
+			                              .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+			
+			var ymax_label = $("<label/>").text("Maximum:").attr("for","ymax_" + cell_index);
+	    	var ymax_input = $("<input/>").addClass("max")
+			                              .attr("id", "ymax_" + cell_index)
+	    	                              .attr("name","ymax")
+			                              .change(update_metadata)
+			                              .val(cell.metadata.ymax)
+			                              .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+			
+	    	y_label_container.append($("<td>").append(yaxis_label))
+	    	                 .append($("<td>").append(ymin_label))
+	    	                 .append($("<td>").append(ymax_label));
+
+			y_input_container.append($("<td>").append(yaxis_input))
+			                 .append($("<td>").append(ymin_input))
+			                 .append($("<td>").append(ymax_input));
+			
+			y_table.append(y_label_container).append(y_input_container);
+			y_div.append(y_label).append(y_table);
+			
+	    	var x_label = $("<label/>").attr("for","x_section")
+                                       .addClass("fieldlabel")
+                                       .addClass("section-label")
+                                       .text("X Axis:");
+            var x_div = $("<div/>").attr("id", "x_section").addClass("generate-values");
+            var x_table = $("<table/>");
+
+            var x_label_container = $("<tr/>").attr("id","x-label-container");
+            var x_input_container = $("<tr/>").attr("id","x-input-container");
+			
+			var xaxis_label = $("<label/>").text("Label:").attr("for","xaxis_" + cell_index);
+		    var xaxis_input = $("<input/>").addClass("axis")
+		                                   .attr("id", "xaxis_" + cell_index)
 			                               .attr("name","xaxis")
 			                               .change(update_metadata)
 			                               .val(cell.metadata.xaxis)
 			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			var xaxis_div = $("<div/>").addClass("generate-values")
-			                           .addClass("xaxis_div_" + cell_index)
-			                           .append(xaxis_label)
-			                           .append(xaxis_input);
 			
-			var ymin_label = $("<p/>").text("y minimum:");
-	    	var ymin_input = $("<input/>").addClass("ymin ymin_" + cell_index)
-			                               .attr("name","ymin")
-			                               .change(update_metadata)
-			                               .val(cell.metadata.ymin)
-			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			var ymin_div = $("<div/>").addClass("generate-values")
-			                           .addClass("ymin_div_" + cell_index)
-			                           .append(ymin_label)
-			                           .append(ymin_input);   
-			
-			var xmin_label = $("<p/>").text("x minimum:");
-	    	var xmin_input = $("<input/>").addClass("xmin xmin_" + cell_index)
-			                               .attr("name","xmin")
-			                               .change(update_metadata)
-			                               .val(cell.metadata.xmin)
-			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			var xmin_div = $("<div/>").addClass("generate-values")
-			                           .addClass("xmin_div_" + cell_index)
-			                           .append(xmin_label)
-			                           .append(xmin_input);   
-			
-			var ymax_label = $("<p/>").text("y maximum:");
-	    	var ymax_input = $("<input/>").addClass("ymax ymax_" + cell_index)
-			                               .attr("name","ymax")
-			                               .change(update_metadata)
-			                               .val(cell.metadata.ymax)
-			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			var ymax_div = $("<div/>").addClass("generate-values")
-			                           .addClass("ymax_div_" + cell_index)
-			                           .append(ymax_label)
-			                           .append(ymax_input);   
-			
-			var xmax_label = $("<p/>").text("x maximum:");
-	    	var xmax_input = $("<input/>").addClass("xmax xmax_" + cell_index)
-			                               .attr("name","xmax")
-			                               .change(update_metadata)
-			                               .val(cell.metadata.xmax)
-			                               .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-			var xmax_div = $("<div/>").addClass("generate-values")
-			                           .addClass("xmax_div_" + cell_index)
-			                           .append(xmax_label)
-			                           .append(xmax_input);   
 
-			var caption_label = $("<p/>").text("Caption:");
-	        var caption_input = $("<textarea/>").addClass("caption caption_" + cell_index)
+			var xmin_label = $("<label/>").text("Minimum:").attr("for","xmin_" + cell_index);
+	    	var xmin_input = $("<input/>").addClass("min")
+                                          .attr("id", "xmin_" + cell_index)
+                                          .attr("name","xmin")
+			                              .change(update_metadata)
+			                              .val(cell.metadata.xmin)
+			                              .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+					
+			var xmax_label = $("<label/>").text("Maximum:").attr("for","xmax_" + cell_index);
+	    	var xmax_input = $("<input/>").addClass("max")
+	    	                              .attr("id", "xmax_" + cell_index)
+			                              .attr("name","xmax")
+			                              .change(update_metadata)
+			                              .val(cell.metadata.xmax)
+			                              .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+
+	    	x_label_container.append($("<td>").append(xaxis_label))
+                             .append($("<td>").append(xmin_label))
+                             .append($("<td>").append(xmax_label));
+	    	
+			x_input_container.append($("<td>").append(xaxis_input))
+                             .append($("<td>").append(xmin_input))
+                             .append($("<td>").append(xmax_input));
+			
+			x_table.append(x_label_container).append(x_input_container);
+			x_div.append(x_label).append(x_table);
+			
+			var caption_label = $("<p/>").text("Caption:").addClass("section-label");
+	        var caption_input = $("<textarea/>").addClass("caption")
+	                                            .attr("id", "caption_" + cell_index)
 	                                            .attr("name","caption")
                                                 .change(update_metadata)
                                                 .val(cell.metadata.caption)
@@ -145,12 +177,8 @@ define([
 	                                     .append(caption_label)
 	                                     .append(caption_input);    
 
-			$(div).append(yaxis_div);
-			$(div).append(xaxis_div);
-			$(div).append(ymax_div);
-			$(div).append(ymin_div);
-			$(div).append(xmax_div);
-			$(div).append(xmin_div);
+			$(div).append(y_div);
+			$(div).append(x_div);
 			$(div).append(caption_div)
 	    } 
 	
