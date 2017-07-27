@@ -129,6 +129,20 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         };
         return utils.promising_ajax(url, settings);
     };
+    
+    //import data from local files. 
+    var import_data = function(data) {
+        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/file_import"]);
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "POST",
+            data: JSON.stringify(data),
+            contentType: "application/json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
 
     //redownloads data from dspace. 
     var redownload_data = function(data) {
@@ -167,6 +181,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
         update_config: update_config,
         get_config: get_config,
         download_data: download_data,
+        import_data: import_data,
         redownload_data: redownload_data,
         get_server_path: get_server_path,
     };

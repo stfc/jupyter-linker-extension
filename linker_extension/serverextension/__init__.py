@@ -16,6 +16,7 @@ from .LDAPHandler import LDAPHandler
 from .CustomNbconvertHandler import CustomNbconvertHandler
 from .DownloadHandler import DownloadHandler, RedownloadHandler
 from .MiscHandlers import ContentsHandler
+from .LocalImportHandler import ImportHandler
 
 # ----------------------------------------------------------------------------
 # URL to handler mappings
@@ -88,6 +89,10 @@ def load_jupyter_server_extension(nbapp):
     route_pattern_download = url_path_join(web_app.settings['base_url'],
                                        '/dspace_download')
     web_app.add_handlers(host_pattern, [(route_pattern_download, DownloadHandler)])
+
+    route_pattern_import = url_path_join(web_app.settings['base_url'],
+                                       '/file_import')
+    web_app.add_handlers(host_pattern, [(route_pattern_import, ImportHandler)])
 
     route_pattern_redownload = url_path_join(web_app.settings['base_url'],
                                        '/dspace_redownload')

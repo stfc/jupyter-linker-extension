@@ -7,8 +7,6 @@ define([
      *  Makes all the hacky changes to the notebook page.
      */ 
     var load = function() {
-    	console.log("Going to try just printing Jupyter object.");
-    	console.log($(Jupyter));
         var publish_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","publish-menu");
         var publish_button  = $("<button/>")
                       .addClass("btn btn-default dropdown-toggle")

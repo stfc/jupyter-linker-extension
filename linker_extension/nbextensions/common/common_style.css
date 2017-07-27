@@ -391,3 +391,11 @@ label.required:after {
   color:grey;
   font-style: italic;
 }
+
+.download-page {
+  margin:15px;
+}
+
+.datatab{
+	outline:none;
+}
