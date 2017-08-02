@@ -403,7 +403,7 @@ define(["base/js/namespace",
     
     var create_modal = function(failed_downloads) {        
         var modal = dialog.modal({
-            title: "Download data from eData",
+            title: "Import external data for use in the notebook",
             body: create_tabs(failed_downloads),
             buttons: {
                 Cancel: {},

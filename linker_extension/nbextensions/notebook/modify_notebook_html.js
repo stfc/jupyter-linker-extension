@@ -7,63 +7,6 @@ define([
      *  Makes all the hacky changes to the notebook page.
      */ 
     var load = function() {
-        var publish_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","publish-menu");
-        var publish_button  = $("<button/>")
-                      .addClass("btn btn-default dropdown-toggle")
-                      .attr("type","button")
-                      .attr("data-toggle","dropdown")
-                      .attr("title", "Publish")
-                      .text("Publish ");
-        var publish_caret = $("<span>").addClass("caret");
-        publish_button.append(publish_caret);
-
-        var publish_dropdown_ul = $("<ul/>")
-            .attr("id","publish_menu")
-            .addClass("dropdown-menu");
-
-        publish_dropdown.append(publish_button).append(publish_dropdown_ul);
-
-        $(Jupyter.toolbar.selector).append(publish_dropdown);
-        
-        publish_dropdown_ul.append($("<li/>").attr("id","toggle_cell_references_bar")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Show/Hide cell references toolbar")))
-                                             
-                   .append($("<li/>").attr("id","generate_references")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Generate references")))
-                                             
-                   .append($("<li/>").addClass("divider"))
-                                             
-                   .append($("<li/>").attr("id","insert_dataplot_cell")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Insert dataplot cell")))
-                                             
-                   .append($("<li/>").attr("id","edit_current_cell")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Edit current cell")))
-
-                   .append($("<li/>").addClass("divider"))
-                   
-                   .append($("<li/>").attr("id","manage_metadata")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Manage Metadata")))
-                   
-                   .append($("<li/>").attr("id","manage_associated_data")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Manage Associated Data")))
-
-                   .append($("<li/>").attr("id","publish")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Publish")));
-
         var data_dropdown =  $("<div/>").addClass("dropdown btn-group").attr("id","data-menu");
         var data_button  = $("<button/>")
                       .addClass("btn btn-default dropdown-toggle")
@@ -82,14 +25,30 @@ define([
 
         $(Jupyter.toolbar.selector).append(data_dropdown);
         
-        data_dropdown_ul.append($("<li/>").attr("id","download_data")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Download data")))
-                        .append($("<li/>").attr("id","redownload_data")
-                                     .append($("<a/>")
-                                             .attr("href","#")
-                                             .text("Retrieve associated data from eData")));
+        function add_new_item(display_text, id) {
+        	data_dropdown_ul.append($("<li/>").attr("id",id)
+                                              .append($("<a/>")
+                                                      .attr("href","#")
+                                                      .text(display_text)));
+        }
+        
+        function add_divider() {
+        	data_dropdown_ul.append($("<li/>").addClass("divider"));
+        }
+        
+        add_new_item("Show/Hide cell references toolbar", "toggle_cell_references_bar");
+        add_new_item("Generate references", "generate_references");
+        add_divider();
+        add_new_item("Insert dataplot cell", "insert_dataplot_cell");
+        add_new_item("Insert analysis cell", "insert_analysis_cell");
+        add_new_item("Edit current cell", "edit_current_cell");
+        add_divider();
+        add_new_item("Manage metadata", "manage_metadata");
+        add_new_item("Manage associated data", "manage_associated_data");
+        add_divider();
+        add_new_item("Import data", "download_data");
+        add_divider();
+        add_new_item("Publish", "publish");
 
         /*  
          *  The notebook metadata doesn't exist immediately and we need it to

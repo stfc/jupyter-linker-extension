@@ -399,3 +399,7 @@ label.required:after {
 .datatab{
 	outline:none;
 }
+
+.variable-table {
+	margin:10px;
+}
