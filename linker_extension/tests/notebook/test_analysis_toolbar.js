@@ -243,4 +243,43 @@ casper.notebook_test(function() {
     });
     take_screenshot("variables-recreated");
     
+    //Enter text, then create variables
+    this.then(function() {
+        this.evaluate(function() {
+            $("#variable-input-1").val("test input");
+        });
+    });
+    
+    this.thenClick("#edit-variables-1");
+    this.waitForSelector("#select");
+    this.thenClick("#select");
+    
+    this.waitUntilVisible("#variable-label-1");
+    
+    this.then(function() {    	
+    	var variable_name_1 = this.evaluate(function() {
+    		return $("#variable-label-1").text();
+    	});
+    	
+    	this.test.assertEquals(variable_name_1, "second_var:", "First variable correctly recreated");
+    	this.test.assertDoesntExist("#variable-label-2", "No more variables exist");
+    	this.test.assertDoesntExist("#variable-label-0", "No more variables exist");
+    });
+
+    this.thenClick("#show-hide-1");
+    take_screenshot("show-code");
+    this.waitUntilVisible(".input_area");
+    
+    this.waitForSelector("#generate-1");
+    this.thenClick("#generate-1");
+    
+    console.log("Getting text from cell");
+    this.then(function() {
+        var cell_text = this.evaluate(function() {
+            return Jupyter.notebook.get_selected_cell().get_text();
+        });
+        
+        this.test.assertNotEquals(cell_text.indexOf("second_var = 'test input'"), -1, "Variable succesfully created");
+        this.test.assertNotEquals(cell_text.indexOf("name = 'data1.dat'"), -1, "Datafile succesfully imported");
+    });
 });
