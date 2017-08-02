@@ -270,8 +270,8 @@ casper.notebook_test(function() {
     take_screenshot("show-code");
     this.waitUntilVisible(".input_area");
     
-    this.waitForSelector("#generate-1");
-    this.thenClick("#generate-1");
+    this.waitForSelector("#run-1");
+    this.thenClick("#run-1");
     
     console.log("Getting text from cell");
     this.then(function() {

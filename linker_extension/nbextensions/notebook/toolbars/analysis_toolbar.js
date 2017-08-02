@@ -33,7 +33,7 @@ define([
 		function setup_title() {
 			//The title for the toolbar.
 			var title_container = $("<div/>").addClass("generate-title")
-	                                         .append("Generate Analysis Cell");
+	                                         .append("Analysis Cell");
 	    	$(div).append(title_container);
 	    }
 	   
@@ -246,50 +246,50 @@ define([
 
 		}
 	
+		function generate_code() {
+    		console.log("Generating code for cell " + cell_index)
+    		var variables = [];
+    		var labels = [];
+    		var values = [];
+    		
+    		$(".cell-" + cell_index + "-variable").each(function(index,item) {
+				var display_name = $(item).text().trim();
+				var name = display_name.substring(0, display_name.length - 1);
+				labels.push(name);		
+			});
+    		
+    		$(".cell-" + cell_index + "-variable-input").each(function(index,item) {
+				var value = $(item).val().trim();
+				values.push(value);		
+			});
+    		
+    		for (var i = 0; i < cell.metadata.analysis_variables.length; i++) {
+    			variables.push({name: labels[i], value: values[i]});
+    		}
+    		
+    		var script = code.analysis_script(cell.metadata.analysis_files,
+					                          variables);
+    		
+    		var current_text = cell.get_text();
+    		
+    		var end_marker = "#Begin user script\n";
+    		if (current_text.indexOf(end_marker) != -1) {
+    			var split_text = current_text.split(end_marker);
+    			current_text = split_text[1];
+    		}
+    		
+    		cell.set_text(script + current_text);
+    		cell.execute();
+    		
+    		local_data.update_associated_data("analysis");
+		}
+		
 	    function setup_generate() {
-	    	var generate_code = function() {
-	    		console.log("Generating code for cell " + cell_index)
-	    		var variables = [];
-	    		var labels = [];
-	    		var values = [];
-	    		
-	    		$(".cell-" + cell_index + "-variable").each(function(index,item) {
-					var display_name = $(item).text().trim();
-					var name = display_name.substring(0, display_name.length - 1);
-					labels.push(name);		
-				});
-	    		
-	    		$(".cell-" + cell_index + "-variable-input").each(function(index,item) {
-					var value = $(item).val().trim();
-					values.push(value);		
-				});
-	    		
-	    		for (var i = 0; i < cell.metadata.analysis_variables.length; i++) {
-	    			variables.push({name: labels[i], value: values[i]});
-	    		}
-	    		
-	    		var script = code.analysis_script(cell.metadata.analysis_files,
-						                          variables);
-	    		
-	    		var current_text = cell.get_text();
-	    		
-	    		var end_marker = "#Begin user script\n";
-	    		if (current_text.indexOf(end_marker) != -1) {
-	    			var split_text = current_text.split(end_marker);
-	    			current_text = split_text[1];
-	    		}
-	    		
-	    		cell.set_text(script + current_text);
-	    		cell.execute();
-	    		
-	    		local_data.update_associated_data("dataplot");
-	    	}
-	    	
 	    	//Button that generates and executes the code.
 	        var generate_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
-	                                          .attr("id", "generate-" + cell_index)
+	                                          .attr("id", "run-" + cell_index)
 	                                          .click(generate_code)
-	                                          .text("Generate");
+	                                          .text("Run");
 	        
 	        var show_hide_code = function() {
 	        	console.log("Show/hide button clicked for dataplot toolbar");
