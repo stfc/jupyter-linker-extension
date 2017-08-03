@@ -82,17 +82,17 @@ casper.notebook_test(function() {
     });
     
     this.thenClick("#show-hide-1");
-    take_screenshot("show-code");
-    this.waitUntilVisible(".input_area");
-    this.then(function() {
-        this.test.assertVisible(".input_area", "Code is visible");
-    });
-    
-    this.thenClick("#show-hide-1");
     take_screenshot("hide-code");
     this.waitWhileVisible(".input_area");
     this.then(function() {
         this.test.assertNotVisible(".input_area", "Code is hidden");
+    });
+    
+    this.thenClick("#show-hide-1");
+    take_screenshot("show-code");
+    this.waitUntilVisible(".input_area");
+    this.then(function() {
+        this.test.assertVisible(".input_area", "Code is shown");
     });
     
     //Select an input file
@@ -139,10 +139,10 @@ casper.notebook_test(function() {
     //Define some variables
     this.thenClick("#edit-variables-1");
     this.waitForSelector("#select");
-    this.waitUntilVisible("#variable-0");
+    this.waitUntilVisible("#variable-display-0");
     
     this.then(function() {
-        this.test.assertVisible("#variable-0",
+        this.test.assertVisible("#variable-display-0",
                                 "Define variables modal exists");
     });
     
@@ -150,9 +150,13 @@ casper.notebook_test(function() {
     
     this.then(function() {
         this.evaluate(function() {
-            $("#variable-0").val("first_var");
+            $("#variable-display-0").val("First variable");
+            $("#variable-name-0").val("first_var");
+            $("#variable-default-0").val("1234");
             $("#add-variable-button").click();
-            $("#variable-1").val("second_var");
+            $("#variable-display-1").val("Second variable");
+            $("#variable-name-1").val("second_var");
+            $("#variable-default-1").val("5678");
         });
     });
     
@@ -170,28 +174,50 @@ casper.notebook_test(function() {
     		return $("#variable-label-1").text();
     	});
     	
-    	this.test.assertEquals(variable_name_0, "first_var:", "First variable correctly created");
-    	this.test.assertEquals(variable_name_1, "second_var:", "Second variable correctly created");
+    	this.test.assertEquals(variable_name_0, "First variable:", "First variable correctly created");
+    	this.test.assertEquals(variable_name_1, "Second variable:", "Second variable correctly created");
     	this.test.assertDoesntExist("#variable-label-2", "No extra variables created");
     });
     
     //Test variables are successfully recreated
     this.thenClick("#edit-variables-1");
     this.waitForSelector("#select");
-    this.waitUntilVisible("#variable-0"); 
+    this.waitUntilVisible("#variable-display-0"); 
     
     this.then(function() {
     	var variable_0 = this.evaluate(function() {
-    		return $("#variable-0").val();
+    		return {display: $("#variable-display-0").val(),
+    			    name: $("#variable-name-0").val(),
+    			    default_value: $("#variable-default-0").val()};     
     	});
     	
     	var variable_1 = this.evaluate(function() {
-    		return $("#variable-1").val();
+    		return {display: $("#variable-display-1").val(),
+			    name: $("#variable-name-1").val(),
+			    default_value: $("#variable-default-1").val()}; 
     	});
     	
-    	this.test.assertEquals(variable_0, "first_var", "First variable correctly reloaded");
-    	this.test.assertEquals(variable_1, "second_var", "Second variable correctly reloaded");
-    	this.test.assertDoesntExist("#variable-2", "No extra variables created");
+    	this.test.assertEquals(variable_0.display, 
+    			               "First variable", 
+    			               "First variable display correctly reloaded");
+    	this.test.assertEquals(variable_1.display, 
+    			               "Second variable", 
+    			               "Second variable display correctly reloaded");
+    	this.test.assertEquals(variable_0.name, 
+    			               "first_var", 
+    			               "First variable name correctly reloaded");
+    	this.test.assertEquals(variable_1.name, 
+    			               "second_var", 
+    			               "Second variable name correctly reloaded");
+    	this.test.assertEquals(variable_0.default_value, 
+    			               "1234", 
+    			               "First variable default correctly reloaded");
+    	this.test.assertEquals(variable_1.default_value, 
+    			               "5678", 
+    			               "Second variable default correctly reloaded");
+    	
+    	this.test.assertDoesntExist("#variable-display-2", 
+    			                    "No extra variables created");
     });
     
     take_screenshot("variables-reloaded");
@@ -208,8 +234,8 @@ casper.notebook_test(function() {
     		return $("#variable-label-1").text();
     	});
     	
-    	this.test.assertEquals(variable_name_0, "first_var:", "First variable correctly recreated");
-    	this.test.assertEquals(variable_name_1, "second_var:", "Second variable correctly recreated");
+    	this.test.assertEquals(variable_name_0, "First variable:", "First variable correctly recreated");
+    	this.test.assertEquals(variable_name_1, "Second variable:", "Second variable correctly recreated");
     	this.test.assertDoesntExist("#variable-label-2", "No extra variables created");
     });
     take_screenshot("variables-recreated");
@@ -230,23 +256,23 @@ casper.notebook_test(function() {
     take_screenshot("variable-removed");
     this.thenClick("#select");
     
-    this.waitUntilVisible("#variable-label-1");
+    this.waitUntilVisible("#variable-label-0");
     
     this.then(function() {    	
     	var variable_name_1 = this.evaluate(function() {
-    		return $("#variable-label-1").text();
+    		return $("#variable-label-0").text();
     	});
     	
-    	this.test.assertEquals(variable_name_1, "second_var:", "First variable correctly recreated");
-    	this.test.assertDoesntExist("#variable-label-0", "Variable label removed");
-    	this.test.assertDoesntExist("#variable-input-0", "Variable input removed");
+    	this.test.assertEquals(variable_name_1, "Second variable:", "Remaining variable correctly recreated");
+    	this.test.assertDoesntExist("#variable-label-1", "Variable label removed");
+    	this.test.assertDoesntExist("#variable-input-1", "Variable input removed");
     });
     take_screenshot("variables-recreated");
     
     //Enter text, then create variables
     this.then(function() {
         this.evaluate(function() {
-            $("#variable-input-1").val("test input");
+            $("#variable-input-0").val("test input");
         });
     });
     
@@ -254,21 +280,16 @@ casper.notebook_test(function() {
     this.waitForSelector("#select");
     this.thenClick("#select");
     
-    this.waitUntilVisible("#variable-label-1");
+    this.waitUntilVisible("#variable-label-0");
     
     this.then(function() {    	
     	var variable_name_1 = this.evaluate(function() {
-    		return $("#variable-label-1").text();
+    		return $("#variable-label-0").text();
     	});
     	
-    	this.test.assertEquals(variable_name_1, "second_var:", "First variable correctly recreated");
-    	this.test.assertDoesntExist("#variable-label-2", "No more variables exist");
-    	this.test.assertDoesntExist("#variable-label-0", "No more variables exist");
+    	this.test.assertEquals(variable_name_1, "Second variable:", "First variable correctly recreated");
+    	this.test.assertDoesntExist("#variable-label-1", "No more variables exist");
     });
-
-    this.thenClick("#show-hide-1");
-    take_screenshot("show-code");
-    this.waitUntilVisible(".input_area");
     
     this.waitForSelector("#run-1");
     this.thenClick("#run-1");
@@ -279,7 +300,7 @@ casper.notebook_test(function() {
             return Jupyter.notebook.get_selected_cell().get_text();
         });
         
-        this.test.assertNotEquals(cell_text.indexOf("second_var = 'test input'"), -1, "Variable succesfully created");
+        this.test.assertNotEquals(cell_text.indexOf("second_var = '5678'"), -1, "Variable succesfully created");
         this.test.assertNotEquals(cell_text.indexOf("name = 'data1.dat'"), -1, "Datafile succesfully imported");
     });
 });

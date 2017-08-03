@@ -65,82 +65,73 @@ define([
 	        $(div).append(input_container);
 	    }
 	
+	    var empty_message;
+	    var variables_table;
 	    function setup_variables() {
 	    	console.log("Setting up variables for cell " + cell_index);
 	    	var variables = $("<div/>").addClass("generate-values");
-	    	var variables_table = $("<table/>").addClass("variable-table").attr("id", "variable-list-" + cell_index);
+	    	variables_table = $("<table/>").addClass("variable-table").attr("id", "variable-list-" + cell_index);
 	    	var variables_label = $("<label/>").addClass("fieldlabel")
                                                .addClass("section-label")
                                                .text("Variables:");
 
-	    	variables.append(variables_label).append(variables_table);
-	    	
 	    	$(div).append(variables);
-	    	var empty_message = $("<span/>").addClass("empty-message")
-		                                    .attr("id", "empty-variable-message")
-		                                    .text("No variables defined. Please click the 'edit variables' button to add some.");
+	    	empty_message = $("<span/>").addClass("empty-message")
+		                                .attr("id", "empty-variable-message")
+		                                .text("No variables defined. Please click the 'edit variables' button to add some.");
 			        
-			variables_table.append(empty_message);
+	    	variables.append(variables_label)
+	    	         .append(empty_message)
+	    	         .append(variables_table);
+			
 	    	if (cell.metadata.analysis_variables != undefined) {
-	    		update_variables(variables_table);
+	    		update_variables();
 	    	} 	
 	    }
 	    
-	    var variable_index = 0;
-	    
-		function update_variables(variables_table) {
+		function update_variables() {
 			console.log("Updating variables for cell " + cell_index);
 			var variables_to_create = cell.metadata.analysis_variables.slice();
-			var variable_count = 0;
-
-			$(".cell-" + cell_index + "-variable").each(function(index,item) {
-				var display_name = $(item).text().trim();
-				var name = display_name.substring(0, display_name.length - 1);
-				
-				console.log("Found exisiting variable: " + name);
-				
-				if (variables_to_create.indexOf(name) == -1) {
-					console.log(name + " should no longer exist, removing");
-					$(item).parent().parent().remove()
-				} else {
-					console.log("Field already exists for " + name);
-					variables_to_create.splice(variables_to_create.indexOf(name), 1);
-					variable_count++;
-				}			
+			
+			$(".cell-" + cell_index + "-row").each(function(index,item) {
+				$(item).remove();
 			});
 			
+			var variable_count = 0;
 			for (var i = 0; i < variables_to_create.length; i++) { 
 				var variable = variables_to_create[i];
-				console.log("Adding container for " + variable);
-				var container = $("<tr/>");
-				var label = $("<label/>").text(variable + ":")
+				variable.index = variable_count;
+				console.log("Adding container for " + variable.display);
+				var container = $("<tr/>").addClass("cell-" + cell_index + "-row");
+				var label = $("<label/>").text(variable.display + ":")
 				                         .addClass("variable")
 				                         .addClass("cell-" + cell_index + "-variable")
-				                         .attr("id", "variable-label-" + variable_index);
+				                         .attr("id", "variable-label-" + variable.index);
 				container.append($("<td/>").append(label));
 				
 				var input =  $("<input/>").attr("type","text")
-	                                      .attr("id", "variable-input-" + variable_index)
+	                                      .attr("id", "variable-input-" + variable.index)
 	                                      .addClass("variable-input")
 				                          .addClass("cell-" + cell_index + "-variable-input")
+				                          .val(variable.default_value)
 	                                      .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+				
+				for (var j = 0; j < cell.metadata.analysis_variables.length; j++) {
+					if (cell.metadata.analysis_variables[j].name == variable.name) {
+						cell.metadata.analysis_variables[j].index = variable.index;
+					}
+				}
+				
 				variable_count++;
-				variable_index++;
 				container.append($("<td/>").append(input));
 	            
-				variables_table.append(container);
+				variables_table.append(container);			
 			}
 			
 			if (variable_count > 0) {
-				if ($("#empty-variable-message").is(":visible")) {
-					console.log("Hiding empty message");
-					$("#empty-variable-message").hide();
-				}
+				empty_message.hide();
 			} else {
-				if (!$("#empty-variable-message").is(":visible")) {
-					console.log("Showing empty message");
-					$("#empty-variable-message").show();
-				}
+				empty_message.show();
 			}
 		}
 		
@@ -152,33 +143,74 @@ define([
 			    var variables = $("<div/>").attr("id", "variables")
 			                                   .addClass("download-page");
 
-	            var variable_container = $("<div/>").addClass("variable-container");
-
+			    var table = $("<table/>").addClass("variable-def-table")
+			                             .attr("id", "variable-def-table-" + cell_index);
+			    
+			    var label_container = $("<tr/>");
+			    table.append(label_container);
+			    
+			    var display_label = $("<label/>").text("Display name:");
+                label_container.append($("<td/>").append(display_label));
+			    
+                var name_label = $("<label/>").text("Variable name:");
+                label_container.append($("<td/>").append(name_label));
+                
+                var default_label = $("<label/>").text("Default value:");
+                label_container.append($("<td/>").append(default_label));
+                
+                //Empty column- used for the add/remove button
+                label_container.append($("<td/>"));
+                
+                variables.append(label).append(table);
+               
 		        var add_variable_button = $("<button/>")
 		            .addClass("btn btn-xs btn-default btn-add add-variable-button")
 		            .attr("id","add-variable-button")
 		            .attr("type","button")
 		            .attr("aria-label","Add variable")
 		            .click(function() {
-		                addVariable("");
-		            });
-	
-		        add_variable_button.append($("<i>").addClass("fa fa-plus"));
-	
-		        variables.append(label).append(variable_container);
-	
+		                addVariable();
+		            })
+	                .append($("<i>").addClass("fa fa-plus"));
+	                
+                
 		        var variable_count = 0;
-		        var last_variable;
-		        function addVariable(variable_name) {
-		            var new_variable_container = $("<div/>").addClass("variable-container");
-		            var new_variable = $("<input/>")
-		                .attr("class","variable-define")
+		        var previous_button;
+		        function addVariable(variable) {
+		        	if (variable == undefined) {
+		        		variable = {display: "", name: "", default_value:""};
+		        	} 
+		            var row = $("<tr/>").addClass("variable-define");
+		            var display = $("<input/>")
+		                .attr("class","variable-field var-display")
 		                .attr("type","text")
-		                .attr("id","variable-" + variable_count);
-	
-		            new_variable.val(variable_name);
-	                 
-		            if (last_variable != undefined) {
+		                .attr("id","variable-display-" + variable_count);
+		            row.append($("<td/>").append(display));
+		            
+		            var name = $("<input/>")
+	                    .attr("class","variable-field var-name")
+	                    .attr("type","text")
+	                    .attr("id","variable-name-" + variable_count);
+		            row.append($("<td/>").append(name));
+		            
+		            var def = $("<input/>")
+	                    .attr("class","variable-field var-def")
+	                    .attr("type","text")
+	                    .attr("id","variable-default-" + variable_count);
+		            row.append($("<td/>").append(def));
+		            
+		            display.val(variable.display);
+		            name.val(variable.name);
+		            def.val(variable.default_value);
+		            
+                    add_variable_button.detach();
+                    
+                    var button = $("<td/>");
+                    row.append(button)
+		            
+		            button.append(add_variable_button);
+		            
+		            if (previous_button != undefined) {
 		            	var variable_id = variable_count - 1;
 			            var delete_variable = $("<button/>")
 			                .addClass("btn btn-xs btn-default btn-remove remove-variable-button")
@@ -187,25 +219,24 @@ define([
 			                .attr("aria-label","Remove variable")
 			                .click(function() {
 			                	console.log("Removing variable " + variable_id);
-			                    $(this).parent().remove();
+			                    $(this).parent().parent().remove();
 			                });
 		
 			            delete_variable.append($("<i>")
 			                             .addClass("fa fa-trash")
 			                             .attr("aria-hidden","true"));
-			            last_variable.append(delete_variable);
+			            previous_button.append(delete_variable);
 		            }
 
-		            add_variable_button.detach(); 
-		            variables.append(new_variable_container.append(new_variable).append(add_variable_button));
+		            table.append(row);
 		            variable_count++;
-		            last_variable = new_variable_container;
+		            previous_button = button;
 		            return;
 		        }
 		        
 		        if (cell.metadata.analysis_variables == undefined ||
 		            cell.metadata.analysis_variables.length == 0) {
-		        	addVariable("");
+		        	addVariable();
 		        } else {
 		        	console.log("Found " + cell.metadata.analysis_variables.length + " existing variables");
 		        	for (var i = 0; i < cell.metadata.analysis_variables.length; i++) {
@@ -220,13 +251,25 @@ define([
 				cell.metadata.analysis_variables = [];
 				
 				$(".variable-define").each(function(index,item) {
-					if ($(item).val().trim() != "") {
-						console.log("Variable for analysis toolbar: " + $(item).val().trim());
-						cell.metadata.analysis_variables.push($(item).val().trim());
+					var new_variable = {};
+					
+					var display = $(item).find(".var-display");
+					var name = $(item).find(".var-name");
+					var def = $(item).find(".var-def");
+					
+					var new_variable = {display: display.val().trim(),
+							            name: name.val().trim(),
+							            default_value: def.val()};
+					
+					if (new_variable.display != "" &&
+						new_variable.name != "") {
+						console.log("Variable for analysis toolbar: " + display.val());
+						cell.metadata.analysis_variables.push(new_variable);
 					}
+
 				});
 				
-				update_variables($("#variable-list-" + cell_index));
+				update_variables();
 			};
 			
 	        var modal = dialog.modal({
@@ -252,19 +295,17 @@ define([
     		var labels = [];
     		var values = [];
     		
-    		$(".cell-" + cell_index + "-variable").each(function(index,item) {
-				var display_name = $(item).text().trim();
-				var name = display_name.substring(0, display_name.length - 1);
-				labels.push(name);		
-			});
-    		
-    		$(".cell-" + cell_index + "-variable-input").each(function(index,item) {
-				var value = $(item).val().trim();
-				values.push(value);		
-			});
-    		
     		for (var i = 0; i < cell.metadata.analysis_variables.length; i++) {
-    			variables.push({name: labels[i], value: values[i]});
+    			var variable = cell.metadata.analysis_variables[i];
+    			console.log("Variable to generate: " + variable.name);
+    			var to_upload = {};
+    			
+    			to_upload.name = variable.name;
+    			console.log("Getting value from #variable-input-" + variable.index);
+    			to_upload.value = $("#variable-input-" + variable.index).val().trim();
+    			console.log(to_upload.name + " has value " + to_upload.value);
+    			
+    			variables.push(to_upload);
     		}
     		
     		var script = code.analysis_script(cell.metadata.analysis_files,
