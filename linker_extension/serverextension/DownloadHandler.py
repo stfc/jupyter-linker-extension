@@ -35,7 +35,11 @@ class DownloadHandler(IPythonHandler):
         pw = arguments['password']
         URLs = arguments["URLs"]
         notebook_path = arguments["notebookpath"]
-        notebook_wd = os.path.dirname(notebook_path)
+        notebook_wd = ""
+        try:
+            notebook_wd = os.path.dirname(notebook_path)
+        except Exception:
+            notebook_wd = ""
 
         # login for token
         login_url = urljoin(dspace_url, "/rest/login")
@@ -252,7 +256,10 @@ class DownloadHandler(IPythonHandler):
 
                 while True:
                     try:
-                        path = cwd + "/" + notebook_wd  + "/" + item_names[url] + index
+                        path = cwd 
+                        if notebook_wd != "":
+                            path += "/" + notebook_wd
+                        path += "/" + item_names[url] + index
                         os.makedirs(path)
                         break
                     except FileExistsError:

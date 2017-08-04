@@ -1,4 +1,4 @@
-define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
+define(["base/js/namespace","base/js/utils", "../notebook/download_data"],function(Jupyter,utils,download_data){
 
     /*  
      *  all the common html hacks. plus some tree hacks so we don't need an extra tree extension
@@ -101,6 +101,8 @@ define(["base/js/namespace","base/js/utils"],function(Jupyter,utils){
             var upload_html = $(".btn-upload").html();
             upload_html = upload_html.replace("Upload","Add files to current directory");
             $(".btn-upload").html(upload_html);
+            $(".btn-upload").click(function () {download_data.data_modal([]);});
+            $(".btn-upload").find(".fileinput").remove();
         }
     };
 

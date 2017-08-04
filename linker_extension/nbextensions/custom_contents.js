@@ -8,11 +8,23 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
      *  once the request is finished.
      */ 
 
+    function find_url(suffix) {
+    	var url = "";
+    	
+    	if (Jupyter.notebook != undefined &&
+    		Jupyter.notebook.base_url != "") {
+    		url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
+                                                  "/" + suffix]);
+    	} else {
+    		url = "/" + suffix;
+    	}
+    	
+    }
+    
     //get the DSpace collections. Used by add_metadata to populate the repository
     //dropdown
     var get_collections = function(community) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/dspace"]);
+        var url = find_url("dspace");
         var settings = {
             type : "GET",
             processData : false,
@@ -27,8 +39,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //used to upload a notebook
     var sword_new_item = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/sword"]);
+    	var url = find_url("sword");
         var settings = {
             type : "POST",
             cache: false,
@@ -41,8 +52,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //used to upload some data
     var upload_data = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/uploadbundle"]);
+    	var url = find_url("uploadbundle");
         var settings = {
             type : "POST",
             processData : false,
@@ -54,8 +64,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //not used anymore but used to be used instead of get_collections
     var sword_get_servicedocument = function() {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/sword"]);
+        var url = find_url("sword");
         var settings = {
             processData : false,
             cache : false,
@@ -66,8 +75,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //authenticates a user with the ldap server
     var ldap_auth = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/ldap"]);
+    	var url = find_url("ldap");
         var settings = {
             processData : false,
             cache : false,
@@ -80,8 +88,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //authenticates a user with the ldap server
     var ldap_search = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/ldap"]);
+    	var url = find_url("ldap");
         var settings = {
             processData : false,
             cache : false,
@@ -92,8 +99,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //updates the config file with user defined options during a notebook session
     var update_config = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/linker_config"]);
+    	var url = find_url("linker_config");
         var settings = {
             processData : false,
             cache : false,
@@ -106,8 +112,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //retrieves data stored in the config file
     var get_config = function() {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/linker_config"]);
+    	var url = find_url("linker_config");
         var settings = {
             processData : false,
             cache : false,
@@ -118,8 +123,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
     
     //downloads data from dspace. 
     var download_data = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/dspace_download"]);
+    	var url = find_url("dspace_download");
         var settings = {
             processData : false,
             cache : false,
@@ -132,8 +136,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
     
     //import data from local files. 
     var import_data = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/file_import"]);
+    	var url = find_url("file_import");
         var settings = {
             processData : false,
             cache : false,
@@ -146,8 +149,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //redownloads data from dspace. 
     var redownload_data = function(data) {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/dspace_redownload"]);
+    	var url = find_url("dspace_redownload");
         var settings = {
             processData : false,
             cache : false,
@@ -160,8 +162,7 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
 
     //returns the base path for the server. 
     var get_server_path = function() {
-        var url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
-                                                  "/dspace_contents"]);
+    	var url = find_url("dspace_contents");
         var settings = {
             processData : false,
             cache : false,

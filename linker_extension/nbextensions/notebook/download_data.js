@@ -5,6 +5,8 @@ define(["base/js/namespace",
         "../custom_utils",
         "./modify_notebook_html"
 ],function(Jupyter,utils,dialog,custom_contents,custom_utils){
+	var files_to_download;
+	
 	var create_urls = function (id, failed_downloads) {
         var urls_label = $("<label/>")
             .attr("for","download_data_form")
@@ -140,9 +142,7 @@ define(["base/js/namespace",
         var input_files = $("<div/>").attr("id","input-files")
                                      .addClass("download-page");
         
-        var test = function () {
-        	var files_to_download = [];
-        	
+        var test = function () {      	
         	if ($(this).get(0) == undefined ||
         		$(this).get(0).files == undefined) {
         		return;
@@ -178,7 +178,7 @@ define(["base/js/namespace",
             
             Promise.all(promises).then(
             	function() {
-            		Jupyter.notebook.metadata.files_to_download = files_to_submit;
+            		files_to_download = files_to_submit;
             	}
             );
             
@@ -256,37 +256,34 @@ define(["base/js/namespace",
     };
     
     var submit_files = function() {
-    	console.log("Submitting data:");
-    	console.log(Jupyter.notebook.metadata.files_to_download);
-    	custom_contents.import_data({
-            files: Jupyter.notebook.metadata.files_to_download,
-        }).then(function(response) {
-            var downloaded_items = Jupyter.notebook.metadata.downloaded_items || {};
-            Object.keys(response).forEach(function(key) {
-                var result = response[key];
-                if(result.error) {
-                    custom_utils.create_alert(
-                        "alert-danger download-failure-alert",
-                        result.message + " while importing " +
-                        result.name + " (<a href=\"" + key + 
-                        "\" class=\"alert-link\">"+ key + 
-                        "</a>)").attr("id",key);
-                } else {
-                    custom_utils.create_alert(
-                        "alert-success download-success-alert",
-                        result.message + " <a href=\"" + key +  
-                        "\"class=\"alert-link\">" + key +
-                        "</a> imported from local files.");
-                    downloaded_items[result.name] = result.paths;
-                }
+    	if (files_to_download != undefined) {
+        	console.log("Submitting data:");
+        	custom_contents.import_data({
+                files: files_to_download,
+            }).then(function(response) {
+                Object.keys(response).forEach(function(key) {
+                    var result = response[key];
+                    if(result.error) {
+                        custom_utils.create_alert(
+                            "alert-danger download-failure-alert",
+                            result.message + " while importing " +
+                            result.name + " (<a href=\"" + key + 
+                            "\" class=\"alert-link\">"+ key + 
+                            "</a>)").attr("id",key);
+                    } else {
+                        custom_utils.create_alert(
+                            "alert-success download-success-alert",
+                            result.message + " <a href=\"" + key +  
+                            "\"class=\"alert-link\">" + key +
+                            "</a> imported from local files.");
+                    }
+                });
+                files_to_download = [];
             });
-            Jupyter.notebook.metadata.downloaded_items = downloaded_items;
-            Jupyter.notebook.metadata.files_to_download = [];
-            Jupyter.notebook.save_notebook();
-        });
-        //dismiss modal - can't return true since
-        //we're in a promise so dismiss it manually
-        $(".modal").modal("hide");
+            //dismiss modal - can't return true since
+            //we're in a promise so dismiss it manually
+            $(".modal").modal("hide");
+    	}
     }
     
     var submit_dspace = function() {
@@ -322,14 +319,19 @@ define(["base/js/namespace",
 
             var login_request = custom_contents.ldap_auth(login_details);
 
+            var path = "";
+            
+            if (Jupyter.notebook != undefined) {
+            	path = Jupyter.notebook.notebook_path;
+            }
+            
             login_request.then(function() { //success function
                 custom_contents.download_data({
                     URLs: urls,
                     username: $("#username").val(),
                     password: $("#password").val(),
-                    notebookpath: Jupyter.notebook.notebook_path
+                    notebookpath: path
                 }).then(function(response) {
-                    var downloaded_items = Jupyter.notebook.metadata.downloaded_items || {};
                     Object.keys(response).forEach(function(key) {
                         var result = response[key];
                         if(result.error) {
@@ -346,11 +348,9 @@ define(["base/js/namespace",
                                 " (<a href=\"" + key +  
                                 "\"class=\"alert-link\">" + key +
                                 "</a>) downloaded from eData.");
-                            downloaded_items[result.name] = result.paths;
                         }
                     });
-                    Jupyter.notebook.metadata.downloaded_items = downloaded_items;
-                    Jupyter.notebook.save_notebook();
+
                     var failed_urls = [];
                     $(".download-failure-alert").each(function() {
                         failed_urls.push($(this).attr("id"));
@@ -401,7 +401,7 @@ define(["base/js/namespace",
     	submit_dspace();
     }
     
-    var create_modal = function(failed_downloads) {        
+    var data_modal = function(failed_downloads) {        
         var modal = dialog.modal({
             title: "Import external data for use in the notebook",
             body: create_tabs(failed_downloads),
@@ -412,8 +412,7 @@ define(["base/js/namespace",
                     click: submit,
                 }
             },
-            notebook: Jupyter.notebook,
-            keyboard_manager: Jupyter.notebook.keyboard_manager,
+            keyboard_manager: Jupyter.keyboard_manager,
         });
 
         //stuff to do when modal is open and fully visible
@@ -436,7 +435,7 @@ define(["base/js/namespace",
         help: "Download data from urls/dois",
         help_index: "a",
         icon: "fa-download",
-        handler : create_modal,
+        handler : data_modal,
     };
 
     var download_prefix = "linker_extension";
@@ -444,13 +443,14 @@ define(["base/js/namespace",
 
 
     var load = function () {
-        Jupyter.notebook.keyboard_manager.actions.register(download_action,download_action_name,download_prefix);
+        Jupyter.keyboard_manager.actions.register(download_action,download_action_name,download_prefix);
         $("#download_data").click(function () {
-            create_modal([]);
+            data_modal([]);
         });
     };
 
     module.exports = {
         load: load,
+        data_modal: data_modal,
     };
 });
