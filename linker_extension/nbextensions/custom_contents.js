@@ -11,14 +11,14 @@ define(["base/js/namespace","base/js/utils"], function(Jupyter,utils){
     function find_url(suffix) {
     	var url = "";
     	
-    	if (Jupyter.notebook != undefined &&
-    		Jupyter.notebook.base_url != "") {
+    	if (Jupyter.notebook != undefined) {
     		url = utils.url_path_join.apply(null,[Jupyter.notebook.base_url,
                                                   "/" + suffix]);
     	} else {
     		url = "/" + suffix;
     	}
     	
+    	return url;
     }
     
     //get the DSpace collections. Used by add_metadata to populate the repository
