@@ -302,6 +302,7 @@ define(["base/js/namespace",
                     .css("color","red")
                     .text("URL or DOI is not valid for eData");
 
+                console.log("Invalid eData URI detected");
                 $(item).before(error);
             }
         });
@@ -326,15 +327,19 @@ define(["base/js/namespace",
             }
             
             login_request.then(function() { //success function
+            	console.log("Login request successful");
+            	console.log("Sending data request with path: " + path);
                 custom_contents.download_data({
                     URLs: urls,
                     username: $("#username").val(),
                     password: $("#password").val(),
                     notebookpath: path
                 }).then(function(response) {
+                	console.log("Data request response received");
                     Object.keys(response).forEach(function(key) {
                         var result = response[key];
                         if(result.error) {
+                        	console.log("Error while downloading " + result.name + ": " + result.message);
                             custom_utils.create_alert(
                                 "alert-danger download-failure-alert",
                                 result.message + " while downloading " +
@@ -342,6 +347,7 @@ define(["base/js/namespace",
                                 "\" class=\"alert-link\">"+ key + 
                                 "</a>)").attr("id",key);
                         } else {
+                        	console.log("Successfully downlaoded " + result.name);
                             custom_utils.create_alert(
                                 "alert-success download-success-alert",
                                 result.message + " " + result.name +
@@ -389,6 +395,8 @@ define(["base/js/namespace",
                     .addClass("login-error")
                     .css("color","red");
 
+                console.log("Login request failed: " + reason.message);
+                
                 error.text(reason.message);
                 login.after(error);
             });
@@ -409,7 +417,12 @@ define(["base/js/namespace",
                 Cancel: {},
                 Download: { 
                     class : "btn-primary",
-                    click: submit,
+                    click: function() {
+                    	       submit();
+                    	       if ($("#refresh_notebook_list")) {
+                    	    	   $("#refresh_notebook_list").click();
+                    	       }
+                           }
                 }
             },
             keyboard_manager: Jupyter.keyboard_manager,
