@@ -47,14 +47,14 @@ define([
             .addClass("ztree");
 
         var warning = $("<p/>")
-            .text("WARNING: checking a directory will automatically expand and check all " +
+            .text("Note: checking a directory will automatically expand and check all " +
                   "subdirectories. If you check a large directory, this may take a lot of time")
-            .css("color","red");
+            .addClass("fieldnote");
 
         var select_all_button = $("<button/>")
             .addClass("btn btn-default btn-sm")
             .attr("id","select-all-" + id)
-            .text("Select all loaded files")
+            .text("Select all")
             .click(function() {
                 var tree = $.fn.zTree.getZTreeObj("file-tree-" + id);
                 tree.checkAllNodes(true);
@@ -63,19 +63,20 @@ define([
         var deselect_all_button = $("<button/>")
             .addClass("btn btn-default btn-sm")
             .attr("id","deselect-all-" + id)
-            .text("Deselect all loaded files")
+            .text("Clear")
             .click(function() {
                 var tree = $.fn.zTree.getZTreeObj("file-tree-" + id);
                 tree.checkAllNodes(false);
             });
 
-        files_page.append(warning);
+        
         files_page.append(loading_text);
         file_tree_container.append(select_all_button)
                            .append(deselect_all_button)
                            .append(file_tree);
         files_page.append(file_tree_container);
-
+        files_page.append(warning);
+        
         form.append(files_page);
         
         return(form);

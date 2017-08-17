@@ -13,13 +13,13 @@ define(["base/js/namespace",
 
         var form_body = $("<form/>").attr("id","add_metadata_form")
                                     .append($("<label/>")
-                                            .attr("for","add_metadata_form")
+                                    		.attr("for","add_metadata_form")
                                             .text("Add the metadata for the notebook."))
                                     .append(form_fields.form1)
                                     .append(form_fields.form2);
         
         var modal = dialog.modal({
-            title: "Add metadata for " + Jupyter.notebook.notebook_name,
+            title: "Notebook metadata",
             body: form_body,
             buttons: {
                 Cancel: {},

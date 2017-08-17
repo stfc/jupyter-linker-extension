@@ -11,10 +11,16 @@ define(["base/js/namespace",
 	
 	    var date = $("<table/>").attr("id","date");
 	
+	    var dateLabel = $("<label/>")
+            .attr("for","date")
+            .addClass("fieldlabel")
+            .text("Issue Date:")
+            .attr("id","date-label");
+	    
 	    var yearLabel = $("<label/>")
 	        .attr("for","year")
 	        .addClass("required")
-	        .text("Issue Year: ")
+	        .text("Year: ")
 	        .attr("id","year-label");
 	    var year = $("<select/>").attr("name","year").attr("id","year")
                                  .append($("<option/>").attr("value","0").text("Not Set"))
@@ -53,10 +59,10 @@ define(["base/js/namespace",
         	day.append($("<option/>").attr("value",i).text(i));
         }
 	
-	    var dateLabelContainer = $("<tr/>").attr("id","date-label-container");
+	    var labelContainer = $("<tr/>").attr("id","date-label-container");
 	    var dateInputContainer = $("<tr/>").attr("id","date-input-container");
 	
-	    dateLabelContainer.append($("<td>").append(yearLabel))
+	    labelContainer.append($("<td>").append(yearLabel))
 	                      .append($("<td>").append(monthLabel))
 	                      .append($("<td>").append(dayLabel));
 	
@@ -64,7 +70,7 @@ define(["base/js/namespace",
 	                      .append($("<td>").append(month))
 	                      .append($("<td>").append(day));
 	
-	    date.append(dateLabelContainer).append(dateInputContainer);
+	    date.append(dateLabel).append(labelContainer).append(dateInputContainer);
 	
 	    //default to have the current date selected
 	    day.val(currtime.getDate());

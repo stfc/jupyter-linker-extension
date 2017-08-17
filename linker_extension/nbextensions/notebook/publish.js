@@ -117,9 +117,16 @@ define(["base/js/namespace",
     var publish = function() {
         var instructions = $("<label/>")
             .attr("id","publish_instructions")
-            .attr("for","publish-form");
+            .attr("for","publish-form")
+            .addClass("publish-instructions");
 
-        instructions.text("Confirm data to be published");
+        var instructions_list = [];
+        instructions_list.push("Step 1. Confirm the data files to be published.");
+        instructions_list.push("Step 2. Confirm metadata for the data item.");
+        instructions_list.push("Step 3. Confirm licensing information and repository.");
+        instructions_list.push("Step 4. User authentication.");
+                                 
+        instructions.text(instructions_list[0]);
 
         var data_fields = local_data.data_form("publish");
         var metadata_fields = add_metadata.create_forms();
@@ -134,7 +141,7 @@ define(["base/js/namespace",
                         .append(final_page());
 
         var modal = dialog.modal({
-            title: "Publish Data",
+            title: "Publish to eData",
             body: form_body,
             buttons: {
                 Cancel: {},
@@ -142,17 +149,18 @@ define(["base/js/namespace",
                     click: function() {
                         if (!($("#md_fields1").hasClass("hide-me"))) {
                             $("#md_fields1").addClass("hide-me");
-                            instructions.text("Confirm data to be published");
+                            instructions.text(instructions_list[0]);
                             local_data.init_data_form(md.reportmetadata.files, "publish");
                             $("#files-page-publish").removeClass("hide-me");
                             $("#previous").prop("disabled",true);
                         } else if (!($("#md_fields2").hasClass("hide-me"))) {
                             $("#md_fields2").addClass("hide-me");
                             $("#md_fields1").removeClass("hide-me");
+                            instructions.text(instructions_list[1]);
                         } else if (!($("#final-page").hasClass("hide-me"))) {
                             $("#final-page").addClass("hide-me");
                             $("#md_fields2").removeClass("hide-me");
-                            instructions.text("Add metadata to the file bundle.");
+                            instructions.text(instructions_list[2]);
                             $("#next").text("Next");
                         }
                         return false;
@@ -168,11 +176,12 @@ define(["base/js/namespace",
                                 $("#files-page-publish").addClass("hide-me");
                                 $("#md_fields1").removeClass("hide-me");
                                 $("#previous").prop("disabled",false);
-                                instructions.text("Add metadata to the file bundle.");
+                                instructions.text(instructions_list[1]);
                             }
                         } else if(!$("#md_fields1").hasClass("hide-me")) {
                         	add_metadata.validate_fields1();
                             if($(".metadata-form-error").length === 0) {
+                            	instructions.text(instructions_list[2]);
                                 $("#md_fields1").addClass("hide-me");
                                 $("#md_fields2").removeClass("hide-me");
                                 add_metadata.save_metadata();
@@ -183,7 +192,7 @@ define(["base/js/namespace",
                                 $("#md_fields2").addClass("hide-me");
                                 $("#final-page").removeClass("hide-me");
                                 add_metadata.save_metadata();
-                                instructions.text("Publish your data.");
+                                instructions.text(instructions_list[3]);
                                 $("#next").text("Publish");
                             }
                         } else if (!$("#final-page").hasClass("hide-me")) {

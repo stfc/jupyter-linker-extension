@@ -35,6 +35,7 @@ define(["base/js/namespace",
         var title = $("<input/>")
             .attr("name","title")
             .attr("id","title")
+            .addClass("title-input")
             .attr("type","text")
             .attr("required","required")
             .val("");
@@ -189,6 +190,54 @@ define(["base/js/namespace",
 	}
 	
 	/*  
+     *  Funders for the project the data is associated with.
+     *  
+     *  This field is optional.
+     */ 	
+	function funders_field() {
+		var funders_div = $("<div/>");
+		
+        var funders_label = $("<label/>")
+            .attr("for","funders")
+            .addClass("fieldlabel")
+            .text("Funders: ");
+
+        var funders = $("<input/>")
+            .attr("name","funders")
+            .attr("id","funders");         
+
+        funders_div.append(funders_label).append(funders);
+        
+        funders.val(md.reportmetadata.funders);
+        
+        return funders_div;
+	}
+	
+	/*  
+     *  Sponsors for the project the data is associated with.
+     *  
+     *  This field is optional, and currentlly not used.
+     */ 
+	function sponsors_field() {
+		var sponsors_div = $("<div/>");
+
+        var sponsorsLabel = $("<label/>")
+            .attr("for","sponsors")
+            .addClass("fieldlabel")
+            .text("Sponsors: ");
+
+        var sponsors = $("<textarea/>")
+            .attr("name","sponsors")
+            .attr("id","sponsors");
+        
+        sponsors_div.append(sponsors_label).append(sponsors);
+        
+        sponsors.val(md.reportmetadata.sponsors);
+        
+        return sponsors_div;
+	}
+	
+	/*  
      *  Any citations of third party resources.
      *  
      *  This field is optional.
@@ -199,7 +248,7 @@ define(["base/js/namespace",
         var citationsLabel = $("<label/>")
             .addClass("fieldlabel")
             .attr("for","nb-citations")
-            .text("Add citations for any third party resources that have been used in this notebook: ");
+            .text("Citations for third party resources: ");
 
         var citation_container = $("<div/>").addClass("nb-citation-container");
 
@@ -275,7 +324,7 @@ define(["base/js/namespace",
         var referenced_by_label = $("<label/>")
             .addClass("fieldlabel")
             .attr("for","nb-referenced-bys")
-            .text("Add URIs for items that reference this notebook or its data: ");
+            .text("URIs referencing this notebook/data: ");
 
         var referenced_by_count = 0;
         
@@ -342,55 +391,7 @@ define(["base/js/namespace",
 
         return referenced_by_div;
 	}
-	
-	/*  
-     *  Funders for the project the data is associated with.
-     *  
-     *  This field is optional.
-     */ 	
-	function funders_field() {
-		var funders_div = $("<div/>");
 		
-        var funders_label = $("<label/>")
-            .attr("for","funders")
-            .addClass("fieldlabel")
-            .text("Funders: ");
-
-        var funders = $("<input/>")
-            .attr("name","funders")
-            .attr("id","funders");         
-
-        funders_div.append(funders_label).append(funders);
-        
-        funders.val(md.reportmetadata.funders);
-        
-        return funders_div;
-	}
-	
-	/*  
-     *  Sponsors for the project the data is associated with.
-     *  
-     *  This field is optional, and currentlly not used.
-     */ 
-	function sponsors_field() {
-		var sponsors_div = $("<div/>");
-
-        var sponsorsLabel = $("<label/>")
-            .attr("for","sponsors")
-            .addClass("fieldlabel")
-            .text("Sponsors: ");
-
-        var sponsors = $("<textarea/>")
-            .attr("name","sponsors")
-            .attr("id","sponsors");
-        
-        sponsors_div.append(sponsors_label).append(sponsors);
-        
-        sponsors.val(md.reportmetadata.sponsors);
-        
-        return sponsors_div;
-	}
-	
     /*  
      *  Get the user's username and department. This is used to autofill the author and department.
      *  
@@ -485,9 +486,9 @@ define(["base/js/namespace",
             .addClass("collapse")
             .attr("id","extra_metadata_2")
             .append(publisher_field())
+            .append(funders_field())
             .append(citations_field())
-            .append(referenced_by_field())
-            .append(funders_field());
+            .append(referenced_by_field());
 
         form2.append(licences.licence_field())
              .append(department.department_fields())

@@ -502,7 +502,6 @@ casper.notebook_test(function() {
     this.waitFor(function() {
         return this.evaluate(function() {
         	tos_text = $("#tos-display").text();
-        	console.log("TOS display text is: " + tos_text);
             return tos_text != "No files selected";
         });
     });

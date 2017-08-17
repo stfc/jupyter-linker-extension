@@ -48,7 +48,7 @@ define([
         add_divider();
         add_new_item("Import data", "download_data");
         add_divider();
-        add_new_item("Publish", "publish");
+        add_new_item("Publish to eData", "publish");
 
         /*  
          *  The notebook metadata doesn't exist immediately and we need it to

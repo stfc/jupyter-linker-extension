@@ -5,9 +5,15 @@ define(["base/js/namespace",
 ],function(Jupyter,utils,dialog,local_data){
 	var md = Jupyter.notebook.metadata.reportmetadata;
     var manage_associated_data = function() {
+        var main_body = $("<div/>").attr("id","associated_data")
+                                   .append($("<label/>")
+        		                           .attr("for","associated_data")
+                                           .text("Select data associated with the notebook."))
+                                   .append(local_data.data_form("associated"));
+    	
 		var modal = dialog.modal({
-            title: "Manage datafiles associated with this notebook",
-            body: local_data.data_form("associated"),
+            title: "Associated Data",
+            body: main_body,
             buttons: {
                 Cancel: {},
                 Select: { 

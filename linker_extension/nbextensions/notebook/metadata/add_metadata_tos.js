@@ -28,13 +28,13 @@ define(["base/js/namespace",
     	var input_container = $("<div/>").addClass("tos-input");
     	
     	var onclick = function () {
-    		local_data.open_modal(tos_list, $(".tos-display"), "tos");
+    		local_data.open_modal(tos_list, $("#tos-display"), "tos");
     	}
         var input_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
                                        .attr("id", "tos-select")
                                        .text("Select terms of service files")
                                        .click(onclick);
-        var input_display = $("<span/>").addClass("tos-display")
+        var input_display = $("<span/>").addClass("file-display")
                                         .attr("id", "tos-display")
                                         .text(local_data.get_display_text(tos_list));
         

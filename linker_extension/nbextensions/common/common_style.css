@@ -130,7 +130,7 @@ span#login_widget {
   margin-left: 4px; 
 }
 
-#md_fields1 > input, #md_fields2 > input, #data_fields > input, .referencedBy, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input, .download-url, #files-page > input, #metadata-page > input{
+#md_fields1 > input, #md_fields2 > input, #data_fields > input, .title-input, .referenced-by, #licence-url, .citation, #extra_nb_metadata_1 > input, #extra_nb_metadata_2 > input, .download-url, #files-page > input, #metadata-page > input{
   margin-bottom: 8px;
   outline: none;
   box-shadow: none; 
@@ -380,9 +380,10 @@ label.required:after {
 }
 
 .fieldlabel {
-  margin-top: 5px;
+  margin-top: 10px;
   margin-bottom: 2px;
   display: block;
+  font-weight:bold;
 }
 
 .fieldnote {
@@ -402,4 +403,13 @@ label.required:after {
 
 .variable-table {
 	margin:10px;
+}
+
+.publish-instructions {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.file-display {
+	margin: 10px;
 }
