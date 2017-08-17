@@ -25,7 +25,7 @@ define(["base/js/namespace",
 
         var add_download_URL_button = $("<button/>")
             .addClass("btn btn-xs btn-default btn-add add-download-url-button")
-            .attr("id","download-url-button")
+            .attr("id","add-url-button")
             .attr("type","button")
             .attr("aria-label","Add URL")
             .click(function() {
@@ -88,10 +88,9 @@ define(["base/js/namespace",
 	}
 	
 	var dspace_url = "";
+	var config_username = "";
 	
 	var create_login_details = function() {
-        var config_username = "";
-        var dspace_url = "";
         var login = $("<table/>").attr("id","login-fields-upload-data");
         var login_labels = $("<tr/>");
         var login_fields = $("<tr/>");
@@ -217,8 +216,8 @@ define(["base/js/namespace",
         dspace_form = $("<div/>");
         dspace_form.append(
             $("<form/>").attr("id","download_data_form")
-                        .append(create_urls("dspace", failed_downloads)
-                                .append(create_login_details())));
+                        .append(create_urls("dspace", failed_downloads))
+                        .append(create_login_details()));
         dspace_form.addClass("tab-pane fade in active").attr("id", "dspace-tab");
 
         local_form = $("<div/>");
@@ -276,14 +275,18 @@ define(["base/js/namespace",
                             result.message + " <a href=\"" + key +  
                             "\"class=\"alert-link\">" + key +
                             "</a> imported from local files.");
+                        
+                        //dismiss modal - can't return true since
+                        //we're in a promise so dismiss it manually
+                        $(".modal").modal("hide");
                     }
                 });
                 files_to_download = [];
             });
-            //dismiss modal - can't return true since
-            //we're in a promise so dismiss it manually
-            $(".modal").modal("hide");
+            
     	}
+    	
+    	return false;
     }
     
     var submit_dspace = function() {
@@ -398,15 +401,17 @@ define(["base/js/namespace",
                 console.log("Login request failed: " + reason.message);
                 
                 error.text(reason.message);
-                login.after(error);
+                $("#login-fields-upload-data").after(error);
             });
         }
         return false;
     }
     
     var submit = function() {
-    	submit_files();
-    	submit_dspace();
+    	var files_res = submit_files();
+    	var dspace_res = submit_dspace();
+    	
+    	return (files_res && dpsace_res);
     }
     
     var data_modal = function(failed_downloads) {        
@@ -418,10 +423,11 @@ define(["base/js/namespace",
                 Download: { 
                     class : "btn-primary",
                     click: function() {
-                    	       submit();
+                    	       var result = submit();
                     	       if ($("#refresh_notebook_list")) {
                     	    	   $("#refresh_notebook_list").click();
                     	       }
+                    	       return result;
                            }
                 }
             },
