@@ -258,9 +258,14 @@ label[for=filename-collision-behaviour-overwrite] > span, label[for=filename-col
   margin-bottom: 5px;
 }
 
-.generate-title {
-  margin-left:5px;
-  font-size: 17px;
+.toolbar-title {
+  margin:5px 0px 5px 10px;
+  font-size: 21px;
+}
+
+.toolbar-desc {
+  margin:5px 0px 5px 10px;
+
 }
 
 .generate-code {
@@ -273,6 +278,10 @@ label[for=filename-collision-behaviour-overwrite] > span, label[for=filename-col
   border: solid #DADCE0 1px;
   background-color: #F8F9FA;
   padding : 4px 7px 9px 7px; 
+}
+
+.empty-message {
+  margin: 10px;
 }
 
 .input-display {

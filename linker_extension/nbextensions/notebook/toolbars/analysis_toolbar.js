@@ -30,11 +30,19 @@ define([
 	    setup_variables();
 	    setup_generate();
 		
+	    var title_container;
+	    var desc_container;
 		function setup_title() {
 			//The title for the toolbar.
-			var title_container = $("<div/>").addClass("generate-title")
-	                                         .append("Analysis Cell");
+			title_container = $("<div/>").addClass("toolbar-title")
+			                             .attr("id", "cell-title")
+	                                     .append("Analysis Cell");
 	    	$(div).append(title_container);
+	    	
+			desc_container = $("<div/>").addClass("toolbar-desc")
+                                        .attr("id", "cell-desc")
+                                        .append("Click on 'edit' to create a custom analysis cell.");
+		    $(div).append(desc_container);
 	    }
 	   
 	    function setup_file_input() {
@@ -78,70 +86,88 @@ define([
 	    	$(div).append(variables);
 	    	empty_message = $("<span/>").addClass("empty-message")
 		                                .attr("id", "empty-variable-message")
-		                                .text("No variables defined. Please click the 'edit variables' button to add some.");
+		                                .text("No variables defined. Use the 'edit' button to define the interface for this cell.");
 			        
 	    	variables.append(variables_label)
 	    	         .append(empty_message)
 	    	         .append(variables_table);
 			
-	    	if (cell.metadata.analysis_variables != undefined) {
-	    		update_variables();
-	    	} 	
+	    	update_display(); 	
 	    }
 	    
-		function update_variables() {
-			console.log("Updating variables for cell " + cell_index);
-			var variables_to_create = cell.metadata.analysis_variables.slice();
-			
-			$(".cell-" + cell_index + "-row").each(function(index,item) {
-				$(item).remove();
-			});
-			
-			var variable_count = 0;
-			for (var i = 0; i < variables_to_create.length; i++) { 
-				var variable = variables_to_create[i];
-				variable.index = variable_count;
-				console.log("Adding container for " + variable.display);
-				var container = $("<tr/>").addClass("cell-" + cell_index + "-row");
-				var label = $("<label/>").text(variable.display + ":")
-				                         .addClass("variable")
-				                         .addClass("cell-" + cell_index + "-variable")
-				                         .attr("id", "variable-label-" + variable.index);
-				container.append($("<td/>").append(label));
-				
-				var input =  $("<input/>").attr("type","text")
-	                                      .attr("id", "variable-input-" + variable.index)
-	                                      .addClass("variable-input")
-				                          .addClass("cell-" + cell_index + "-variable-input")
-				                          .val(variable.default_value)
-	                                      .focus(function(){Jupyter.keyboard_manager.edit_mode()});
-				
-				for (var j = 0; j < cell.metadata.analysis_variables.length; j++) {
-					if (cell.metadata.analysis_variables[j].name == variable.name) {
-						cell.metadata.analysis_variables[j].index = variable.index;
-					}
+		function update_display() {
+			if (cell.metadata.analysis_title != undefined) {
+				if (cell.metadata.analysis_title.trim() == "") {
+					title_container.text("Analysis Cell");
+				} else {
+					title_container.text(cell.metadata.analysis_title.trim());
 				}
-				
-				variable_count++;
-				container.append($("<td/>").append(input));
-	            
-				variables_table.append(container);			
 			}
 			
-			if (variable_count > 0) {
-				empty_message.hide();
-			} else {
-				empty_message.show();
+			if (cell.metadata.analysis_desc != undefined) {
+				if (cell.metadata.analysis_desc.trim() == "") {
+					desc_container.text("Click on 'edit' to create a custom analysis cell.");
+				} else {
+					desc_container.text(cell.metadata.analysis_desc.trim());
+				}
+			}
+			
+			if (cell.metadata.analysis_variables != undefined) {
+				console.log("Updating variables for cell " + cell_index);
+				var variables_to_create = cell.metadata.analysis_variables.slice();
+				
+				$(".cell-" + cell_index + "-row").each(function(index,item) {
+					$(item).remove();
+				});
+				
+				var variable_count = 0;
+				for (var i = 0; i < variables_to_create.length; i++) { 
+					var variable = variables_to_create[i];
+					variable.index = variable_count;
+					console.log("Adding container for " + variable.display);
+					var container = $("<tr/>").addClass("cell-" + cell_index + "-row");
+					var label = $("<label/>").text(variable.display + ":")
+					                         .addClass("variable")
+					                         .addClass("cell-" + cell_index + "-variable")
+					                         .attr("id", "variable-label-" + variable.index);
+					container.append($("<td/>").append(label));
+					
+					var input =  $("<input/>").attr("type","text")
+		                                      .attr("id", "variable-input-" + variable.index)
+		                                      .addClass("variable-input")
+					                          .addClass("cell-" + cell_index + "-variable-input")
+					                          .val(variable.default_value)
+		                                      .focus(function(){Jupyter.keyboard_manager.edit_mode()});
+					
+					for (var j = 0; j < cell.metadata.analysis_variables.length; j++) {
+						if (cell.metadata.analysis_variables[j].name == variable.name) {
+							cell.metadata.analysis_variables[j].index = variable.index;
+						}
+					}
+					
+					variable_count++;
+					container.append($("<td/>").append(input));
+		            
+					variables_table.append(container);			
+				}
+				
+				if (variable_count > 0) {
+					empty_message.hide();
+				} else {
+					empty_message.show();
+				}
 			}
 		}
 		
 		function select_variables() {
 			console.log("Selecting variables for cell " + cell_index);
-			var form_body = function () {
-		        var label = $("<label/>").text("Choose variables for use in analysis script.");
 			
-			    var variables = $("<div/>").attr("id", "variables")
-			                                   .addClass("download-page");
+			var variable_table = function () {
+		        var label =  $("<label/>").attr("for","variables")
+	                                                .addClass("fieldlabel")
+	                                                .text("Variables: ");
+				
+			    var variables = $("<div/>").attr("id", "variables");
 
 			    var table = $("<table/>").addClass("variable-def-table")
 			                             .attr("id", "variable-def-table-" + cell_index);
@@ -250,6 +276,57 @@ define([
 		        return variables;
 			};
 			
+	        var title = $("<input/>").attr("name","cell-title")
+                                     .attr("id","cell-title")
+                                     .addClass("title-input")
+                                     .attr("type","text");
+	        
+	        var desc = $("<textarea/>").attr("name","cell-desc")
+                                       .attr("id","cell-desc")
+                                       .addClass("desc-input")
+                                       .attr("type","text");
+			
+			var form_body = function () {
+			    var edit_toolbar_body = $("<div/>").attr("id", "edit-toolbar")
+                                                   .addClass("download-page");
+			    
+				var title_div = $("<div/>");
+				
+		        var title_label =  $("<label/>")
+		            .attr("for","cell-title")
+		            .addClass("required")
+		            .addClass("fieldlabel")
+		            .text("Cell Title: ");
+		        
+		        if (cell.metadata.analysis_title != undefined) {
+		        	title.val(cell.metadata.analysis_title);
+		        }
+		        
+		        title_div.append(title_label);
+		        title_div.append(title);
+		        edit_toolbar_body.append(title_div);
+		        
+				var desc_div = $("<div/>");
+				
+		        var desc_label =  $("<label/>")
+		            .attr("for","cell-desc")
+		            .addClass("required")
+		            .addClass("fieldlabel")
+		            .text("Cell Description: ");
+		        
+		        if (cell.metadata.analysis_desc != undefined) {
+		        	desc.val(cell.metadata.analysis_desc);
+		        }
+		        
+		        desc_div.append(desc_label);
+		        desc_div.append(desc);
+		        edit_toolbar_body.append(desc_div);
+		        
+		        edit_toolbar_body.append(variable_table());
+		        
+		        return (edit_toolbar_body);
+			};
+			
 			var submit = function () {
 				cell.metadata.analysis_variables = [];
 				
@@ -272,11 +349,13 @@ define([
 
 				});
 				
-				update_variables();
+				cell.metadata.analysis_title = title.val().trim();
+				cell.metadata.analysis_desc = desc.val().trim();
+				update_display();
 			};
 			
 	        var modal = dialog.modal({
-	            title: "Add variables to be used in the analysis tool",
+	            title: "Edit Interface for Analysis Toolbar",
 	            body: form_body(),
 	            buttons: {
 	                Cancel: {},
@@ -355,7 +434,7 @@ define([
 	        
 	        var variables_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
                                                .attr("id", "edit-variables-" + cell_index)
-                                               .text("Edit Variables")
+                                               .text("Edit")
                                                .click(select_variables);
 	        
 	        var close = function() {
@@ -364,7 +443,7 @@ define([
 
 	        var close_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
                                            .attr("id", "close-toolbar-" + cell_index)
-                                               .text("Close toolbar")
+                                               .text("Close")
                                                .click(close);
 	
 	        var generate_container = $("<div/>").addClass("generate-code")

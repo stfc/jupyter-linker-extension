@@ -28,7 +28,7 @@ define([
 		
 		function setup_title() {
 			//The title for the toolbar.
-			var title_container = $("<div/>").addClass("generate-title")
+			var title_container = $("<div/>").addClass("toolbar-title")
 	                                         .append("Generate Dataplot Cell");
 	    	$(div).append(title_container);
 	    }
@@ -229,7 +229,7 @@ define([
 
 	        var close_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
                                            .attr("id", "close-toolbar-" + cell_index)
-                                               .text("Close toolbar")
+                                               .text("Close")
                                                .click(close);
 	
 	        var generate_container = $("<div/>").addClass("generate-code")
