@@ -149,13 +149,16 @@ define([
 			    var label_container = $("<tr/>");
 			    table.append(label_container);
 			    
-			    var display_label = $("<label/>").text("Display name:");
+			    var display_label = $("<label/>").text("Display name:")
+			    								 .attr("class","variable-field");
                 label_container.append($("<td/>").append(display_label));
 			    
-                var name_label = $("<label/>").text("Variable name:");
+                var name_label = $("<label/>").text("Variable name:")
+				                              .attr("class","variable-field");
                 label_container.append($("<td/>").append(name_label));
                 
-                var default_label = $("<label/>").text("Default value:");
+                var default_label = $("<label/>").text("Default value:")
+				                                 .attr("class","variable-field");
                 label_container.append($("<td/>").append(default_label));
                 
                 //Empty column- used for the add/remove button

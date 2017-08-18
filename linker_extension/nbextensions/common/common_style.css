@@ -405,6 +405,10 @@ label.required:after {
 	margin:10px;
 }
 
+.variable-field {
+	margin:5px;
+}
+
 .publish-instructions {
 	font-weight: bold;
 	font-size: 15px;
