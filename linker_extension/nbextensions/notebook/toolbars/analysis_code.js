@@ -11,14 +11,18 @@ define([
 		for (var i = 0; i < variables.length; i++) {
 	        code += variables[i].name + " = '" + variables[i].value + "'\n"
 	    }
-		code += "\n"
-		code += "name = '" + files[0].path + "'\n"
-	    
-		code += "with open(name) as f:\n" +
-	            "    data = f.read()\n" +
-	            "\n" +
-	            "    data = data.rstrip()\n" +
-	            "    data = data.split('\\n')\n"
+		
+		if (files.length > 0) {
+			code += "\n"
+			code += "name = '" + files[0].path + "'\n"
+			    
+			code += "with open(name) as f:\n" +
+			        "    data = f.read()\n" +
+			        "\n" +
+			        "    data = data.rstrip()\n" +
+			        "    data = data.split('\\n')\n"
+		}
+
 	    
 	    code += "#End generated code\n\n"
 	    	
