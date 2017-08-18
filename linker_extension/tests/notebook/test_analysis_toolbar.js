@@ -150,6 +150,8 @@ casper.notebook_test(function() {
     
     this.then(function() {
         this.evaluate(function() {
+        	$("#cell-title").val("Example tool");
+        	$("#cell-desc").val("An example tool created for the unit test.");
             $("#variable-display-0").val("First variable");
             $("#variable-name-0").val("first_var");
             $("#variable-default-0").val("1234");
@@ -174,6 +176,21 @@ casper.notebook_test(function() {
     		return $("#variable-label-1").text();
     	});
     	
+    	var title = this.evaluate(function() {
+    		return $("#cell-title").val(); 
+    	});
+    	
+    	var desc = this.evaluate(function() {
+    		return $("#cell-desc").val(); 
+    	});
+    	
+    	this.test.assertEquals(title, 
+	                           "Example tool", 
+	                           "Title correctly set");
+    	this.test.assertEquals(desc, 
+    			               "An example tool created for the unit test.", 
+	                           "Description correctly set");
+    	
     	this.test.assertEquals(variable_name_0, "First variable:", "First variable correctly created");
     	this.test.assertEquals(variable_name_1, "Second variable:", "Second variable correctly created");
     	this.test.assertDoesntExist("#variable-label-2", "No extra variables created");
@@ -197,6 +214,20 @@ casper.notebook_test(function() {
 			    default_value: $("#variable-default-1").val()}; 
     	});
     	
+    	var title = this.evaluate(function() {
+    		return $("#cell-title").val(); 
+    	});
+    	
+    	var desc = this.evaluate(function() {
+    		return $("#cell-desc").val(); 
+    	});
+    	
+    	this.test.assertEquals(title, 
+	                           "Example tool", 
+	                           "Title correctly reloaded");
+    	this.test.assertEquals(desc, 
+    			               "An example tool created for the unit test.", 
+	                           "Description correctly reloaded");
     	this.test.assertEquals(variable_0.display, 
     			               "First variable", 
     			               "First variable display correctly reloaded");
