@@ -17,8 +17,8 @@ casper.notebook_test(function() {
     });
 
     //put in some references
-    this.waitForSelector("#toggle_cell_references_bar");
-    this.thenClick("#toggle_cell_references_bar");
+    this.waitForSelector("#cell_references_bar");
+    this.thenClick("#cell_references_bar");
 
     this.then(function() {
     	this.evaluate(function() {

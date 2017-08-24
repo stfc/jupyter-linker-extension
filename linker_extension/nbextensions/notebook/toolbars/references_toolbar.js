@@ -20,6 +20,17 @@ define([
         var URL_container = $("<div/>").addClass("cell-urls");
         toolbar_container.append(URL_container);
         
+        var close = function() {
+        	cell.element.find("div.ctb_hideshow").removeClass("ctb_show");
+        }
+
+        var close_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
+                                       .attr("id", "close-toolbar")
+                                       .text("Done")
+                                       .click(close);
+        
+        toolbar_container.append(close_button);
+        
         //Create reference URLs list in cell metadata
         var metadata_set = cell.metadata.hasOwnProperty("referenceURLs");
         if(!metadata_set) {

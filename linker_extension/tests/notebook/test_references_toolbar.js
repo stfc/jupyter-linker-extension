@@ -19,18 +19,8 @@ casper.notebook_test(function() {
     });
 
     //click the toggle button
-    selector = "#toggle_cell_references_bar";
+    selector = "#cell_references_bar";
     this.waitForSelector(selector);
-    this.then(function() {
-        var text = this.evaluate(function() {
-            return $("#toggle_cell_references_bar").text();
-        });
-        this.test.assertEquals(
-            text,
-            "Show cell references toolbar",
-            "Toggle button says show when it is not visible"
-        );
-    });
     this.thenClick(selector);
 
     //test that toggle on works
@@ -38,42 +28,10 @@ casper.notebook_test(function() {
         selector = ".cell-urls-container";
         //check we have our toolbar active
         this.test.assertExists(selector, "Our cell toolbar instance exists");
-        this.test.assertElementCount(
-            selector,
-            2,
-            "There are 2 instances of the toolbar - one for each cell"
-        );
         this.test.assertVisible(
             selector,
-            "At least one cell toolbars is visible"
+            "Cell toolbar is visible"
         ); //this should mean that all are visible
-
-        var text = this.evaluate(function() {
-            return $("#toggle_cell_references_bar").text();
-        });
-        this.test.assertEquals(
-            text,
-            "Hide cell references toolbar",
-            "Toggle button says hide when it is visible"
-        );
-    });
-
-    //test that toggle off works 
-    this.thenClick(selector);
-    this.then(function() {
-        selector = ".cell-urls-container";
-        this.test.assertNotVisible(
-            selector,
-            "Cell toolbar has been toggled off successfully"
-        );
-        var text = this.evaluate(function() {
-            return $("#toggle_cell_references_bar").text();
-        });
-        this.test.assertEquals(
-            text,
-            "Show cell references toolbar",
-            "Toggle button says show when it isn't visible"
-        );
     });
 
     this.thenClick(selector);
@@ -344,141 +302,6 @@ casper.notebook_test(function() {
             cell2_inputs.url1,
             "URL5",
             "Cell 2 input 1 refilled successfully"
-        );
-    });
-
-    //check text of toggle button before reload
-
-    this.waitFor(function() {
-        var text = this.evaluate(function() {
-            return $("#toggle_cell_references_bar").text();
-        });
-        if(text !== "Show/Hide cell references toolbar" && text !== "") {
-            //this is the default text and empty string, so either unloaded yet
-            //or our promise hasn't resolved yet
-            return true;
-        }
-    }, function then() {
-        var text = this.evaluate(function() {
-            return $("#toggle_cell_references_bar").text();
-        });
-        this.test.assertEquals(
-            text,
-            "Hide cell references toolbar",
-            "Toggle button says hide when it is visible before reload"
-        );
-    });
-
-    var nbname = "test_references_toolbar.ipynb";
-    this.thenEvaluate(function (nbname) {
-        require(["base/js/events"], function (events) {
-            Jupyter.notebook.set_notebook_name(nbname);
-            Jupyter._save_success = Jupyter._save_failed = false;
-            events.on("notebook_saved.Notebook", function () {
-                Jupyter._save_success = true;
-            });
-            events.on("notebook_save_failed.Notebook", function (event, error) {
-                Jupyter._save_failed = "save failed with " + error;
-            });
-            Jupyter.notebook.save_notebook();
-        });
-    }, {nbname:nbname});
-    
-    this.waitFor(function () {
-        return this.evaluate(function(){
-            return Jupyter._save_failed || Jupyter._save_success;
-        });
-    });
-
-    this.then(function(){
-        var success_failure = this.evaluate(function(){
-            return [Jupyter._save_success, Jupyter._save_failed];
-        });
-        this.test.assertEquals(success_failure[1], false, "Save did not fail");
-        this.test.assertEquals(success_failure[0], true, "Save OK");
-    });
-
-    
-    //shutdown
-    this.then(function() {
-        this.shutdown_current_kernel();
-    });
-    this.wait(2000);
-
-    this.then(function() {
-        this.test.assertNot(this.kernel_running(),"Notebook shutdown successfully");
-    });
-
-    this.then(function() {
-        this.open(this.get_notebook_server());
-    });
-
-    this.waitFor(this.page_loaded);
-    this.wait_for_dashboard();
-
-    //go back into notebook - we're doing this to check
-    //that the notebook was saved automatically
-    this.then(function(){
-        var notebook_url = this.evaluate(function(nbname){
-            var escaped_name = encodeURIComponent(nbname);
-            var return_this_thing = null;
-            $("a.item_link").map(function (i,a) {
-                if (a.href.indexOf(escaped_name) >= 0) {
-                    return_this_thing = a.href;
-                    return;
-                }
-            });
-            return return_this_thing;
-        }, {nbname:nbname});
-        this.test.assertNotEquals(
-            notebook_url,
-            null,
-            "Found URL in notebook list"
-        );
-        // open the notebook
-        this.open(notebook_url);
-    });
-
-    //wait for redirect
-    this.waitFor(this.kernel_running);
-    this.waitFor(function() {
-        return this.evaluate(function () {
-            return Jupyter && Jupyter.notebook && true;
-        });
-    });
-
-    //check that we're back in the notebook
-    //(via checking the notebook name in the ipython instance)
-    this.then( function() {
-        var name = this.evaluate(function() {
-            return Jupyter.notebook.notebook_name;
-        });
-        this.test.assertEquals(
-            name,
-            nbname,
-            "Re-opened notebook successfully"
-        );
-    });
-
-    //check text of toggle button after reload
-
-    this.waitFor(function() {
-        var text = this.evaluate(function() {
-            return $("#toggle_cell_references_bar").text();
-        });
-        if(text !== "Show/Hide cell references toolbar" && text !== "") {
-            //this is the default text and empty string, so either unloaded yet
-            //or our promise hasn't resolved yet
-            return true;
-        }
-    }, function then() {
-        var text = this.evaluate(function() {
-            return $("#toggle_cell_references_bar").text();
-        });
-        this.test.assertEquals(
-            text,
-            "Show cell references toolbar",
-            "Toggle button always defaults to hidden after a reload"
         );
     });
 });

@@ -30,8 +30,6 @@ define([
         //Hide everything on page open.
         cell_toolbar.global_hide();
         delete Jupyter.notebook.metadata.celltoolbar;
-        $("#toggle_cell_references_bar > a")
-            .text("Show cell references toolbar");
        
         //Register the toolbars
         cell_toolbar.register_callback("linker_extension.reference_url_toolbar",
@@ -73,17 +71,17 @@ define([
     var register_callbacks = function() {
         var prefix = "linker_extension";
         
-        var globalAction = {
-            help: "Show/hide the cell references bar on all the cells ",
+        var refAction = {
+            help: "Open the cell references bar",
             help_index: "g",
             icon: "fa-eye",
-            handler : toggle_cell_references_bar,
+            handler : cell_references_bar,
         };
-        var globalActionName = "toggle-cell-references-bar";
-        $("#toggle_cell_references_bar").click(function () {
-            toggle_cell_references_bar();
+        var refActionName = "cell-references-bar";
+        $("#cell_references_bar").click(function () {
+            cell_references_bar();
         });
-        Jupyter.notebook.keyboard_manager.actions.register(globalAction,globalActionName,prefix);
+        Jupyter.notebook.keyboard_manager.actions.register(refAction,refActionName,prefix);
 
         var editCellAction = {
             help: "Edit the cell references bar on the current cell",
@@ -132,26 +130,7 @@ define([
     
     /*  
      * Callback Functions
-     */ 
-    var toggle_cell_references_bar = function() {
-    	// Toggles the visibility of the references toolbar.
-        if(Jupyter.notebook.metadata.celltoolbar !== "Linker Extension References") {
-            cell_toolbar.global_show();
-        	
-            cell_toolbar.activate_preset("Linker Extension References");
-            Jupyter.notebook.metadata.celltoolbar = "Linker Extension References";
-            
-            $("#toggle_cell_references_bar > a")
-                .text("Hide cell references toolbar");
-        } else {
-            cell_toolbar.global_hide();
-            delete Jupyter.notebook.metadata.celltoolbar;
-            $("#toggle_cell_references_bar > a")
-                .text("Show cell references toolbar");
-        }
-    }
-    
-    //Show or hide input areas for dataplot cells.
+     */    
     function setup_cells() {
         Jupyter.notebook.get_cells().forEach(function(cell){
         	if (dataplot.is_dataplot(cell) ||
@@ -267,6 +246,33 @@ define([
     
     function edit_analysis_cell(cell){
     	enable_analysis_toolbar();
+        
+        cell.element.find("div.ctb_hideshow").addClass("ctb_show");
+        cell.element.find("div.input").show();
+        
+        if (cell.metadata.hide_code) {
+        	cell.element.find("div.input_area").hide();
+        } 
+    }
+    
+    function enable_ref_toolbar() {
+    	cell_toolbar.global_show();
+        cell_toolbar.activate_preset("Linker Extension References");
+        Jupyter.notebook.metadata.celltoolbar = "Linker Extension References";
+        
+        var cells = Jupyter.notebook.get_cells(); 
+        
+        cells.forEach(function(cell){
+        	cell.element.find("div.ctb_hideshow").removeClass("ctb_show");
+        	cell.element.find("div.input").hide();
+        });
+    }
+    
+    
+    var cell_references_bar = function() {
+    	var cell = Jupyter.notebook.get_selected_cell();
+    	
+    	enable_ref_toolbar();
         
         cell.element.find("div.ctb_hideshow").addClass("ctb_show");
         cell.element.find("div.input").show();

@@ -25,31 +25,53 @@ define([
 
         $(Jupyter.toolbar.selector).append(data_dropdown);
         
-        function add_new_item(display_text, id) {
-        	data_dropdown_ul.append($("<li/>").attr("id",id)
+        function add_new_item(menu, display_text, id) {
+        	menu.append($("<li/>").attr("id",id)
                                               .append($("<a/>")
                                                       .attr("href","#")
                                                       .text(display_text)));
         }
         
-        function add_divider() {
-        	data_dropdown_ul.append($("<li/>").addClass("divider"));
+        function add_divider(menu) {
+        	menu.append($("<li/>").addClass("divider"));
         }
         
-        add_new_item("Show/Hide cell references toolbar", "toggle_cell_references_bar");
-        add_new_item("Generate references", "generate_references");
-        add_divider();
-        add_new_item("Insert dataplot cell", "insert_dataplot_cell");
-        add_new_item("Insert analysis cell", "insert_analysis_cell");
-        add_new_item("Edit current cell", "edit_current_cell");
-        add_divider();
-        add_new_item("Manage metadata", "manage_metadata");
-        add_new_item("Manage associated data", "manage_associated_data");
-        add_divider();
-        add_new_item("Import data", "download_data");
-        add_divider();
-        add_new_item("Publish to eData", "publish");
+        //Create data toolboar
+        add_new_item(data_dropdown_ul, "Add Cell References", "cell_references_bar");
+        add_new_item(data_dropdown_ul, "Generate References", "generate_references");
+        add_divider(data_dropdown_ul);
+        add_new_item(data_dropdown_ul, "Insert Dataplot Cell", "insert_dataplot_cell");
+        add_new_item(data_dropdown_ul, "Insert Analysis Cell", "insert_analysis_cell");
+        add_new_item(data_dropdown_ul, "Edit Current Cell", "edit_current_cell");
+        add_divider(data_dropdown_ul);
+        add_new_item(data_dropdown_ul, "Manage Metadata", "manage_metadata");
+        add_new_item(data_dropdown_ul, "Manage Associated Data", "manage_associated_data");
+        add_divider(data_dropdown_ul);
+        add_new_item(data_dropdown_ul, "Import Data", "download_data");
+        add_divider(data_dropdown_ul);
+        add_new_item(data_dropdown_ul, "Publish to eData", "publish");
 
+        //Extend insert menu
+        var insert_menu = $("#insert_menu");
+        add_divider(insert_menu);
+        add_new_item(insert_menu, "Insert Dataplot Cell", "insert_dataplot_cell");
+        add_new_item(insert_menu, "Insert Analysis Cell", "insert_analysis_cell");
+        
+        //Extend cell menu
+        var cell_menu = $("#cell_menu");
+        add_divider(cell_menu);
+        add_new_item(cell_menu, "Add Cell References", "cell_references_bar");
+        
+        //Extend edit menu
+        var manage_metadata = $("<li/>").attr("id","manage_metadata").append($("<a/>")
+                .attr("href","#")
+                .text("Manage Metadata"));
+        var manage_associated = $("<li/>").attr("id","manage_associated_data").append($("<a/>")
+                .attr("href","#")
+                .text("Manage Associated Data"));
+        $("#edit_nb_metadata").after(manage_associated);  
+        $("#edit_nb_metadata").after(manage_metadata);       
+        
         /*  
          *  The notebook metadata doesn't exist immediately and we need it to
          *  determine whether the toggle cell toolbar button needs to say show or
