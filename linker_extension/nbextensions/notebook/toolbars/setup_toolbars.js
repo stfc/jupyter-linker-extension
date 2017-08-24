@@ -20,8 +20,8 @@ define([
     	setup_celltoolbar();
     	register_callbacks();
     	
-    	//Hide all input areas.
-    	show_input(false);
+    	//Setup any existing cells.
+    	setup_cells();
     };
     
     var cell_toolbar = celltoolbar.CellToolbar;
@@ -143,29 +143,23 @@ define([
             
             $("#toggle_cell_references_bar > a")
                 .text("Hide cell references toolbar");
-            
-            show_dataplot_input(true);
         } else {
             cell_toolbar.global_hide();
             delete Jupyter.notebook.metadata.celltoolbar;
             $("#toggle_cell_references_bar > a")
                 .text("Show cell references toolbar");
-            
-            show_dataplot_input(false);
         }
     }
     
     //Show or hide input areas for dataplot cells.
-    function show_input(show) {
+    function setup_cells() {
         Jupyter.notebook.get_cells().forEach(function(cell){
         	if (dataplot.is_dataplot(cell) ||
         	    analysis.is_analysis(cell)) {
-        		if (show) {
-        			cell.element.find("div.input").show();
-        		} else {
-        			cell.element.find("div.input").hide();
-        		}
-        		
+        		cell.element.find("div.input").hide();     
+            	cell.element.dblclick(function () {
+            	    edit_current_cell();           
+                });
         	}
         });
     }
@@ -182,6 +176,9 @@ define([
     	Jupyter.notebook.select(index, true);
     	new_cell.metadata.dataplot = true;
     	new_cell.metadata.hide_code = true;
+    	new_cell.element.dblclick(function () {
+    	    edit_current_cell();           
+        });
     	new_cell.metadata.dataplot_files = [];
         new_cell.set_text("print('Please use the toolbar to generate an dataplot.');");
         new_cell.execute();
@@ -199,7 +196,11 @@ define([
     	console.log("Number of cells: " + Jupyter.notebook.get_cells().length);
     	Jupyter.notebook.select(index, true);
     	new_cell.metadata.analysis = true;
+    	new_cell.metadata.toolbar_open = 
     	new_cell.metadata.hide_code = false;
+    	new_cell.element.dblclick(function () {
+    	    edit_current_cell();           
+        });
     	console.log("Setting analysis_variables to empty list");
     	new_cell.metadata.analysis_variables = [];
     	new_cell.metadata.analysis_files = [];
