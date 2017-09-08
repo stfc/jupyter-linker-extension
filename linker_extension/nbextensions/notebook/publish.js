@@ -49,7 +49,7 @@ define(["base/js/namespace",
         login.append(login_labels).append(login_fields);
 
         final_page.append(login);
-        
+               
         custom_contents.get_config().then(function(response){
             config_username = response.username;
             username_field.val(config_username);
@@ -61,6 +61,15 @@ define(["base/js/namespace",
             login.after(error);
         });
         
+        
+        if (md.databundle_url != undefined) {
+            var warning = $("<div/>").html("Note: This notebook has already been published, and is available at <a href =\"" +
+                                         md.databundle_url + "\" class=\"fieldlink\">" + md.databundle_url + "</a>")
+                                     .addClass("fieldwarn");
+      
+            final_page.append(warning);
+        }
+
         return final_page;
 	}
 	
@@ -111,6 +120,7 @@ define(["base/js/namespace",
                     		                  "again, or contact the support team.");
                 }
             );
+        	
         }
     };
 	
