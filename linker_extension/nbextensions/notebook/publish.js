@@ -149,6 +149,8 @@ define(["base/js/namespace",
                         .append(metadata_fields.form1)
                         .append(metadata_fields.form2)
                         .append(final_page());
+        
+        var submit_block = false;
 
         var modal = dialog.modal({
             title: "Publish to eData",
@@ -206,6 +208,13 @@ define(["base/js/namespace",
                                 $("#next").text("Publish");
                             }
                         } else if (!$("#final-page").hasClass("hide-me")) {
+                        	//If the button has been clicked already, return immediately.
+                        	if (submit_block) {
+                        		return false;
+                        	} else {
+                        		submit_block = true;
+                        	}
+                        	
                             $(".login-error").remove();
                             console.log("Submitting metadata: " + JSON.stringify(md.reportmetadata));
                             var username_field_val = $("#username").val();
@@ -235,8 +244,11 @@ define(["base/js/namespace",
 
                                 error.text(reason.message);
                                 $("#login-fields-upload-data").after(error);
+                                
+                                submit_block = false;
                             });
                         }
+                        
                         return false;
                     },
                 }
