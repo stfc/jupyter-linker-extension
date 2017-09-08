@@ -87,7 +87,10 @@ define(["base/js/namespace",
         Jupyter.notebook.keyboard_manager.actions.register(action,action_name,prefix);
         $("#manage_metadata").click(function () {
             add_metadata();
-        });
+        })
+        $("#manage_metadata_edit").click(function () {
+            add_metadata();
+        });;
     };
 
     module.exports = {

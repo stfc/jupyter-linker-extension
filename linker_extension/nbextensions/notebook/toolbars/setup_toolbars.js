@@ -81,6 +81,9 @@ define([
         $("#cell_references_bar").click(function () {
             cell_references_bar();
         });
+        $("#cell_references_cell_menu").click(function () {
+            cell_references_bar();
+        });
         Jupyter.notebook.keyboard_manager.actions.register(refAction,refActionName,prefix);
 
         var editCellAction = {
@@ -107,6 +110,11 @@ define([
         $("#insert_dataplot_cell").click(function () {
             insert_dataplot_cell();
         });        
+        
+        $("#insert_dataplot_cell_insert").click(function () {
+            insert_dataplot_cell();
+        });   
+        
         Jupyter.notebook.keyboard_manager.actions.register(insertDataplotAction,
         		                                           insertDataplotActionName,
         		                                           prefix);
@@ -120,7 +128,10 @@ define([
         var insertAnalysisActionName = "insert-analysis-cell";
         $("#insert_analysis_cell").click(function () {
             insert_analysis_cell();
-        });        
+        });       
+        $("#insert_analysis_cell_insert").click(function () {
+            insert_analysis_cell();
+        });  
         Jupyter.notebook.keyboard_manager.actions.register(insertAnalysisAction,
         		                                           insertAnalysisActionName,
         		                                           prefix);

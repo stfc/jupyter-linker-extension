@@ -57,6 +57,10 @@ define(["base/js/namespace",
         $("#manage_associated_data").click(function () {
             manage_associated_data();
         });
+        
+        $("#manage_associated_data_edit").click(function () {
+            manage_associated_data();
+        });
     };
 
     module.exports = {

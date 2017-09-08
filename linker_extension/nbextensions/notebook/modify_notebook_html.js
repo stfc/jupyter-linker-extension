@@ -54,19 +54,19 @@ define([
         //Extend insert menu
         var insert_menu = $("#insert_menu");
         add_divider(insert_menu);
-        add_new_item(insert_menu, "Insert Dataplot Cell", "insert_dataplot_cell");
-        add_new_item(insert_menu, "Insert Analysis Cell", "insert_analysis_cell");
+        add_new_item(insert_menu, "Insert Dataplot Cell", "insert_dataplot_cell_insert");
+        add_new_item(insert_menu, "Insert Analysis Cell", "insert_analysis_cell_insert");
         
         //Extend cell menu
         var cell_menu = $("#cell_menu");
         add_divider(cell_menu);
-        add_new_item(cell_menu, "Add Cell References", "cell_references_bar");
+        add_new_item(cell_menu, "Add Cell References", "cell_references_cell_menu");
         
         //Extend edit menu
-        var manage_metadata = $("<li/>").attr("id","manage_metadata").append($("<a/>")
+        var manage_metadata = $("<li/>").attr("id","manage_metadata_edit").append($("<a/>")
                 .attr("href","#")
                 .text("Manage Metadata"));
-        var manage_associated = $("<li/>").attr("id","manage_associated_data").append($("<a/>")
+        var manage_associated = $("<li/>").attr("id","manage_associated_data_edit").append($("<a/>")
                 .attr("href","#")
                 .text("Manage Associated Data"));
         $("#edit_nb_metadata").after(manage_associated);  
