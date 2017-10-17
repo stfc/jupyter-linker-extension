@@ -16,3 +16,4 @@ node_modules/
 linker_extension/tests/login_credentials.txt*
 *.ipynb
 .project
+*jshintrc*

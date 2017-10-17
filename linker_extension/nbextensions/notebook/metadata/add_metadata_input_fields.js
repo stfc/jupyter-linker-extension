@@ -129,6 +129,38 @@ define(["base/js/namespace",
 	}
 	
 	/*  
+     *  How to bundle the data items being uploaded.
+     *  
+     *  Defaults to uploading a zip file and separate items.
+     */ 
+	function upload_opt_field() {
+		var upload_opt_div = $("<div/>");
+		
+		var uploadOptLabel = $("<label/>").attr("for","upload_opt")
+                                         .addClass("fieldlabel")
+                                         .text("Upload option: ");
+
+        var uploadOpt = $("<select/>")
+            .attr("name","upload_opt")
+            .attr("id","upload_opt")
+            .append($("<option/>").attr("value","both").text("Both (default)"))
+            .append($("<option/>").attr("value","bundle").text("Upload the data items as a ZIP file"))
+            .append($("<option/>").attr("value","separate").text("Upload the data items individually"));
+
+        uploadOpt.val("both");
+        
+        upload_opt_div.append(uploadOptLabel)
+                      .append(uploadOpt);
+        
+        if (md.reportmetadata.hasOwnProperty("uploadOpt")) {
+            uploadOpt.val(md.reportmetadata.uploadOpt);
+        }
+        
+        return(upload_opt_div);
+	}
+	
+	
+	/*  
      *  The language of the item being published
      *  
      *  This field is optional, but defaults to English (GB)
@@ -160,7 +192,9 @@ define(["base/js/namespace",
         language_div.append(languageLabel)
                     .append(language);
         
-        language.val(md.reportmetadata.language);
+        if (md.reportmetadata.hasOwnProperty("language")) {
+            language.val(md.reportmetadata.language);	
+        }
         
         return(language_div);
 	}
@@ -485,6 +519,7 @@ define(["base/js/namespace",
         var extra_metadata_2 = $("<div/>")
             .addClass("collapse")
             .attr("id","extra_metadata_2")
+            .append(upload_opt_field())
             .append(publisher_field())
             .append(funders_field())
             .append(citations_field())
@@ -573,6 +608,7 @@ define(["base/js/namespace",
         });
 
         data.funders = $("#funders").val();
+        data.uploadOpt = $("#upload_opt").val();
         data.sponsors = $("#sponsors").val();
         
         tos.save_tos_to_metadata();

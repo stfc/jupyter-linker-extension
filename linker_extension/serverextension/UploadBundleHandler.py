@@ -3,6 +3,7 @@
 import json
 import requests
 import os
+import re
 import xml.etree.ElementTree as ET
 import zipfile
 from tempfile import TemporaryDirectory
@@ -168,21 +169,10 @@ class UploadBundleHandler(IPythonHandler):
 
         # get the file paths and mimetypes, 
         data_files = arguments["files"]
-        file_paths = []
-        file_names = []
+        paths_to_upload = []
+        names_to_upload = []
+        paths_to_zip = []
         file_mimetypes = []
-        for file in data_files:
-            file_paths.append(file["path"])
-            file_names.append(file["name"])
-
-            if(file["mimetype"] == None):
-                file_mimetypes.append("application/octet-stream")
-            else:
-                file_mimetypes.append(file["mimetype"])
-    
-        # the TOS files and the licence
-        TOS_files = arguments["TOS"]
-        licence = arguments["licence"]
 
         # make a temporary directory for us to play around in since we're
         # creating files
@@ -194,6 +184,31 @@ class UploadBundleHandler(IPythonHandler):
             print ("Creating temporary directory at " + tempdir)
         except OSError:
             raise web.HTTPError(500, "OSError when opening temp dir")
+
+        bundle_name = arguments["title"][:]
+        bundle_name = bundle_name.strip()
+        bundle_name = re.sub(r"[^\w\s]", '', bundle_name)
+        bundle_name = re.sub(r"\s+", '_', bundle_name + ".zip")
+        bundle_path = tempdir + "/" + bundle_name
+
+        if arguments["uploadOpt"] != "separate":
+            paths_to_upload.append(bundle_path)
+            names_to_upload.append(bundle_name)
+            file_mimetypes.append("application/octet-stream")
+
+        for file in data_files:
+            if arguments["uploadOpt"] != "bundle":
+                names_to_upload.append(file["path"])
+                paths_to_upload.append(file["path"])
+            paths_to_zip.append(file["path"])
+            if(file["mimetype"] == None):
+               file_mimetypes.append("application/octet-stream")
+            else:
+                file_mimetypes.append(file["mimetype"])
+    
+        # the TOS files and the licence
+        TOS_files = arguments["TOS"]
+        licence = arguments["licence"]
 
         # for each TOS file, write to a file. They're named TOS [ID].[extension]
         try:
@@ -225,21 +240,17 @@ class UploadBundleHandler(IPythonHandler):
         try:
             files = tree.getroot()[2][0]
             i = 0
-            if file_paths is not []:  # TODO: enforce that this doesn't happen
-                if len(file_names) > 0:
-                    for index, file_path in enumerate(file_paths):
-                        file_attr = {"GROUPID": "sword-mets-fgid-" + str(i),
-                                     "ID": file_path,
-                                     "MIMETYPE": file_mimetypes[index]}
-                        files_xml = ET.Element('file', file_attr)
-
-                        FLocat_attr = {"LOCTYPE": "URL",
-                                       "xlink:href": file_path}
-                        FLocat_xml = ET.Element('FLocat', FLocat_attr)
-
-                        files_xml.append(FLocat_xml)
-                        files.append(files_xml)
-                        i += 1
+            for index, file_path in enumerate(names_to_upload):
+                file_attr = {"GROUPID": "sword-mets-fgid-" + str(i),
+                             "ID": file_path,
+                             "MIMETYPE": file_mimetypes[index]}
+                files_xml = ET.Element('file', file_attr)
+                FLocat_attr = {"LOCTYPE": "URL",
+                               "xlink:href": file_path}
+                FLocat_xml = ET.Element('FLocat', FLocat_attr)
+                files_xml.append(FLocat_xml)
+                files.append(files_xml)
+                i += 1
 
             for i in list(range(0, len(TOS_files))):
                 TOS_file_name = TOS_files[i]["name"]
@@ -288,11 +299,9 @@ class UploadBundleHandler(IPythonHandler):
                                    "DMDID": "sword-mets-dmd-1",
                                    "TYPE": "Data Files"}
             files_struct_xml = ET.Element('div', files_struct_attr)
-            if file_paths is not []:
-                if len(file_names) > 0:
-                    for index, file_path in enumerate(file_paths):
-                        helper.dir_search(file_path,
-                                          files_struct_xml)
+            for file_path in names_to_upload:
+                helper.dir_search(file_path,
+                                  files_struct_xml)
 
             struct.append(files_struct_xml)
 
@@ -340,18 +349,48 @@ class UploadBundleHandler(IPythonHandler):
         except OSError:
             raise web.HTTPError(500, "OSError when writing tree to mets.xml")
 
+        if arguments["uploadOpt"] != "separate":
+            # If needed, zip all the stuff except mets.xml together
+            try:
+                print ("Creating bundle zip file at " + bundle_path)
+                bundle_zip_file = zipfile.ZipFile(bundle_path, "w")
+               
+                for file_path in paths_to_zip:
+                    path = os.path.join(os.getcwd(),notebook_dir,file_path)
+                    bundle_zip_file.write(path, file_path)
+                    
+
+                for i in list(range(0, len(TOS_files))):
+                    TOS_file_name = TOS_files[i]["name"]
+                    index_of_dot = TOS_file_name.index(".")
+                    TOS_file_extension = TOS_file_name[index_of_dot:]
+                    name_to_write = "TOS " + str(i) + TOS_file_extension
+                    bundle_zip_file.write(tempdir + "/" + name_to_write, name_to_write)
+
+                bundle_zip_file.write(licence_file_path, "LICENSE.txt")  
+ 
+            except:  # dunno what exceptions we might encounter here
+                raise web.HTTPError(500, "Error when writing zip file")
+            finally:
+                # close the zip either way
+                bundle_zip_file.close()
+
         # create a zip file for our sword submission. Write mets.xml,
         # our data files, TOS files and the licence file to the zip.
         # TODO: might need to zip all the stuff except mets.xml together
         try:
+            print ("Creating upload zip file")
             created_zip_file = zipfile.ZipFile(tempdir + "/data_bundle.zip", "w")
             created_zip_file.write(tempdir + "/mets.xml", "mets.xml")
 
-            if file_paths is not []:
-                if len(file_paths) > 0:
-                    for file_path in file_paths:
-                        path = os.path.join(os.getcwd(),notebook_dir,file_path)
-                        created_zip_file.write(path, file_path)
+            if arguments["uploadOpt"] != "separate":
+                paths_to_upload.pop(0)
+                created_zip_file.write(bundle_path, bundle_name)
+
+            for file_path in paths_to_upload:
+                print("Uploading " + file_path)
+                path = os.path.join(os.getcwd(),notebook_dir,file_path)
+                created_zip_file.write(path, file_path)
 
 
             for i in list(range(0, len(TOS_files))):
@@ -364,7 +403,7 @@ class UploadBundleHandler(IPythonHandler):
             created_zip_file.write(licence_file_path, "LICENSE.txt")
 
 
-        except:  # dunno what exceptions we might encounter here
+        except: 
             raise web.HTTPError(500, "Error when writing zip file")
         finally:
             # close the zip either way
