@@ -66,7 +66,8 @@ for data in datasets:
 
 fig.text(0.95,0.5,caption,fontsize=12);
 
-ax.legend()
+if len(datasets) > 0:
+    ax.legend()
 
 if (y_max != ""): plt.ylim(ymax=float(y_max))
 if (y_min != ""): plt.ylim(ymin=float(y_min))

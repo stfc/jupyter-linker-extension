@@ -81,21 +81,21 @@ casper.notebook_test(function() {
     	this.test.assertEquals(cell_count, 2, "New cell created");
     });
     
-    this.thenClick("#show-hide-1");
+    this.thenClick("#show-hide-0");
     take_screenshot("show-code");
     this.waitUntilVisible(".input_area");
     this.then(function() {
         this.test.assertVisible(".input_area", "Code is visible");
     });
     
-    this.thenClick("#show-hide-1");
+    this.thenClick("#show-hide-0");
     take_screenshot("hide-code");
     this.waitWhileVisible(".input_area");
     this.then(function() {
         this.test.assertNotVisible(".input_area", "Code is hidden");
     });
     
-    this.thenClick("#dataplot-input-1");
+    this.thenClick("#dataplot-input-0");
     this.waitForSelector("#select");
     
     this.waitForSelector("#files-loading-dataplot");
@@ -123,7 +123,7 @@ casper.notebook_test(function() {
     
     this.waitFor(function() {
         return this.evaluate(function() {
-        	files_text = $("#input-display-1").text();
+        	files_text = $("#input-display-0").text();
         	console.log("Dataplot display text is: " + files_text);
             return files_text != "No files selected";
         });
@@ -133,13 +133,13 @@ casper.notebook_test(function() {
 
     this.then(function() {
     	var files_text = this.evaluate(function() {
-    		return $("#input-display-1").text();
+    		return $("#input-display-0").text();
     	});
     	
     	this.test.assertEquals(files_text, "2 files selected", "Dataplot files successfully uploaded");
     });
     
-    this.waitUntilVisible("#generate-plot-1");
+    this.waitUntilVisible("#generate-plot-0");
 
     this.then(function() {
         this.evaluate(function() {
@@ -153,7 +153,7 @@ casper.notebook_test(function() {
     });
     
     take_screenshot("labels-set");
-    this.thenClick("#generate-plot-1");
+    this.thenClick("#generate-plot-0");
     
     casper.scrollToBottom();
     this.scrollToBottom();

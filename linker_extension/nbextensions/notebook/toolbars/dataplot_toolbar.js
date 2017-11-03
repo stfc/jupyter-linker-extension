@@ -25,12 +25,30 @@ define([
 	    setup_file_input();
 	    setup_details();
 	    setup_generate();
+	    
+    	
+		var script = code.dataplot_script(cell.metadata.dataplot_files,
+                                          cell.metadata.xaxis,
+                                          cell.metadata.yaxis,
+                                          cell.metadata.xmin,
+                                          cell.metadata.xmax,
+                                          cell.metadata.ymin,
+                                          cell.metadata.ymax,
+                                          cell.metadata.caption);
+        cell.set_text(script);
 		
 		function setup_title() {
 			//The title for the toolbar.
 			var title_container = $("<div/>").addClass("toolbar-title")
 	                                         .append("Generate Dataplot Cell");
 	    	$(div).append(title_container);
+	    	
+			var desc_container = $("<div/>")
+			                          .addClass("toolbar-desc")
+                                      .attr("id", "cell-desc")
+                                      .append("Provide a dataset and axis labels, " +
+                                         	  "then generate a dataplot.");
+            $(div).append(desc_container);
 	    }
 	   
 	    function setup_file_input() {
@@ -199,7 +217,7 @@ define([
 	    		
 	    		local_data.update_associated_data("dataplot");
 	    	}
-	    	
+ 	    	
 	        var generate_button = $("<span/>").addClass("btn btn-sm btn-default btn-add")
 	                                          .attr("id", "generate-plot-" + cell_index)
 	                                          .text("Generate dataplot")

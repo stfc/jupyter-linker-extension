@@ -81,14 +81,14 @@ casper.notebook_test(function() {
     	this.test.assertEquals(cell_count, 2, "New cell created");
     });
     
-    this.thenClick("#show-hide-1");
+    this.thenClick("#show-hide-0");
     take_screenshot("hide-code");
     this.waitWhileVisible(".input_area");
     this.then(function() {
         this.test.assertNotVisible(".input_area", "Code is hidden");
     });
     
-    this.thenClick("#show-hide-1");
+    this.thenClick("#show-hide-0");
     take_screenshot("show-code");
     this.waitUntilVisible(".input_area");
     this.then(function() {
@@ -96,7 +96,7 @@ casper.notebook_test(function() {
     });
     
     //Select an input file
-    this.thenClick("#analysis-input-1");
+    this.thenClick("#analysis-input-0");
     this.waitForSelector("#select");
     
     this.waitForSelector("#files-loading-analysis");
@@ -120,7 +120,7 @@ casper.notebook_test(function() {
     
     this.waitFor(function() {
         return this.evaluate(function() {
-        	files_text = $("#input-display-1").text();
+        	files_text = $("#input-display-0").text();
         	console.log("Analysis display text is: " + files_text);
             return files_text != "No files selected";
         });
@@ -130,14 +130,14 @@ casper.notebook_test(function() {
 
     this.then(function() {
     	var files_text = this.evaluate(function() {
-    		return $("#input-display-1").text();
+    		return $("#input-display-0").text();
     	});
     	
     	this.test.assertEquals(files_text, "1 file selected", "Analysis files successfully uploaded");
     });
     
     //Define some variables
-    this.thenClick("#edit-variables-1");
+    this.thenClick("#edit-variables-0");
     this.waitForSelector("#select");
     this.waitUntilVisible("#variable-display-0");
     
@@ -197,7 +197,7 @@ casper.notebook_test(function() {
     });
     
     //Test variables are successfully recreated
-    this.thenClick("#edit-variables-1");
+    this.thenClick("#edit-variables-0");
     this.waitForSelector("#select");
     this.waitUntilVisible("#variable-display-0"); 
     
@@ -272,7 +272,7 @@ casper.notebook_test(function() {
     take_screenshot("variables-recreated");
     
     //Remove a variable
-    this.thenClick("#edit-variables-1");
+    this.thenClick("#edit-variables-0");
     this.waitForSelector("#select");
     this.waitForSelector("#variable-remove-0"); 
     
@@ -307,7 +307,7 @@ casper.notebook_test(function() {
         });
     });
     
-    this.thenClick("#edit-variables-1");
+    this.thenClick("#edit-variables-0");
     this.waitForSelector("#select");
     this.thenClick("#select");
     
@@ -322,8 +322,8 @@ casper.notebook_test(function() {
     	this.test.assertDoesntExist("#variable-label-1", "No more variables exist");
     });
     
-    this.waitForSelector("#run-1");
-    this.thenClick("#run-1");
+    this.waitForSelector("#run-0");
+    this.thenClick("#run-0");
     
     console.log("Getting text from cell");
     this.then(function() {

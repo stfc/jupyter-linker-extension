@@ -159,7 +159,7 @@ define([
     	console.log("Inserting new dataplot cell");
         
     	//Create the new cell
-    	var index = Jupyter.notebook.get_selected_index() + 1;
+    	var index = Jupyter.notebook.get_selected_index();
     	var new_cell = Jupyter.notebook.insert_cell_at_index("code", index);
 
     	console.log("Number of cells: " + Jupyter.notebook.get_cells().length);
@@ -170,17 +170,23 @@ define([
     	    edit_current_cell();           
         });
     	new_cell.metadata.dataplot_files = [];
-        new_cell.set_text("print('Please use the toolbar to generate an dataplot.');");
-        new_cell.execute();
-    	
+    	new_cell.metadata.xaxis = "";
+    	new_cell.metadata.yaxis = "";
+    	new_cell.metadata.xmin = "";
+    	new_cell.metadata.xmax = "";
+    	new_cell.metadata.ymin = "";
+    	new_cell.metadata.ymax = "";
+    	new_cell.metadata.caption = "";
+
         edit_dataplot_cell(new_cell);
+        new_cell.execute();
     };
     
     var insert_analysis_cell = function() {
     	console.log("Inserting new analysis cell");
         
     	//Create the new cell
-    	var index = Jupyter.notebook.get_selected_index() + 1;
+    	var index = Jupyter.notebook.get_selected_index();
     	var new_cell = Jupyter.notebook.insert_cell_at_index("code", index);
 
     	console.log("Number of cells: " + Jupyter.notebook.get_cells().length);
